@@ -16,23 +16,24 @@ services:
       - "traefik.http.routers.web.tls.certresolver=myresolver"
   
   traefik:
-    image: traefik:v2.9
-    container_name: traefik_proxy
-    command:
+  image: traefik:v2.9
+  container_name: traefik_proxy
+  command:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--entrypoints.websecure.address=:443"
       - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
-      - "--certificatesresolvers.myresolver.acme.email=stockmaster0x@twinfinance.io"
+      - "--certificatesresolvers.myresolver.acme.email=your_real_email@example.com"
       - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
-    ports:
+  ports:
       - "443:443"
-    volumes:
+  volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "./letsencrypt:/letsencrypt"
-    networks:
+  networks:
       - webnet
-    restart: always
+  restart: always
+
 
 networks:
   webnet:
