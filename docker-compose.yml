@@ -1,29 +1,38 @@
-version: '3'
+version: '3.7'
 
 services:
   web:
-    build: .
-    container_name: twin-racer-web
-    restart: unless-stopped
+    image: nginx:alpine
+    container_name: twin_racer_web
+    volumes:
+      - ./www:/usr/share/nginx/html:ro
+    networks:
+      - webnet
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.web.rule=Host(`racer.twinfinace.io`)"
+      - "traefik.http.routers.web.entrypoints=websecure"
+      - "traefik.http.routers.web.tls=true"
+      - "traefik.http.routers.web.tls.certresolver=myresolver"
+  
+  traefik:
+    image: traefik:v2.9
+    container_name: traefik_proxy
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=youremail@example.com"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
     ports:
-      - "80:80"
       - "443:443"
     volumes:
-      - ./www:/usr/share/nginx/html
-      - ./nginx:/etc/nginx/conf.d
-      - ./letsencrypt:/etc/letsencrypt
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./letsencrypt:/letsencrypt"
     networks:
       - webnet
-
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./letsencrypt:/etc/letsencrypt
-      - ./www:/var/www/html
-    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'
-    networks:
-      - webnet
+    restart: always
 
 networks:
   webnet:
