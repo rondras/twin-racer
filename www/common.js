@@ -292,19 +292,27 @@ var Render = {
   //---------------------------------------------------------------------------
 
   sprite: function(ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY, offsetX, offsetY, clipY) {
-
-                    //  scale for projection AND relative to roadWidth (for tweakUI)
-    var destW  = (sprite.w * scale * width/2) * (SPRITES.SCALE * roadWidth);
-    var destH  = (sprite.h * scale * width/2) * (SPRITES.SCALE * roadWidth);
+    console.log(sprite)
+    // Scale for projection AND relative to roadWidth (for tweakUI)
+    var destW = (sprite.width * scale * width / 2) * (SPRITES.SCALE * roadWidth);
+    var destH = (sprite.height * scale * width / 2) * (SPRITES.SCALE * roadWidth);
 
     destX = destX + (destW * (offsetX || 0));
     destY = destY + (destH * (offsetY || 0));
 
-    var clipH = clipY ? Math.max(0, destY+destH-clipY) : 0;
-    if (clipH < destH)
-      ctx.drawImage(sprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h*clipH/destH), destX, destY, destW, destH - clipH);
+    var clipH = clipY ? Math.max(0, destY + destH - clipY) : 0;
+    if (clipH < destH) {
+        // Check if the sprite is part of a spritesheet or a standalone image
+        if (sprite.x !== undefined && sprite.y !== undefined && sprite.w !== undefined && sprite.h !== undefined) {
+            // Sprite from spritesheet
+            ctx.drawImage(sprites, sprite.x, sprite.y, sprite.w, sprite.h - (sprite.h * clipH / destH), destX, destY, destW, destH - clipH);
+        } else {
+            // Standalone sprite image
+            ctx.drawImage(sprite, destX, destY, destW, destH - clipH);
+        }
+    }
+},
 
-  },
 
   //---------------------------------------------------------------------------
 
