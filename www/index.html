@@ -5,6 +5,7 @@
   <title>TWIN Racer</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <link href="common.css" rel="stylesheet" type="text/css" />
+  
 </head> 
 
 <body> 
@@ -27,6 +28,14 @@
       Sorry, this example cannot be run because your browser does not support the &lt;canvas&gt; element
     </canvas>
     Loading...
+  </div>
+
+  <!-- On-screen controls for mobile devices -->
+  <div id="controls">
+    <button id="left-btn" class="control-btn">Left</button>
+    <button id="right-btn" class="control-btn">Right</button>
+    <button id="accelerate-btn" class="control-btn">Accelerate</button>
+    <button id="brake-btn" class="control-btn">Brake</button>
   </div>
 
   <audio id='music'>
@@ -101,7 +110,44 @@
       last_lap_time:    { value: null, dom: Dom.get('last_lap_time_value')    },
       fast_lap_time:    { value: null, dom: Dom.get('fast_lap_time_value')    }
     }
+        // Adding event listeners for touch controls
+        var leftBtn = Dom.get('left-btn');
+    var rightBtn = Dom.get('right-btn');
+    var accelerateBtn = Dom.get('accelerate-btn');
+    var brakeBtn = Dom.get('brake-btn');
 
+    leftBtn.addEventListener('touchstart', function() {
+      keyLeft = true;
+    });
+
+    leftBtn.addEventListener('touchend', function() {
+      keyLeft = false;
+    });
+
+    rightBtn.addEventListener('touchstart', function() {
+      keyRight = true;
+    });
+
+    rightBtn.addEventListener('touchend', function() {
+      keyRight = false;
+    });
+
+    accelerateBtn.addEventListener('touchstart', function() {
+      keyFaster = true;
+    });
+
+    accelerateBtn.addEventListener('touchend', function() {
+      keyFaster = false;
+    });
+
+    brakeBtn.addEventListener('touchstart', function() {
+      keySlower = true;
+    });
+
+    brakeBtn.addEventListener('touchend', function() {
+      keySlower = false;
+    });
+    
     //=========================================================================
     // UPDATE THE GAME WORLD
     //=========================================================================

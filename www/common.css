@@ -8,7 +8,7 @@ html, body {
     padding: 0;
     overflow: hidden; /* This prevents scrollbars from appearing */
   }
-  
+
 body          { font-family: Arial, Helvetica, sans-serif; }
 #stats        { border: 2px solid black; }
 #controls     { width: 28em; float: left; padding: 1em; font-size: 0.7em; }
@@ -49,3 +49,32 @@ body          { font-family: Arial, Helvetica, sans-serif; }
 #hud .value            { color: black; font-weight: bold; }
 #hud .fastest          { background-color: rgba(255,215,0,0.5); }
 
+/* CSS for the control buttons */
+#controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    z-index: 10; /* Ensure controls are above the canvas */
+}
+
+.control-btn {
+    padding: 20px;
+    font-size: 20px;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    flex: 1;
+    margin: 5px;
+    max-width: 100px;
+}
+
+/* Optional: Adjust button size for smaller screens */
+@media (max-width: 600px) {
+    .control-btn {
+    padding: 15px;
+    font-size: 16px;
+    }
+}
