@@ -126,7 +126,6 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
           update(step);
         }
         render();
-        stats.update();
         last = now;
         requestAnimationFrame(frame, canvas);
       }
@@ -235,6 +234,7 @@ var Render = {
     ctx.fill();
   },
 
+
   //---------------------------------------------------------------------------
 
   segment: function(ctx, width, lanes, x1, y1, w1, x2, y2, w2, fog, color) {
@@ -309,17 +309,25 @@ var Render = {
   //---------------------------------------------------------------------------
 
   player: function(ctx, width, height, resolution, roadWidth, sprites, speedPercent, scale, destX, destY, steer, updown) {
-
-    var bounce = (1.5 * Math.random() * speedPercent * resolution) * Util.randomChoice([-1,1]);
+    var bounce = (1.5 * Math.random() * speedPercent * resolution) * Util.randomChoice([-1, 1]);
     var sprite;
     if (steer < 0)
-      sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_LEFT : SPRITES.PLAYER_LEFT;
+      sprite = (updown > 0) ? playerUphillLeftSprite : playerLeftSprite;
     else if (steer > 0)
-      sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_RIGHT : SPRITES.PLAYER_RIGHT;
+      sprite = (updown > 0) ? playerUphillRightSprite : playerRightSprite;
     else
-      sprite = (updown > 0) ? SPRITES.PLAYER_UPHILL_STRAIGHT : SPRITES.PLAYER_STRAIGHT;
+      sprite = playerStraightSprite;  // Use the new player straight sprite image
 
-    Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY + bounce, -0.5, -1);
+    var destW = (sprite.width * scale * width / 2) * (SPRITES.SCALE * roadWidth);
+    var destH = (sprite.height * scale * width / 2) * (SPRITES.SCALE * roadWidth);
+
+    destX = destX + (destW * -0.5);
+    destY = destY + (destH * -1) + bounce;
+
+    var clipH = Math.max(0, destY + destH - height);
+    if (clipH < destH) {
+      ctx.drawImage(sprite, 0, 0, sprite.width, sprite.height - (sprite.height * clipH / destH), destX, destY, destW, destH - clipH);
+    }
   },
 
   //---------------------------------------------------------------------------
