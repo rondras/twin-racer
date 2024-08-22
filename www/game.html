@@ -7,17 +7,98 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <link href="common.css" rel="stylesheet" type="text/css" />
+  <script src="https://unpkg.com/@tonconnect/sdk@latest/dist/tonconnect-sdk.min.js" defer></script>
+
+  <style>
+      body {
+        width: 1000px;
+        margin: 0 auto;
+        font-family: Roboto, sans-serif;
+      }
+      .section {
+        padding: 20px; 
+        margin: 20px;
+        border: 2px #AEFF6A solid; 
+        border-radius: 8px;
+      }
+      #tonconnect-buttons>button {
+        display: block;
+        padding: 8px; 
+        margin-bottom: 8px;
+        font-size: 18px; 
+        font-family: inherit;
+      }
+      .featured {
+        font-weight: 800;
+      }
+      #wallet-id {
+        margin-top: 20px;
+        font-size: 20px;
+        color: #333;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="section" id="tonconnect-buttons"></div>
+    <div id="wallet-id"></div> <!-- Display User Wallet ID here -->
+    
+    <script>
+      window.onload = async () => {
+        const connector = new TonConnectSDK.TonConnect({
+          manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json'  // Replace with your manifest URL
+        });
+        
+        const walletsList = await connector.getWallets();
+
+        // Handle wallet connection status changes
+        const unsubscribe = connector.onStatusChange(
+          walletInfo => {
+            if (walletInfo) {
+              // Display the wallet address after successful connection
+              document.getElementById('wallet-id').innerText = 
+                'Connected Wallet Address: ' + walletInfo.account.address;
+            } else {
+              // If the wallet is disconnected, clear the display
+              document.getElementById('wallet-id').innerText = '';
+            }
+          }
+        );
+
+        let buttonsContainer = document.querySelector('#tonconnect-buttons');
+
+        walletsList.forEach(wallet => {
+          let connectButton = document.createElement('button');
+          connectButton.innerText = 'Connect with ' + wallet.name;
+
+          if (wallet.embedded) {
+            connectButton.classList.add('featured');
+          }
+
+          if (wallet.embedded || wallet.injected) {
+            connectButton.onclick = () => {
+              connectButton.disabled = true;
+              connector.connect({jsBridgeKey: wallet.jsBridgeKey});
+            };
+          } else if (wallet.bridgeUrl) {
+            connectButton.onclick = () => {
+              connectButton.disabled = true;
+              console.log('Connection link:', connector.connect({
+                universalLink: wallet.universalLink,
+                bridgeUrl: wallet.bridgeUrl
+              }));
+            };
+          } else {
+            connectButton.disabled = true;
+          }
+
+          buttonsContainer.appendChild(connectButton);
+        });
+      };
+    </script>
   
 </head> 
 
 <body> 
-
-
-
-
-
-
-
 
   <div id="racer">
     <div id="hud">
@@ -27,7 +108,7 @@
       <span id="fast_lap_time"    class="hud">Fastest Lap: <span id="fast_lap_time_value" class="value">0.0</span></span>
     </div>
     <canvas id="canvas">
-      Sorry, this example cannot be run because your browser does not support the &lt;canvas&gt; element
+      Sorry,Twin Racer cannot be run because your browser does not support the &lt;canvas&gt; element
     </canvas>
     Loading...
   </div>
