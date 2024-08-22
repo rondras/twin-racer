@@ -1,6 +1,7 @@
 window.addEventListener('deviceorientation', handleOrientation, true);
 
 function requestPermission() {
+    console.log("Start game button clicked")
     if (typeof DeviceMotionEvent.requestPermission === 'function') {
       DeviceMotionEvent.requestPermission()
         .then(permissionState => {

@@ -292,7 +292,6 @@ var Render = {
   //---------------------------------------------------------------------------
 
   sprite: function(ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY, offsetX, offsetY, clipY) {
-    console.log(sprite)
     // Scale for projection AND relative to roadWidth (for tweakUI)
     var destW = (sprite.width * scale * width / 2) * (SPRITES.SCALE * roadWidth);
     var destH = (sprite.height * scale * width / 2) * (SPRITES.SCALE * roadWidth);
