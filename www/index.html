@@ -33,6 +33,21 @@
             manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
         });
+
+        const connectButton = document.getElementById('connectButton');
+
+        connectButton.addEventListener('click', async () => {
+            try {
+                const connectionResult = await tonConnect.connect();
+                if (connectionResult) {
+                    console.log('Connected to wallet:', connectionResult);
+                    // Save the connection details in local storage or cookies
+                    localStorage.setItem('ton-wallet', JSON.stringify(connectionResult));
+                }
+            } catch (error) {
+                console.error('Connection failed:', error);
+            }
+        });
         document.getElementById('startGameButton').addEventListener('click', function () {
             if (typeof DeviceMotionEvent.requestPermission === 'function') {
                 DeviceMotionEvent.requestPermission()
