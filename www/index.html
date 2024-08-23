@@ -63,7 +63,7 @@
                 DeviceMotionEvent.requestPermission()
                 .then(permissionState => {
                     if (permissionState === 'granted') {
-                        Telegram.WebApp.openLink('https://racer.twinfinance.io/game.html');
+                        window.location.href = "game.html";
                     } else {
                         alert('Permission to access device motion was denied.');
                     }
@@ -71,7 +71,7 @@
                 .catch(console.error);
             } else {
                 // If permissions are not needed (non-iOS or old iOS versions)
-                Telegram.WebApp.openLink('https://racer.twinfinance.io/game.html');
+                window.location.href = "game.html";
             }
         });
     </script>
