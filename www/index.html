@@ -27,27 +27,29 @@
 <body>
 
     <button id="startGameButton">Start Game</button>
-    <button id="connectButton">Connect Wallet</button>
+    <!-- Section for TON Connect button and Wallet ID display -->
+    <div class="section">
+        <div id="ton-connect"></div>
+        <div id="wallet-id"></div> <!-- Display User Wallet ID here -->
+    </div>
     <script>
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
         });
 
-        const connectButton = document.getElementById('connectButton');
-
-        connectButton.addEventListener('click', async () => {
+        async function connectToWallet() {
             try {
-                const connectionResult = await tonConnect.connect();
-                if (connectionResult) {
-                    console.log('Connected to wallet:', connectionResult);
-                    // Save the connection details in local storage or cookies
-                    localStorage.setItem('ton-wallet', JSON.stringify(connectionResult));
-                }
+                const connectedWallet = await tonConnectUI.connectWallet();
+                document.getElementById('wallet-id').textContent = 'Wallet ID: ' + connectedWallet.account.address;
+                console.log(connectedWallet);
             } catch (error) {
-                console.error('Connection failed:', error);
+                console.error("Error connecting to wallet:", error);
             }
-        });
+        }
+
+        document.getElementById('ton-connect').addEventListener('click', connectToWallet);
+
         document.getElementById('startGameButton').addEventListener('click', function () {
             if (typeof DeviceMotionEvent.requestPermission === 'function') {
                 DeviceMotionEvent.requestPermission()
