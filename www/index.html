@@ -35,6 +35,10 @@
     </div>
     
     <script>
+        // Initialize the Telegram WebApp
+        Telegram.WebApp.ready();
+
+
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
@@ -57,7 +61,7 @@
                 DeviceMotionEvent.requestPermission()
                 .then(permissionState => {
                     if (permissionState === 'granted') {
-                        window.location.href = "game.html";  // Redirect to game.html
+                        Telegram.WebApp.openLink('https://yourdomain.com/game.html');
                     } else {
                         alert('Permission to access device motion was denied.');
                     }
@@ -65,7 +69,7 @@
                 .catch(console.error);
             } else {
                 // If permissions are not needed (non-iOS or old iOS versions)
-                window.location.href = "game.html";
+                Telegram.WebApp.openLink('https://yourdomain.com/game.html');
             }
         });
     </script>
