@@ -25,13 +25,15 @@
     </style>
 </head>
 <body>
-
-    <button id="startGameButton">Start Game</button>
-    <!-- Section for TON Connect button and Wallet ID display -->
-    <div class="section">
-        <div id="ton-connect"></div>
-        <div id="wallet-id"></div> <!-- Display User Wallet ID here -->
+    <div>
+        <!-- Section for TON Connect button and Wallet ID display -->
+        <div class="walletConnectTONSection">
+            <div id="ton-connect"></div>
+        </div>
+        
+        <button id="startGameButton">Start Game</button>
     </div>
+    
     <script>
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
