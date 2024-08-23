@@ -50,7 +50,8 @@
             const userInfoDiv = document.getElementById('user-info');
             userInfoDiv.innerHTML = `
                 <img src="${user.photo_url}" alt="${user.first_name} ${user.last_name}">
-                <span>${user.first_name} ${user.last_name || ''} (@${user.username || 'No username'})</span>
+                <span>${user.first_name} ${user.last_name || ''} </span>
+                <span>${user.phote_url} ${user.last_name || ''} </span>
             `;
         } else {
             // Handle case where user information is not available
