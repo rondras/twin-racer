@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Start Game</title>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <style>
         body {
             display: flex;
@@ -26,8 +27,12 @@
 <body>
 
     <button id="startGameButton">Start Game</button>
-
+    <button id="connectButton">Connect Wallet</button>
     <script>
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
         document.getElementById('startGameButton').addEventListener('click', function () {
             if (typeof DeviceMotionEvent.requestPermission === 'function') {
                 DeviceMotionEvent.requestPermission()
