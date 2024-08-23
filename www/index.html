@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Start Game</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             display: flex;
@@ -61,7 +62,7 @@
                 DeviceMotionEvent.requestPermission()
                 .then(permissionState => {
                     if (permissionState === 'granted') {
-                        Telegram.WebApp.openLink('https://yourdomain.com/game.html');
+                        Telegram.WebApp.openLink('https://racer.twinfinance.io/game.html');
                     } else {
                         alert('Permission to access device motion was denied.');
                     }
@@ -69,7 +70,7 @@
                 .catch(console.error);
             } else {
                 // If permissions are not needed (non-iOS or old iOS versions)
-                Telegram.WebApp.openLink('https://yourdomain.com/game.html');
+                Telegram.WebApp.openLink('https://racer.twinfinance.io/game.html');
             }
         });
     </script>
