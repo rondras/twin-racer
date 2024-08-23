@@ -27,6 +27,9 @@
 </head>
 <body>
     <div>
+        <div id="user-info">
+            <!-- User's profile picture and name will be displayed here -->
+        </div>
         <!-- Section for TON Connect button and Wallet ID display -->
         <div class="walletConnectTONSection">
             <div id="ton-connect"></div>
@@ -40,6 +43,19 @@
         Telegram.WebApp.ready();
         // Expand the Mini App to full screen
         Telegram.WebApp.expand();
+        // Retrieve user data
+        const user = Telegram.WebApp.initDataUnsafe.user;
+        if (user) {
+            // Display the user's name and profile picture
+            const userInfoDiv = document.getElementById('user-info');
+            userInfoDiv.innerHTML = `
+                <img src="${user.photo_url}" alt="${user.first_name} ${user.last_name}">
+                <span>${user.first_name} ${user.last_name || ''} (@${user.username || 'No username'})</span>
+            `;
+        } else {
+            // Handle case where user information is not available
+            document.getElementById('user-info').innerText = 'User information not available.';
+        }
 
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
