@@ -48,7 +48,7 @@
         // Retrieve user data
         const user = Telegram.WebApp.initDataUnsafe.user;
         if (user) {
-            addUser(user.id, user.username)
+            addUser(user.username,user.id)
             // Display the user's name and profile picture
             const userInfoDiv = document.getElementById('user-info');
             userInfoDiv.innerHTML = `
