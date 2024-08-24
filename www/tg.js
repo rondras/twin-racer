@@ -104,7 +104,7 @@ async function addUser(tgName, tgID) {
         }
     } catch (error) {
         // Handle any network or other errors
-        console.error('Network error:', error);
+        alert('Network error:', error);
         alert('Failed to add user due to network error.');
     }
 }
