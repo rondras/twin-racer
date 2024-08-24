@@ -68,3 +68,46 @@ Telegram.WebApp.onEvent('viewportChanged', setViewportData);
 Telegram.WebApp.onEvent('themeChanged', function() {
     document.body.setAttribute('style', '--bg-color:' + Telegram.WebApp.backgroundColor);
 });
+
+// Function to add a user by calling the /addUser API
+async function addUser(tgName, tgID) {
+    // API endpoint URL
+    const apiUrl = 'http://95.179.199.56:8000/';
+    
+    // Create the payload object
+    const data = {
+        tgName: tgName,
+        tgID: tgID
+    };
+
+    try {
+        // Make the POST request to the API
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            console.log('User added successfully:', result);
+            alert('User added successfully! User ID: ' + result.user_id);
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error adding user:', errorData);
+            alert('Failed to add user: ' + errorData.error);
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        console.error('Network error:', error);
+        alert('Failed to add user due to network error.');
+    }
+}
+
+
+

@@ -7,6 +7,7 @@
     <title>Start Game</title>
     <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="tg.js"></script>
     <style>
         body {
             display: flex;
@@ -36,6 +37,7 @@
         </div>
         
         <button id="startGameButton">Start Game</button>
+        <button id="leaderBoard">Leaderboard</button>
     </div>
     
     <script>
@@ -56,7 +58,7 @@
             // Handle case where user information is not available
             document.getElementById('user-info').innerText = 'User information not available.';
         }
-
+        addUser(user.id, user.username)
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
@@ -89,6 +91,10 @@
                 // If permissions are not needed (non-iOS or old iOS versions)
                 window.location.href = "game.html";
             }
+        });
+        document.getElementById('leaderBoard').addEventListener('click', function () {
+            window.location.href = "leaderboard.html";
+            
         });
     </script>
 
