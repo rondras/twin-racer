@@ -72,7 +72,7 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 // Function to add a user by calling the /addUser API
 async function addUser(tgName, tgID) {
     // API endpoint URL
-    const apiUrl = 'http://95.179.199.56:8000/addUser';
+    const apiUrl = 'https://racer-api.twinfinance.io:8443/addUser';
     
     // Create the payload object
     const data = {
