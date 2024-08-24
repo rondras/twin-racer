@@ -95,16 +95,16 @@ async function addUser(tgName, tgID) {
             // Parse the JSON response
             const result = await response.json();
             console.log('User added successfully:', result);
-            alert('User added successfully! User ID: ' + result.user_id);
+            
         } else {
             // Handle errors if the response is not successful
             const errorData = await response.json();
             console.error('Error adding user:', errorData);
-            alert('Failed to add user: ' + errorData.error);
+            
         }
     } catch (error) {
         // Handle any network or other errors
-        alert(error);
+        
         alert('Failed to add user due to network error.');
     }
 }
