@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -39,6 +38,12 @@
         <button id="startGameButton">Start Game</button>
         <button id="leaderBoard">Leaderboard</button>
     </div>
+
+    <!-- Audio element for coin sound -->
+    <audio id="coinSound">
+        <source src="audio/coinsound.aac" type="audio/aac">
+        Your browser does not support the audio element.
+    </audio>
     
     <script>
         // Initialize the Telegram WebApp
@@ -48,12 +53,11 @@
         // Retrieve user data
         const user = Telegram.WebApp.initDataUnsafe.user;
         if (user) {
-            addUser(user.username,user.id)
+            addUser(user.username, user.id);
             // Display the user's name and profile picture
             const userInfoDiv = document.getElementById('user-info');
             userInfoDiv.innerHTML = `
                 <span>${user.first_name} ${user.last_name || ''} </span>
-                
             `;
         } else {
             // Handle case where user information is not available
@@ -95,7 +99,6 @@
         });
         document.getElementById('leaderBoard').addEventListener('click', function () {
             window.location.href = "leaderboard.html";
-            
         });
     </script>
 
