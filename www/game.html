@@ -13,19 +13,12 @@
 
 <body> 
 
-
-
-
-
-
-
-
   <div id="racer">
     <div id="hud">
-      <span id="speed"            class="hud"><span id="speed_value" class="value">0</span> mph</span>
+      <span id="speed" class="hud"><span id="speed_value" class="value">0</span> mph</span>
       <span id="current_lap_time" class="hud">Time: <span id="current_lap_time_value" class="value">0.0</span></span> 
-      <span id="last_lap_time"    class="hud">Last Lap: <span id="last_lap_time_value" class="value">0.0</span></span>
-      <span id="fast_lap_time"    class="hud">Fastest Lap: <span id="fast_lap_time_value" class="value">0.0</span></span>
+      <span id="last_lap_time" class="hud">Last Lap: <span id="last_lap_time_value" class="value">0.0</span></span>
+      <span id="fast_lap_time" class="hud">Fastest Lap: <span id="fast_lap_time_value" class="value">0.0</span></span>
     </div>
     <canvas id="canvas">
       Sorry, this example cannot be run because your browser does not support the &lt;canvas&gt; element
@@ -33,15 +26,12 @@
     Loading...
   </div>
 
-  
-
   <audio id='music'>
     <source src="music/racer.ogg">
     <source src="music/racer.mp3">
   </audio>
   <span id="mute"></span>
 
-  
   <script src="common.js"></script>
   <script src="game.js"></script>
   <script src="tg.js"></script>
@@ -103,15 +93,19 @@
     var columnSprite, boulder1Sprite, boulder2Sprite, boulder3Sprite;
     var bush1Sprite, bush2Sprite, cactusSprite, stumpSprite;
     var semiSprite, truckSprite, car01Sprite, car02Sprite, car03Sprite, car04Sprite;
+    var coinSprite; // Coin sprite
 
     var hud = {
       speed:            { value: null, dom: Dom.get('speed_value')            },
       current_lap_time: { value: null, dom: Dom.get('current_lap_time_value') },
       last_lap_time:    { value: null, dom: Dom.get('last_lap_time_value')    },
       fast_lap_time:    { value: null, dom: Dom.get('fast_lap_time_value')    }
-    }
-    
+    };
 
+    var coin = null; // This will hold the coin object
+    var coinActive = false; // To track if the coin is currently active
+    var coinTimer = 0;
+    var coinDropInterval = 5000; // Drop a new coin every 5 seconds
 
     function update(dt) {
       var n, car, carW, sprite, spriteW;
@@ -192,10 +186,28 @@
 
       updateHud('speed', 5 * Math.round(speed / 500));
       updateHud('current_lap_time', formatTime(currentLapTime));
-  }
 
+      // Check if the player collects the coin
+      if (coinActive) {
+        var coinSegment = findSegment(coin.z);
+        if (playerSegment === coinSegment) {
+          var coinW = coinSprite.width * SPRITES.SCALE;
 
-    
+          if (Util.overlap(playerX, playerW, coin.offset, coinW, 0.8)) {
+            coinActive = false; // Deactivate the coin
+            // Optionally: Increase score or trigger an event
+          }
+        }
+      }
+
+      // Randomly drop a new coin after the interval
+      coinTimer += dt * 1000;
+      if (coinTimer >= coinDropInterval) {
+        resetCoin();
+        coinTimer = 0;
+      }
+    }
+
     function updateCars(dt, playerSegment, playerW) {
       var n, car, oldSegment, newSegment;
       for (n = 0; n < cars.length; n++) {
@@ -212,9 +224,9 @@
               newSegment.cars.push(car);
           }
       }
-  }
+    }
 
-  function updateCarOffset(car, carSegment, playerSegment, playerW) {
+    function updateCarOffset(car, carSegment, playerSegment, playerW) {
       var i, j, dir, segment, otherCar, otherCarW, lookahead = 20;
       var carW = car.sprite.width * SPRITES.SCALE; // Update carW based on the actual width of the car sprite
 
@@ -254,7 +266,6 @@
       else if (car.offset > 0.9) return -0.1;
       else return 0;
   }
-
 
     //-------------------------------------------------------------------------
 
@@ -297,7 +308,6 @@
       Render.background(ctx, backgroundHills, width, height, { w: backgroundHills.width, h: backgroundHills.height }, hillOffset, resolution * hillSpeed * playerY);
       Render.background(ctx, backgroundTrees, width, height, { w: backgroundTrees.width, h: backgroundTrees.height }, treeOffset, resolution * treeSpeed * playerY);
 
-
       var n, i, segment, car, sprite, spriteScale, spriteX, spriteY;
 
       for(n = 0 ; n < drawDistance ; n++) {
@@ -330,15 +340,16 @@
 
         maxy = segment.p1.screen.y;
       }
-      // Add this block of code to display the "START" text at the starting line
-      /*
-      if (position < 1000 && !firstLapComplete) {  // Display when near the start line (adjust value as needed)
-          ctx.font = "bold 48px Arial";
-          ctx.fillStyle = "white";
-          ctx.textAlign = "center";
-          ctx.fillText("START", width / 2, height / 2 - 100);
+
+      // Render the coin if it's active
+      if (coinActive) {
+        var coinSegment = findSegment(coin.z);
+        var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength));
+        var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * width / 2);
+        var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
+        Render.sprite(ctx, width, height, resolution, roadWidth, sprites, coinSprite, coinScale, coinX, coinY, -0.5, -1, coinSegment.clip);
       }
-      */
+
       for(n = (drawDistance-1) ; n > 0 ; n--) {
         segment = segments[(baseSegment.index + n) % segments.length];
 
@@ -493,7 +504,7 @@
       
       resetSprites();
       resetCars();
-
+      resetCoin(); // Add this line to reset the coin when resetting the road
 
       // Modify the road width and color for the start line
       var startLineSegment1 = segments[findSegment(playerZ).index + 1];
@@ -574,7 +585,14 @@
         cars.push(car);
     }
   }
-  
+
+  function resetCoin() {
+    coin = {
+      offset: Math.random() * Util.randomChoice([-0.8, 0.8]), // Random position on the road
+      z: Math.floor(Math.random() * segments.length) * segmentLength // Random segment
+    };
+    coinActive = true; // Activate the coin
+  }
 
     //=========================================================================
     // THE GAME LOOP
@@ -590,7 +608,8 @@
         "sprites/player_uphill_left",
         "sprites/player_uphill_right",
         "sprites/player_right",
-        "sprites/player_left","sprites/billboard01",
+        "sprites/player_left",
+        "sprites/billboard01",
         "sprites/billboard02",
         "sprites/billboard03",
         "sprites/billboard04",
@@ -625,6 +644,7 @@
         "sprites/truck8",
         "sprites/truck22",
         "sprites/truck23",
+        "sprites/coin" // Add this line for the coin sprite
       ], 
   
       keys: [
@@ -681,6 +701,7 @@
         truck2Sprite = images[40];
         truck3Sprite = images[41];
         truck4Sprite = images[42];
+        coinSprite = images[43]; // Load the coin sprite
 
         spritesBillboards = [billboard01Sprite,billboard02Sprite,billboard03Sprite,billboard04Sprite,billboard05Sprite, billboard06Sprite, billboard07Sprite, billboard08Sprite, billboard09Sprite];
         spritesPlants = [tree1Sprite, tree2Sprite, deadTree1Sprite, deadTree2Sprite, palmTreeSprite,boulder1Sprite, boulder2Sprite, boulder3Sprite,bush1Sprite, bush2Sprite, cactusSprite, stumpSprite];
@@ -711,8 +732,6 @@
       if ((segments.length==0) || (options.segmentLength) || (options.rumbleLength))
         resetRoad(); // only rebuild road when necessary
     }
-
-
 
   </script>
 
