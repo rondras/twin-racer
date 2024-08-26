@@ -18,7 +18,7 @@ if (startParam) {
     console.log("Start Param:", startParam);
     if (startParam.startsWith('ref')) {
         // Extract the referrer's Telegram ID by stripping the 'ref' prefix
-        referrerTelegramId = referralParam.slice(3); // "ref123456" becomes "123456"
+        referrerTelegramId = startParam.slice(3); // "ref123456" becomes "123456"
     }
 } else {
     console.log("No start_param found.");
