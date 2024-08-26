@@ -15,6 +15,7 @@ Telegram.WebApp.ready();
 // Extract the start parameter which includes the referral code
 const urlParams = new URLSearchParams(window.location.search);
 const referralParam = urlParams.get('tgWebAppStartParam');
+console.log(referralParam)
 
 let referrerTelegramId = null;
 
