@@ -12,22 +12,17 @@ loadTelegramWebAppScript();
 // Initialize the Telegram WebApp
 Telegram.WebApp.ready();
 
-// Extract the start parameter which includes the referral code
-//const urlParams = new URLSearchParams(window.location.search);
-const referralParam = Telegram.WebApp.initDataUnsafe.start_param
-alert(referralParam)
 
-let referrerTelegramId = 1;
-
-// Check if the referral parameter starts with 'ref'
-if (referralParam && referralParam.startsWith('ref')) {
-    // Extract the referrer's Telegram ID by stripping the 'ref' prefix
-    referrerTelegramId = referralParam.slice(3); // "ref123456" becomes "123456"
-}
-
-const user = Telegram.WebApp.initDataUnsafe.user;
-if (user) {
-    addUser(user.username, user.id,referralParam);
+const initData = Telegram.WebApp.initDataUnsafe;
+if (initData.user) {
+    const referralParam = initData.start_param
+    let referrerTelegramId = 1;
+    // Check if the referral parameter starts with 'ref'
+    if (referralParam && referralParam.startsWith('ref')) {
+        // Extract the referrer's Telegram ID by stripping the 'ref' prefix
+        referrerTelegramId = referralParam.slice(3); // "ref123456" becomes "123456"
+    }
+    addUser(initData.user.username, initData.user.id,referrerTelegramId);
     // Display the user's name and profile picture
     const userInfoDiv = document.getElementById('user-info');
     userInfoDiv.innerHTML = `
