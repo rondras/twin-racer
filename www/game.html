@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 
@@ -233,30 +234,34 @@
             }
         }
 
-        function checkCoinCollection(playerPosition) {
-            for (var i = 0; i < coins.length; i++) {
-                if (!coins[i].collected && 
-                    Math.abs(playerPosition.z - coins[i].z) < 100 && 
-                    Math.abs(playerPosition.x - coins[i].offset) < 0.5) {
-                    
-                    // Collect the coin
-                    coins[i].collected = true;
-                    hud.coin_count.value++;
-                    
-                    // Update the HUD directly
-                    document.getElementById('coin_count_value').innerText = hud.coin_count.value;
-                    
-                    // Play the coin sound
-                    playCoinSound();
+function checkCoinCollection(playerPosition) {
+    for (var i = 0; i < coins.length; i++) {
+        // Consider a slight threshold for lane offset comparison
+        var laneThreshold = 0.5; // Adjust this value as necessary
+        if (!coins[i].collected && 
+            Math.abs(playerPosition.z - coins[i].z) < 100 && // Adjust z threshold if necessary
+            Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) { 
+            
+            // Collect the coin
+            coins[i].collected = true;
+            hud.coin_count.value++;
+            
+            // Update the HUD directly
+            document.getElementById('coin_count_value').innerText = hud.coin_count.value;
+            
+            // Play the coin sound
+            playCoinSound();
 
-                    console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
-                    break; // Exit the loop after collecting a coin
-                }
-            }
-
-            // Remove collected coins from the array
-            coins = coins.filter(c => !c.collected);
+            console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
+            break; // Exit the loop after collecting a coin
         }
+    }
+
+    // Remove collected coins from the array
+    coins = coins.filter(c => !c.collected);
+}
+
+
 
         function playCoinSound() {
             var coinSound = document.getElementById('coinSound');
@@ -401,15 +406,20 @@
                 maxy = segment.p1.screen.y;
             }
 
-            for (var i = 0; i < coins.length; i++) {
-                if (!coins[i].collected) {
-                    var coinSegment = findSegment(coins[i].z);
-                    var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coins[i].z, segmentLength)) * 0.03;
-                    var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coins[i].z, segmentLength)) + (coinScale * coins[i].offset * roadWidth * width / 2);
-                    var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coins[i].z, segmentLength));
-                    Render.sprite(ctx, width, height, resolution, roadWidth, sprites, coinSprite, coinScale, coinX, coinY, -0.5, -1, coinSegment.clip);
-                }
-            }
+for (var i = 0; i < coins.length; i++) {
+    if (!coins[i].collected) {
+        var coinSegment = findSegment(coins[i].z);
+        var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coins[i].z, segmentLength)) * 0.03;
+        var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coins[i].z, segmentLength)) + (coinScale * coins[i].offset * roadWidth * width / 2);
+        var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coins[i].z, segmentLength));
+
+        // Debugging: Log the calculated positions
+        console.log(`Coin Rendered - z: ${coins[i].z}, offset: ${coins[i].offset}, x: ${coinX}, y: ${coinY}`);
+
+        Render.sprite(ctx, width, height, resolution, roadWidth, sprites, coinSprite, coinScale, coinX, coinY, -0.5, -1, coinSegment.clip);
+    }
+}
+
 
             for (var n = (drawDistance - 1); n > 0; n--) {
                 var segment = segments[(baseSegment.index + n) % segments.length];
@@ -638,34 +648,23 @@
             dropCoins();
         }
 
-        function dropCoins() {
-            var sequenceType = Util.randomInt(1, 4);
-            var zStart = position + playerZ + 8000;
-            var laneOffsets = [-1.2, 0, 1.2];
-            var zSpacing = 2000;
+function dropCoins() {
+    var zStart = position + playerZ + 8000; // starting z position
+    var zSpacing = 2000; // spacing between coins
+    // Randomly choose the number of coins to drop: either 3, 4, or 6
+    var numberOfCoins = [3, 4, 6][Math.floor(Math.random() * 3)]; 
+    var minSpacing = 300; // Minimum random spacing between coins
+    var maxSpacing = 600; // Maximum random spacing between coins
 
-            for (var i = 0; i < 4; i++) {
-                var offset;
-                var zPosition = zStart + i * zSpacing + Util.randomInt(300, 600);
+    for (var i = 0; i < numberOfCoins; i++) {
+        var offset = 0; // All coins drop in the middle lane
+        var zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
 
-                switch (sequenceType) {
-                    case 1:
-                        offset = Util.randomChoice(laneOffsets);
-                        break;
-                    case 2:
-                        offset = laneOffsets[0];
-                        break;
-                    case 3:
-                        offset = laneOffsets[1];
-                        break;
-                    case 4:
-                        offset = laneOffsets[2];
-                        break;
-                }
+        coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
+    }
+}
 
-                coins.push({ id: i, offset: offset, z: zPosition, collected: false });
-            }
-        }
+
 
         Game.run({
             canvas: canvas,
