@@ -13,8 +13,8 @@ loadTelegramWebAppScript();
 Telegram.WebApp.ready();
 
 // Extract the start parameter which includes the referral code
-const urlParams = new URLSearchParams(window.location.search);
-const referralParam = urlParams.get('tgWebAppStartParam');
+//const urlParams = new URLSearchParams(window.location.search);
+const referralParam = Telegram.WebApp.tgWebAppStartParam
 alert(referralParam)
 
 let referrerTelegramId = 1;
@@ -43,30 +43,7 @@ Telegram.WebApp.onEvent('themeChanged', function() {
     document.documentElement.className = Telegram.WebApp.colorScheme;
 });
 
-// Show main button
-Telegram.WebApp.MainButton.setParams({
-    text: 'Main Button'
-});
-Telegram.WebApp.MainButton.onClick(function () {
-    Telegram.WebApp.showAlert('Main Button was clicked')
-});	
-Telegram.WebApp.MainButton.show();
 
-// Function to call showPopup API
-function showPopup() {
-    Telegram.WebApp.showPopup({
-        title: 'Title',
-        message: 'Some message',
-        buttons: [
-            {id: 'link', type: 'default', text: 'Open ton.org'},
-            {type: 'cancel'},
-        ]
-    }, function(btn) {
-        if (btn === 'link') {
-            Telegram.WebApp.openLink('https://ton.org/');
-        }
-    });
-};
 
 // Function to toggle main TWA button
 function toggleMainButton() {
