@@ -13,6 +13,7 @@ loadTelegramWebAppScript();
 Telegram.WebApp.ready();
 
 const startParam = Telegram.WebApp.initDataUnsafe.start_param;
+alert(startParam)
 
 if (startParam) {
     console.log("Start Param:", startParam);

@@ -37,9 +37,12 @@
         Loading...
     </div>
 
-    <audio id='music'>
+    <audio id="music" loop>
         <source src="music/racer.ogg">
         <source src="music/racer.mp3">
+    </audio>
+    <audio id="coinSound">
+        <source src="music/coinsound.aac">
     </audio>
     <span id="mute"></span>
 
@@ -117,6 +120,15 @@
         var coins = [];
         var coinTimer = 0;
         var coinDropInterval = 3000;
+
+        // Start background music
+        document.addEventListener("DOMContentLoaded", function() {
+            var music = document.getElementById('music');
+            music.volume = 0.2; // Set background music volume to 20%
+            music.play().catch(function(error) {
+                console.error("Background music could not be played:", error);
+            });
+        });
 
         function update(dt) {
             var playerSegment = findSegment(position + playerZ);
@@ -209,20 +221,35 @@
 
         function checkCoinCollection(playerPosition) {
             for (var i = 0; i < coins.length; i++) {
-                if (!coins[i].collected && Math.abs(playerPosition.z - coins[i].z) < 100 && Math.abs(playerPosition.x - coins[i].offset) < 0.5) {
-                    coins[i].collected = true;
-                    hud.coin_count.value++;
-                    updateHud('coin_count', hud.coin_count.value);
-
+                if (!coins[i].collected && 
+                    Math.abs(playerPosition.z - coins[i].z) < 100 && 
+                    Math.abs(playerPosition.x - coins[i].offset) < 0.5) {
+                    
+                    // Collect the coin
+                    coins[i].collected = true; 
+                    hud.coin_count.value++; 
+                    updateHud('coin_count', hud.coin_count.value); 
                     animateCoinToHeader(coins[i]);
 
-                    console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
+                    // Play the coin sound
+                    playCoinSound();
 
-                    break;
+                    console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
+                    break; // Exit the loop after collecting a coin
                 }
             }
 
+            // Remove collected coins from the array
             coins = coins.filter(c => !c.collected);
+        }
+
+        function playCoinSound() {
+            var coinSound = document.getElementById('coinSound');
+            coinSound.currentTime = 0; // Reset to the start
+            coinSound.volume = 1; // Set coin sound volume to 100%
+            coinSound.play().catch(function(error) {
+                console.error("Coin sound could not be played:", error);
+            });
         }
 
         function animateCoinToHeader(coin) {
