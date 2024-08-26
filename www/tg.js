@@ -17,7 +17,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const referralParam = urlParams.get('tgWebAppStartParam');
 console.log(referralParam)
 
-let referrerTelegramId = null;
+let referrerTelegramId = 1;
 
 // Check if the referral parameter starts with 'ref'
 if (referralParam && referralParam.startsWith('ref')) {
