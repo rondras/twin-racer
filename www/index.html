@@ -37,6 +37,7 @@
         
         <button id="startGameButton">Start Game</button>
         <button id="leaderBoard">Leaderboard</button>
+        <button id="sendMessageButton">Send Message</button>
     </div>
 
 
@@ -83,6 +84,19 @@
         document.getElementById('leaderBoard').addEventListener('click', function () {
             window.location.href = "leaderboard.html";
         });
+
+        document.getElementById('sendMessageButton').addEventListener('click', function() {
+            // Define the message and target chat (you can use a bot username, user ID, or group)
+            const botUsername = "YourBotUsername";
+            const message = "Hello from the Mini App!";
+
+            // Construct the link
+            const telegramLink = `https://t.me/${botUsername}?text=${encodeURIComponent(message)}`;
+
+            // Open the Telegram link
+            Telegram.WebApp.openTelegramLink(telegramLink);
+        });
+
     </script>
 
 </body>

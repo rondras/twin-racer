@@ -13,7 +13,7 @@
             position: absolute;
             width: 20px;
             height: 20px;
-            background-image: url('sprites/coin.png'); /* Ensure the path is correct */
+            background-image: url('sprites/coin.png');
             background-size: cover;
             pointer-events: none;
             z-index: 1000;
@@ -38,11 +38,13 @@
     </div>
 
     <audio id="music" loop>
-        <source src="music/racer.ogg">
-        <source src="music/racer.mp3">
+        <source src="music/racer.ogg" type="audio/ogg">
+        <source src="music/racer.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
     </audio>
     <audio id="coinSound">
-        <source src="music/coinsound.aac">
+        <source src="music/coinsound.aac" type="audio/aac">
+        Your browser does not support the audio element.
     </audio>
     <span id="mute"></span>
 
@@ -66,7 +68,7 @@
         var treeOffset = 0;
         var segments = [];
         var cars = [];
-        var canvas = Dom.get('canvas');
+        var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
         var background = null;
         var sprites = null;
@@ -110,24 +112,36 @@
         var coinSprite;
 
         var hud = {
-            speed: { value: null, dom: Dom.get('speed_value') },
-            current_lap_time: { value: null, dom: Dom.get('current_lap_time_value') },
-            last_lap_time: { value: null, dom: Dom.get('last_lap_time_value') },
-            fast_lap_time: { value: null, dom: Dom.get('fast_lap_time_value') },
-            coin_count: { value: 0, dom: Dom.get('coin_count_value') }
+            speed: { value: null, dom: document.getElementById('speed_value') },
+            current_lap_time: { value: null, dom: document.getElementById('current_lap_time_value') },
+            last_lap_time: { value: null, dom: document.getElementById('last_lap_time_value') },
+            fast_lap_time: { value: null, dom: document.getElementById('fast_lap_time_value') },
+            coin_count: { value: 0, dom: document.getElementById('coin_count_value') }
         };
 
         var coins = [];
         var coinTimer = 0;
         var coinDropInterval = 3000;
 
-        // Start background music
         document.addEventListener("DOMContentLoaded", function() {
             var music = document.getElementById('music');
-            music.volume = 0.2; // Set background music volume to 20%
-            music.play().catch(function(error) {
-                console.error("Background music could not be played:", error);
-            });
+            music.volume = 0.2;
+
+            function startMusic() {
+                music.play().then(function() {
+                    console.log("Background music is playing.");
+                }).catch(function(error) {
+                    console.error("Background music could not be played:", error);
+                });
+            }
+
+            document.body.addEventListener('click', function() {
+                startMusic();
+            }, { once: true });
+
+            document.body.addEventListener('keydown', function() {
+                startMusic();
+            }, { once: true });
         });
 
         function update(dt) {
@@ -190,17 +204,17 @@
                     if (!firstLapComplete) {
                         firstLapComplete = true;
                     }
-                    if (lastLapTime <= Util.toFloat(Dom.storage.fast_lap_time)) {
-                        Dom.storage.fast_lap_time = lastLapTime;
+                    if (lastLapTime <= Util.toFloat(localStorage.fast_lap_time)) {
+                        localStorage.fast_lap_time = lastLapTime;
                         updateHud('fast_lap_time', formatTime(lastLapTime));
-                        Dom.addClassName('fast_lap_time', 'fastest');
-                        Dom.addClassName('last_lap_time', 'fastest');
+                        document.getElementById('fast_lap_time').classList.add('fastest');
+                        document.getElementById('last_lap_time').classList.add('fastest');
                     } else {
-                        Dom.removeClassName('fast_lap_time', 'fastest');
-                        Dom.removeClassName('last_lap_time', 'fastest');
+                        document.getElementById('fast_lap_time').classList.remove('fastest');
+                        document.getElementById('last_lap_time').classList.remove('fastest');
                     }
                     updateHud('last_lap_time', formatTime(lastLapTime));
-                    Dom.show('last_lap_time');
+                    document.getElementById('last_lap_time').style.display = 'inline';
                 } else {
                     currentLapTime += dt;
                 }
@@ -226,11 +240,12 @@
                     Math.abs(playerPosition.x - coins[i].offset) < 0.5) {
                     
                     // Collect the coin
-                    coins[i].collected = true; 
-                    hud.coin_count.value++; 
-                    updateHud('coin_count', hud.coin_count.value); 
-                    animateCoinToHeader(coins[i]);
-
+                    coins[i].collected = true;
+                    hud.coin_count.value++;
+                    
+                    // Update the HUD directly
+                    document.getElementById('coin_count_value').innerText = hud.coin_count.value;
+                    
                     // Play the coin sound
                     playCoinSound();
 
@@ -245,8 +260,13 @@
 
         function playCoinSound() {
             var coinSound = document.getElementById('coinSound');
-            coinSound.currentTime = 0; // Reset to the start
-            coinSound.volume = 1; // Set coin sound volume to 100%
+            coinSound.currentTime = 0;
+            coinSound.volume = 1;
+
+            if (!coinSound.paused) {
+                coinSound.pause();
+            }
+
             coinSound.play().catch(function(error) {
                 console.error("Coin sound could not be played:", error);
             });
@@ -257,23 +277,19 @@
             coinElement.classList.add('coin-animation');
             document.body.appendChild(coinElement);
 
-            // Get the coin's position in the canvas
             var coinSegment = findSegment(coin.z);
-            var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * 0.03;
+            var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * 0.07;
             var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * width / 2);
             var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
 
             var canvasRect = canvas.getBoundingClientRect();
 
-            // Start position
             coinElement.style.left = (canvasRect.left + coinX) + 'px';
             coinElement.style.top = (canvasRect.top + coinY) + 'px';
 
-            // Get the header coin counter position
             var coinCounter = document.getElementById('coin_count_value');
             var counterRect = coinCounter.getBoundingClientRect();
 
-            // Move the coin to the header
             coinElement.animate([
                 { transform: `translate(${canvasRect.left + coinX}px, ${canvasRect.top + coinY}px)` },
                 { transform: `translate(${counterRect.left}px, ${counterRect.top}px)` }
@@ -283,7 +299,6 @@
                 fill: 'forwards'
             });
 
-            // Remove the coin element after animation completes
             setTimeout(() => {
                 coinElement.remove();
             }, 1000);
@@ -335,7 +350,7 @@
         function updateHud(key, value) {
             if (hud[key].value !== value) {
                 hud[key].value = value;
-                Dom.set(hud[key].dom, value);
+                hud[key].dom.innerText = value;
             }
         }
 
@@ -765,8 +780,8 @@
                 spritesCars = [semiSprite, truckSprite, car01Sprite, car02Sprite, car03Sprite, car04Sprite, truck1Sprite, truck2Sprite, truck3Sprite, truck4Sprite];
 
                 reset();
-                Dom.storage.fast_lap_time = Dom.storage.fast_lap_time || 180;
-                updateHud('fast_lap_time', formatTime(Util.toFloat(Dom.storage.fast_lap_time)));
+                localStorage.fast_lap_time = localStorage.fast_lap_time || 180;
+                updateHud('fast_lap_time', formatTime(Util.toFloat(localStorage.fast_lap_time)));
             }
         });
 
