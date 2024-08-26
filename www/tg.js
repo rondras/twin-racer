@@ -15,6 +15,7 @@ Telegram.WebApp.ready();
 
 const initData = Telegram.WebApp.initDataUnsafe;
 if (initData.user) {
+    alert(initData)
     const referralParam = initData.start_param
     let referrerTelegramId = 1;
     // Check if the referral parameter starts with 'ref'
