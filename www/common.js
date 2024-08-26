@@ -3,16 +3,30 @@
 //=========================================================================
 
 var Dom = {
-
-  get:  function(id)                     { return ((id instanceof HTMLElement) || (id === document)) ? id : document.getElementById(id); },
-  set:  function(id, html)               { Dom.get(id).innerHTML = html;                        },
-  on:   function(ele, type, fn, capture) { Dom.get(ele).addEventListener(type, fn, capture);    },
-  un:   function(ele, type, fn, capture) { Dom.get(ele).removeEventListener(type, fn, capture); },
-  show: function(ele, type)              { Dom.get(ele).style.display = (type || 'block');      },
-  blur: function(ev)                     { ev.target.blur();                                    },
-
-  addClassName:    function(ele, name)     { Dom.toggleClassName(ele, name, true);  },
-  removeClassName: function(ele, name)     { Dom.toggleClassName(ele, name, false); },
+  get: function(id) {
+    return ((id instanceof HTMLElement) || (id === document)) ? id : document.getElementById(id);
+  },
+  set: function(id, html) {
+    Dom.get(id).innerHTML = html;
+  },
+  on: function(ele, type, fn, capture) {
+    Dom.get(ele).addEventListener(type, fn, capture);
+  },
+  un: function(ele, type, fn, capture) {
+    Dom.get(ele).removeEventListener(type, fn, capture);
+  },
+  show: function(ele, type) {
+    Dom.get(ele).style.display = (type || 'block');
+  },
+  blur: function(ev) {
+    ev.target.blur();
+  },
+  addClassName: function(ele, name) {
+    Dom.toggleClassName(ele, name, true);
+  },
+  removeClassName: function(ele, name) {
+    Dom.toggleClassName(ele, name, false);
+  },
   toggleClassName: function(ele, name, on) {
     ele = Dom.get(ele);
     var classes = ele.className.split(' ');
@@ -24,9 +38,7 @@ var Dom = {
       classes.splice(n, 1);
     ele.className = classes.join(' ');
   },
-
   storage: window.localStorage || {}
-
 }
 
 //=========================================================================
@@ -97,21 +109,18 @@ if (!window.requestAnimationFrame) { // http://paulirish.com/2011/requestanimati
 // GAME LOOP helpers
 //=========================================================================
 
-var Game = {  // a modified version of the game loop from my previous boulderdash game - see http://codeincomplete.com/posts/2011/10/25/javascript_boulderdash/#gameloop
-
+var Game = {
   run: function(options) {
-
     Game.loadImages(options.images, function(images) {
-
       options.ready(images); // tell caller to initialize itself because images are loaded and we're ready to rumble
 
       Game.setKeyListener(options.keys);
 
-      var canvas = options.canvas,    // canvas render target is provided by caller
-          update = options.update,    // method to update game logic is provided by caller
-          render = options.render,    // method to render the game is provided by caller
-          step   = options.step,      // fixed frame step (1/fps) is specified by caller
-          stats  = options.stats,     // stats instance is provided by caller
+      var canvas = options.canvas, // canvas render target is provided by caller
+          update = options.update,  // method to update game logic is provided by caller
+          render = options.render,  // method to render the game is provided by caller
+          step   = options.step,    // fixed frame step (1/fps) is specified by caller
+          stats  = options.stats,   // stats instance is provided by caller
           now    = null,
           last   = Util.timestamp(),
           dt     = 0,
@@ -119,7 +128,7 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
 
       function frame() {
         now = Util.timestamp();
-        dt  = Math.min(1, (now - last) / 1000); // using requestAnimationFrame have to be able to handle large delta's caused when it 'hibernates' in a background or non-visible tab
+        dt = Math.min(1, (now - last) / 1000); // using requestAnimationFrame have to be able to handle large delta's caused when it 'hibernates' in a background or non-visible tab
         gdt = gdt + dt;
         while (gdt > step) {
           gdt = gdt - step;
@@ -131,6 +140,26 @@ var Game = {  // a modified version of the game loop from my previous boulderdas
       }
       frame(); // lets get this party started
       Game.playMusic();
+    });
+  },
+
+  playMusic: function() {
+    var music = Dom.get('music');
+    music.loop = true;
+    music.volume = 0.05; // shhhh! annoying music!
+    music.muted = (Dom.storage.muted === "true");
+
+    // Ensure play is called after a user gesture
+    document.getElementById('startGameButton').addEventListener('click', function() {
+      music.play().catch(function(error) {
+        console.error("Failed to play music:", error);
+      });
+    });
+
+    Dom.toggleClassName('mute', 'on', music.muted);
+    Dom.on('mute', 'click', function() {
+      Dom.storage.muted = music.muted = !music.muted;
+      Dom.toggleClassName('mute', 'on', music.muted);
     });
   },
 
