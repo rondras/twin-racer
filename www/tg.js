@@ -25,6 +25,18 @@ if (referralParam && referralParam.startsWith('ref')) {
     referrerTelegramId = referralParam.slice(3); // "ref123456" becomes "123456"
 }
 
+const user = Telegram.WebApp.initDataUnsafe.user;
+if (user) {
+    addUser(user.username, user.id);
+    // Display the user's name and profile picture
+    const userInfoDiv = document.getElementById('user-info');
+    userInfoDiv.innerHTML = `
+        <span>${user.first_name} ${user.last_name || ''} </span>
+    `;
+} else {
+    // Handle case where user information is not available
+    document.getElementById('user-info').innerText = 'User information not available.';
+}
 
 // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
 Telegram.WebApp.onEvent('themeChanged', function() {

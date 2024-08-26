@@ -46,19 +46,6 @@
         Telegram.WebApp.ready();
         // Expand the Mini App to full screen
         Telegram.WebApp.expand();
-        // Retrieve user data
-        const user = Telegram.WebApp.initDataUnsafe.user;
-        if (user) {
-            addUser(user.username, user.id);
-            // Display the user's name and profile picture
-            const userInfoDiv = document.getElementById('user-info');
-            userInfoDiv.innerHTML = `
-                <span>${user.first_name} ${user.last_name || ''} </span>
-            `;
-        } else {
-            // Handle case where user information is not available
-            document.getElementById('user-info').innerText = 'User information not available.';
-        }
         
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
             manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
