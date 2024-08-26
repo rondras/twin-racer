@@ -11,7 +11,7 @@ loadTelegramWebAppScript();
 
 // Initialize the Telegram WebApp
 Telegram.WebApp.ready();
-referrerTelegramId = null
+var referrerTelegramId = null
 const startParam = Telegram.WebApp.initDataUnsafe.start_param;
 
 if (startParam) {
@@ -31,7 +31,7 @@ if (initData.user) {
     // Display the user's name and profile picture
     const userInfoDiv = document.getElementById('user-info');
     userInfoDiv.innerHTML = `
-        <span>${user.first_name} ${user.last_name || ''} </span>
+        <span>${initData.user.first_name} ${initData.user.last_name || ''} </span>
     `;
 } else {
     // Handle case where user information is not available
