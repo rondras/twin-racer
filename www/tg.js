@@ -12,6 +12,15 @@ loadTelegramWebAppScript();
 // Initialize the Telegram WebApp
 Telegram.WebApp.ready();
 
+const startParam = Telegram.WebApp.initDataUnsafe.start_param;
+
+if (startParam) {
+    console.log("Start Param:", startParam);
+    // Use startParam as needed
+} else {
+    console.log("No start_param found.");
+}
+
 
 const initData = Telegram.WebApp.initDataUnsafe;
 if (initData.user) {
