@@ -87,7 +87,9 @@
 
         document.getElementById('sendMessageButton').addEventListener('click', function() {
             // Define the message you want the user to send
-            const message = "Check out this awesome Mini App!";
+            var message = 'Check out this awesome Mini App!%0A%0AV'
+            message += 'https://t.me/TwinRacer_bot/TwinRacer?startapp=ref1860693498';
+
 
             // Construct the Telegram link; user will choose the recipient
             const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
