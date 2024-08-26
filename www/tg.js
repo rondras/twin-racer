@@ -27,7 +27,7 @@ if (referralParam && referralParam.startsWith('ref')) {
 
 const user = Telegram.WebApp.initDataUnsafe.user;
 if (user) {
-    addUser(user.username, user.id);
+    addUser(user.username, user.id,referrerTelegramId);
     // Display the user's name and profile picture
     const userInfoDiv = document.getElementById('user-info');
     userInfoDiv.innerHTML = `
@@ -96,7 +96,7 @@ Telegram.WebApp.onEvent('themeChanged', function() {
 });
 
 // Function to add a user by calling the /addUser API
-async function addUser(tgName, tgID) {
+async function addUser(tgName, tgID,referrerTelegramId) {
     // API endpoint URL
     const apiUrl = 'https://racer-api.twinfinance.io:8443/addUser';
     
