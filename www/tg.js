@@ -9,8 +9,21 @@ function loadTelegramWebAppScript() {
 loadTelegramWebAppScript();
 
 
-// Init TWA
+// Initialize the Telegram WebApp
 Telegram.WebApp.ready();
+
+// Extract the start parameter which includes the referral code
+const urlParams = new URLSearchParams(window.location.search);
+const referralParam = urlParams.get('tgWebAppStartParam');
+
+let referrerTelegramId = null;
+
+// Check if the referral parameter starts with 'ref'
+if (referralParam && referralParam.startsWith('ref')) {
+    // Extract the referrer's Telegram ID by stripping the 'ref' prefix
+    referrerTelegramId = referralParam.slice(3); // "ref123456" becomes "123456"
+}
+
 
 // Event occurs whenever theme settings are changed in the user's Telegram app (including switching to night mode).
 Telegram.WebApp.onEvent('themeChanged', function() {
@@ -77,7 +90,8 @@ async function addUser(tgName, tgID) {
     // Create the payload object
     const data = {
         tgName: tgName,
-        tgID: tgID
+        tgID: tgID,
+        referrerID: referrerTelegramId,
     };
 
     try {
