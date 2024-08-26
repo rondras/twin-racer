@@ -145,54 +145,57 @@
             }, { once: true });
         });
 
-        function update(dt) {
-            var playerSegment = findSegment(position + playerZ);
-            var playerW = playerStraightSprite.width * SPRITES.SCALE;
-            var speedPercent = speed / maxSpeed;
-            var dx = dt * 2 * speedPercent;
-            var startPosition = position;
+function update(dt) {
+    var playerSegment = findSegment(position + playerZ);
+    var playerW = playerStraightSprite.width * SPRITES.SCALE;
+    var speedPercent = speed / maxSpeed;
+    var dx = dt * 2 * speedPercent;
+    var startPosition = position;
 
-            updateCars(dt, playerSegment, playerW);
+    updateCars(dt, playerSegment, playerW);
 
-            position = Util.increase(position, dt * speed, trackLength);
+    position = Util.increase(position, dt * speed, trackLength);
 
-            if (keyLeft) playerX -= dx;
-            else if (keyRight) playerX += dx;
+    if (keyLeft) playerX -= dx;
+    else if (keyRight) playerX += dx;
 
-            playerX -= dx * speedPercent * playerSegment.curve * centrifugal;
+    playerX -= dx * speedPercent * playerSegment.curve * centrifugal;
 
-            if (keyFaster) speed = Util.accelerate(speed, accel, dt);
-            else if (keySlower) speed = Util.accelerate(speed, breaking, dt);
-            else speed = Util.accelerate(speed, decel, dt);
+    if (keyFaster) speed = Util.accelerate(speed, accel, dt);
+    else if (keySlower) speed = Util.accelerate(speed, breaking, dt);
+    else speed = Util.accelerate(speed, decel, dt);
 
-            if ((playerX < -1) || (playerX > 1)) {
-                if (speed > offRoadLimit) speed = Util.accelerate(speed, offRoadDecel, dt);
+    if ((playerX < -1) || (playerX > 1)) {
+        if (speed > offRoadLimit) speed = Util.accelerate(speed, offRoadDecel, dt);
 
-                for (var n = 0; n < playerSegment.sprites.length; n++) {
-                    var sprite = playerSegment.sprites[n];
-                    var spriteW = sprite.source.width * SPRITES.SCALE;
-                    if (Util.overlap(playerX, playerW, sprite.offset + spriteW / 2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
-                        speed = maxSpeed / 5;
-                        position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength);
-                        break;
-                    }
+        // Separate logic for static sprites (like trees)
+        for (var n = 0; n < playerSegment.sprites.length; n++) {
+            var sprite = playerSegment.sprites[n];
+            var spriteW = sprite.source.width * SPRITES.SCALE;
+            if (Util.overlap(playerX, playerW, sprite.offset + spriteW / 2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
+                if (sprite.source !== palmTreeSprite) { // Exclude palm trees from collision effects
+                    speed = maxSpeed / 5;
+                    position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength);
+                    break;
                 }
             }
+        }
+    }
 
-            for (var n = 0; n < playerSegment.cars.length; n++) {
-                var car = playerSegment.cars[n];
-                var carW = car.sprite.width * SPRITES.SCALE;
-                if (speed > car.speed) {
-                    if (Util.overlap(playerX, playerW, car.offset, carW, 0.8)) {
-                        speed = car.speed * (car.speed / speed);
-                        position = Util.increase(car.z, -playerZ, trackLength);
-                        break;
-                    }
-                }
+    for (var n = 0; n < playerSegment.cars.length; n++) {
+        var car = playerSegment.cars[n];
+        var carW = car.sprite.width * SPRITES.SCALE;
+        if (speed > car.speed) {
+            if (Util.overlap(playerX, playerW, car.offset, carW, 0.8)) {
+                speed = car.speed * (car.speed / speed);
+                position = Util.increase(car.z, -playerZ, trackLength);
+                break;
             }
+        }
+    }
 
-            playerX = Util.limit(playerX, -3, 3);
-            speed = Util.limit(speed, 0, maxSpeed);
+    playerX = Util.limit(playerX, -3, 3);
+    speed = Util.limit(speed, 0, maxSpeed);
 
             skyOffset = Util.increase(skyOffset, skySpeed * playerSegment.curve * (position - startPosition) / segmentLength, 1);
             hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position - startPosition) / segmentLength, 1);
@@ -236,13 +239,12 @@
 
 function checkCoinCollection(playerPosition) {
     for (var i = 0; i < coins.length; i++) {
-        // Consider a slight threshold for lane offset comparison
-        var laneThreshold = 0.5; // Adjust this value as necessary
+        var laneThreshold = 0.5; // Threshold for lane comparison
         if (!coins[i].collected && 
-            Math.abs(playerPosition.z - coins[i].z) < 100 && // Adjust z threshold if necessary
+            Math.abs(playerPosition.z - coins[i].z) < 100 && // Z position threshold
             Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) { 
             
-            // Collect the coin
+            // Mark coin as collected
             coins[i].collected = true;
             hud.coin_count.value++;
             
@@ -252,6 +254,9 @@ function checkCoinCollection(playerPosition) {
             // Play the coin sound
             playCoinSound();
 
+            // Animate the coin to the header (if you have such an animation)
+            animateCoinToHeader(coins[i]);
+
             console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
             break; // Exit the loop after collecting a coin
         }
@@ -259,7 +264,15 @@ function checkCoinCollection(playerPosition) {
 
     // Remove collected coins from the array
     coins = coins.filter(c => !c.collected);
+
+    // Remove associated DOM elements if any exist
+    document.querySelectorAll('.coin-animation').forEach(element => {
+        if (element.style.opacity === "0") {
+            element.remove(); // Remove the element if it's no longer visible
+        }
+    });
 }
+
 
 
 
@@ -587,47 +600,48 @@ for (var i = 0; i < coins.length; i++) {
             trackLength = segments.length * segmentLength;
         }
 
-        function resetSprites() {
-            addSprite(20, billboard01Sprite, -1);
-            addSprite(40, billboard02Sprite, -1);
-            addSprite(60, billboard03Sprite, -1);
-            addSprite(80, billboard04Sprite, -1);
-            addSprite(100, billboard05Sprite, -1);
-            addSprite(120, billboard06Sprite, -1);
-            addSprite(140, billboard07Sprite, -1);
-            addSprite(160, billboard08Sprite, -1);
-            addSprite(180, billboard09Sprite, -1);
+function resetSprites() {
+    addSprite(20, billboard01Sprite, -1);
+    addSprite(40, billboard02Sprite, -1);
+    addSprite(60, billboard03Sprite, -1);
+    addSprite(80, billboard04Sprite, -1);
+    addSprite(100, billboard05Sprite, -1);
+    addSprite(120, billboard06Sprite, -1);
+    addSprite(140, billboard07Sprite, -1);
+    addSprite(160, billboard08Sprite, -1);
+    addSprite(180, billboard09Sprite, -1);
 
-            addSprite(240, billboard01Sprite, -1.2);
-            addSprite(240, billboard02Sprite, 1.2);
-            addSprite(segments.length - 25, billboard03Sprite, -1.2);
-            addSprite(segments.length - 25, billboard04Sprite, 1.2);
+    addSprite(240, billboard01Sprite, -1.2);
+    addSprite(240, billboard02Sprite, 1.2);
+    addSprite(segments.length - 25, billboard03Sprite, -1.2);
+    addSprite(segments.length - 25, billboard04Sprite, 1.2);
 
-            for (var n = 10; n < 200; n += 4 + Math.floor(n / 100)) {
-                addSprite(n, palmTreeSprite, 0.5 + Math.random() * 0.5);
-                addSprite(n, palmTreeSprite, 1 + Math.random() * 2);
-            }
+    for (var n = 10; n < 200; n += 4 + Math.floor(n / 100)) {
+        addSprite(n, palmTreeSprite, 1 + Math.random() * 0.5); // Right side of the road
+        addSprite(n, palmTreeSprite, -1 - Math.random() * 0.5); // Left side of the road
+    }
 
-            for (var n = 250; n < 1000; n += 5) {
-                addSprite(n, columnSprite, 1.1);
-                addSprite(n + Util.randomInt(0, 5), tree1Sprite, -1 - (Math.random() * 2));
-                addSprite(n + Util.randomInt(0, 5), tree1Sprite, -1 - (Math.random() * 2));
-            }
+    for (var n = 250; n < 1000; n += 5) {
+        addSprite(n, columnSprite, 1.1);
+        addSprite(n + Util.randomInt(0, 5), tree1Sprite, -1 - (Math.random() * 2));
+        addSprite(n + Util.randomInt(0, 5), tree1Sprite, -1 - (Math.random() * 2));
+    }
 
-            for (var n = 200; n < segments.length; n += 3) {
-                addSprite(n, Util.randomChoice(spritesPlants), Util.randomChoice([1, -1]) * (2 + Math.random() * 5));
-            }
+    for (var n = 200; n < segments.length; n += 3) {
+        addSprite(n, Util.randomChoice(spritesPlants), Util.randomChoice([1, -1]) * (2 + Math.random() * 5));
+    }
 
-            for (var n = 1000; n < (segments.length - 50); n += 100) {
-                var side = Util.randomChoice([1, -1]);
-                addSprite(n + Util.randomInt(0, 50), Util.randomChoice(spritesBillboards), -side);
-                for (var i = 0; i < 20; i++) {
-                    var sprite = Util.randomChoice(spritesPlants);
-                    var offset = side * (1.5 + Math.random());
-                    addSprite(n + Util.randomInt(0, 50), sprite, offset);
-                }
-            }
+    for (var n = 1000; n < (segments.length - 50); n += 100) {
+        var side = Util.randomChoice([1, -1]);
+        addSprite(n + Util.randomInt(0, 50), Util.randomChoice(spritesBillboards), -side);
+        for (var i = 0; i < 20; i++) {
+            var sprite = Util.randomChoice(spritesPlants);
+            var offset = side * (1.5 + Math.random());
+            addSprite(n + Util.randomInt(0, 50), sprite, offset);
         }
+    }
+}
+
 
         function resetCars() {
             cars = [];
