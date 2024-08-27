@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Coin Rain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #f3f3f3;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        header, footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .tagline, .coin-overview {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .coin-overview {
+            margin-top: 5px;
+            font-size: 1.2rem;
+            color: #e74c3c;
+        }
+
+        .quest-wrapper {
+            flex-grow: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .quest-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 20px;
+            text-align: left;
+            position: relative;
+            z-index: 2;
+        }
+
+        .quest-container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .quest-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .quest-item.completed {
+            background-color: #f0f0f0;
+            color: #aaa;
+        }
+
+        .quest-item.grey-out {
+            background-color: #f0f0f0;
+            color: #aaa;
+        }
+
+        .quest-item.grey-out:before {
+            content: attr(data-countdown);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #e74c3c;
+        }
+
+        .quest-item:last-child {
+            border-bottom: none;
+        }
+
+        .quest-item p {
+            margin: 0;
+            flex-grow: 1;
+            padding-right: 10px;
+        }
+
+        .quest-item span {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .quest-item button {
+            background-color: #e74c3c;
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 120px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .quest-item button:hover {
+            opacity: 0.8;
+        }
+
+        .quest-item.completed button,
+        .quest-item.grey-out button {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .quest-item a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .quest-item a:hover {
+            opacity: 0.8;
+        }
+
+        footer .social-icons img {
+            width: 24px;
+            height: 24px;
+            margin: 0 10px;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1 class="game-title">Twin Racer</h1>
+            <p class="tagline">Complete Quests, Earn Rewards!</p>
+            <p id="coin-overview" class="coin-overview">Total Coins: 0</p>
+        </div>
+    </header>
+
+    <canvas id="canvasCoins"></canvas>
+
+    <main>
+        <div class="quest-wrapper">
+            <div class="quest-container">
+                <h2>Available Quests</h2>
+
+                <div class="quest-item">
+                    <p>Connect your TON Wallet <span>(100 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://ton.org', 100, 10000)">Connect</button>
+                </div>
+                <div class="quest-item">
+                    <p>Daily Check-In <span>(10 Coins, reset every 24h)</span></p>
+                    <button onclick="startTask(this, '#', 10, 10000)">Check In</button>
+                </div>
+                <div class="quest-item">
+                    <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
+                    <button onclick="startTask(this, '#', 100, 10000)">Log In</button>
+                </div>
+                <div class="quest-item">
+                    <p>Follow Twin Finance on X <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://twitter.com/TwinFinance', 500, 10000)">Follow</button>
+                </div>
+                <div class="quest-item">
+                    <p>Follow Twin-Racer on X <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://x.com/twin_race', 500, 10000)">Follow</button>
+                </div>
+                <div class="quest-item">
+                    <p>Like and Retweet THIS THREAD <span>(250 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://twitter.com/intent/retweet?tweet_id=1234567890', 250, 10000)">Retweet</button>
+                </div>
+                <div class="quest-item">
+                    <p>Join Twin Racer Channel on Telegram <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://t.me/twin_racer', 500, 10000)">Join</button>
+                </div>
+                <div class="quest-item">
+                    <p>Join Twin Racer Group on Telegram <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://t.me/twinracer', 500, 10000)">Join</button>
+                </div>
+                <div class="quest-item">
+                    <p>Join Twin Finance Telegram <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://t.me/+OKQWss_9UDFhMDIy', 500, 10000)">Join</button>
+                </div>
+                <div class="quest-item">
+                    <p>Subscribe to Twin Racer YouTube <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://www.youtube.com/@twinracer', 500, 10000)">Subscribe</button>
+                </div>
+                <div class="quest-item">
+                    <p>Watch Twin Racer YouTube THIS CLIP <span>(750 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://www.youtube.com/watch?v=bBf6BY0yf04&t=1s', 750, 10000, true)">Watch</button>
+                </div>
+                <div class="quest-item">
+                    <p>Join Twin-Racer Discord <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://discord.gg/852Vr8S5Sf', 500, 10000)">Join</button>
+                </div>
+                <div class="quest-item">
+                    <p>Join Twin-Finance Discord <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://discord.gg/gzf6VtJhaq', 500, 10000)">Join</button>
+                </div>
+                <div class="quest-item">
+                    <p>Follow us on TikTok <span>(500 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://www.tiktok.com/@twin_racer', 500, 10000)">Follow</button>
+                </div>
+                <div class="quest-item">
+                    <p>Watch, Comment, and Like This TikTok Video <span>(750 Coins)</span></p>
+                    <button onclick="startTask(this, 'https://www.tiktok.com/@twin_racer/video/7407728014039059744', 750, 10000, true)">Engage</button>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>Follow Us</p>
+            <div class="social-icons">
+                <a href="https://www.tiktok.com/@twin_racer" target="_blank"><img src="images/tiktok.png" alt="TikTok"></a>
+                <a href="https://x.com/twin_race" target="_blank"><img src="images/X.jpg" alt="X (formerly Twitter)"></a>
+                <a href="https://discord.gg/852Vr8S5Sf" target="_blank"><img src="images/discord.webp" alt="Discord"></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        var ctx;
+        var canvas;
+        var imgCoin;
+        var noOfCoins = 50;
+        var fallingCoins = [];
+        var coinRainInterval;
+        var coinRainDuration = 3000; // 3 seconds
+
+        function setupCanvas() {
+            canvas = document.getElementById('canvasCoins');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            if (canvas.getContext) {
+                ctx = canvas.getContext('2d');
+                imgCoin = new Image();
+                imgCoin.src = 'images/coin.png';
+
+                for (var i = 0; i < noOfCoins; i++) {
+                    fallingCoins.push({
+                        x: Math.random() * canvas.width,
+                        y: Math.random() * canvas.height,
+                        speed: Math.random() * 3 + 2,
+                        size: Math.random() * 10 + 20
+                    });
+                }
+            }
+        }
+
+        function startCoinRain() {
+            coinRainInterval = setInterval(drawCoinRain, 30);
+            setTimeout(stopCoinRain, coinRainDuration);
+        }
+
+        function stopCoinRain() {
+            clearInterval(coinRainInterval);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawCoinRain() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0; i < fallingCoins.length; i++) {
+                var coin = fallingCoins[i];
+                ctx.drawImage(imgCoin, coin.x, coin.y, coin.size, coin.size);
+
+                coin.y += coin.speed;
+
+                if (coin.y > canvas.height) {
+                    coin.y = -coin.size;
+                    coin.x = Math.random() * canvas.width;
+                }
+            }
+        }
+
+        function startTask(button, url, coins, timeLimit, isVideo = false) {
+            const questItem = button.closest('.quest-item');
+            button.disabled = true;
+            button.textContent = 'In Progress';
+            window.open(url, '_blank');
+
+            const startTime = Date.now();
+
+            setTimeout(() => {
+                button.textContent = 'Check';
+                button.onclick = () => checkTask(button, coins, startTime, isVideo);
+                button.disabled = false;
+            }, 10000);
+        }
+
+        function checkTask(button, coins, startTime, isVideo) {
+            const questItem = button.closest('.quest-item');
+            const currentTime = Date.now();
+
+            if (isVideo && currentTime - startTime < 600000) {
+                questItem.classList.add('grey-out');
+                let countdown = 30;
+
+                const countdownInterval = setInterval(() => {
+                    if (countdown > 0) {
+                        questItem.setAttribute('data-countdown', `Wait ${countdown} sec`);
+                        countdown--;
+                    } else {
+                        clearInterval(countdownInterval);
+                        questItem.classList.remove('grey-out');
+                        button.textContent = 'Check';
+                        button.disabled = false;
+                    }
+                }, 1000);
+
+                button.disabled = true;
+                button.textContent = 'Task not finished';
+            } else {
+                button.textContent = 'Completed';
+                questItem.classList.add('completed');
+                button.disabled = true;
+                updateTotalCoins(coins);
+                startCoinRain();
+            }
+        }
+
+        function updateTotalCoins(coins) {
+            let totalCoinsElement = document.getElementById('coin-overview');
+            let totalCoins = parseInt(totalCoinsElement.textContent.replace(/\D/g, '')) + coins;
+            totalCoinsElement.textContent = `Total Coins: ${totalCoins}`;
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        window.onload = setupCanvas;
+    </script>
+</body>
+</html>

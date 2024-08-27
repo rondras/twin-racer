@@ -38,6 +38,7 @@
         <button id="startGameButton">Start Game</button>
         <button id="leaderBoard">Leaderboard</button>
         <button id="sendMessageButton">Invite Friends</button>
+        <button id="quests">Quests</button>
     </div>
 
 
@@ -97,6 +98,9 @@
 
             // Open the Telegram link
             Telegram.WebApp.openTelegramLink(telegramLink);
+        });
+        document.getElementById('quests').addEventListener('click', function() {
+            window.location.href = "quest.html";
         });
 
     </script>

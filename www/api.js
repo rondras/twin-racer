@@ -47,7 +47,7 @@ async function recordRaceRound(tgName, tgID,coins,seconds) {
     }
 }
 
-// Function to record a new racing round by calling the /addRacingRound API
+// Function to get the leaderboard Data
 async function leaderboard(limit=5) {
     // API endpoint URL
     const apiUrl = apiBase + 'leaderboard?limit=' + limit;
@@ -76,5 +76,37 @@ async function leaderboard(limit=5) {
         // Handle any network or other errors
         
         alert('Failed to get leaderboard due to network error.');
+    }
+}
+
+// Function to get the quests Data
+async function quests(tgID) {
+    // API endpoint URL
+    const apiUrl = apiBase + 'questsAvailable?tgID=' + tgID;
+    console.log(apiUrl)
+    
+    try {
+        // Make the GET request to the API
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            console.log(result);
+            return (result)
+
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error getting data:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed to get data due to network error.');
     }
 }
