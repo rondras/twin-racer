@@ -32,9 +32,9 @@ if (startParam) {
 const initData = Telegram.WebApp.initDataUnsafe;
 
 if (initData.user) {
-    tgID = user.id
-    tgName = user.username
-    
+    tgID = initData.user.id
+    tgName = initData.user.username
+
     addUser(initData.user.username, initData.user.id,referrerTelegramId);
     // Display the user's name and profile picture
     const userInfoDiv = document.getElementById('user-info');
