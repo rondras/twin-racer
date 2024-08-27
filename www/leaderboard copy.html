@@ -6,42 +6,7 @@
     <title>Twin Racer Leaderboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles/leaderboard.css">
-    <script src="api.js" defer></script>
-    <script>
-        // Function to render the leaderboard
-    async function renderLeaderboard() {
-        const leaderboardContainer = document.querySelector('.leaderboard tbody');
-        leaderboardContainer.innerHTML = '';  // Clear any existing content
-
-        try {
-            // Fetch leaderboard data
-            const leaderboardData = await leaderboard(5); // Fetch the top 5 scores
-
-            // Loop through each entry in the leaderboard and create rows
-            leaderboardData.forEach((entry, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${entry.tgName}</td>
-                    <td>${entry.points}</td>
-                `;
-                leaderboardContainer.appendChild(row);
-            });
-
-        } catch (error) {
-            console.error('Failed to render leaderboard:', error);
-        }
-    }
-
-    // Ensure the leaderboard renders once the DOM is fully loaded
-    document.addEventListener('DOMContentLoaded', renderLeaderboard);
-
-
-        // Ensure the leaderboard renders once the DOM is fully loaded
-        document.addEventListener('DOMContentLoaded', renderLeaderboard);
-    </script>
     <style>
-        /* Existing CSS styles */
         #car-container {
             position: relative;
             width: 100%;
@@ -114,7 +79,21 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Rows will be dynamically generated here -->
+                        <tr>
+                            <td>1</td>
+                            <td>PlayerOne</td>
+                            <td>984</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>SpeedDemon</td>
+                            <td>921</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>RaceMaster</td>
+                            <td>885</td>
+                        </tr>
                     </tbody>
                 </table>
                 <div class="trophy-container">
@@ -131,7 +110,7 @@
         <div class="footer-container">
             <p>Follow Us</p>
             <div class="social-icons">
-                <a href="#"><img src="./images/facebook-icon.png" alt="Facebook"></a>
+                <a href="#"><img src=".images/imagesfacebook-icon.png" alt="Facebook"></a>
                 <a href="#"><img src="./images/twitter-icon.png" alt="Twitter"></a>
                 <a href="#"><img src="./images/instagram-icon.png" alt="Instagram"></a>
             </div>

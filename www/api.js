@@ -46,3 +46,35 @@ async function recordRaceRound(tgName, tgID,coins,seconds) {
         alert('Failed record round due to network error.');
     }
 }
+
+// Function to record a new racing round by calling the /addRacingRound API
+async function leaderboard(limit=5) {
+    // API endpoint URL
+    const apiUrl = apiBase + 'leaderboard?limit=' + limit;
+    console.log(apiUrl)
+    
+    try {
+        // Make the GET request to the API
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            console.log(result);
+            return (result)
+
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error getting leaderboard:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed to get leaderboard due to network error.');
+    }
+}
