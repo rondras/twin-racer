@@ -52,6 +52,7 @@
     <script src="common.js"></script>
     <script src="game.js"></script>
     <script src="tg.js"></script>
+    <script src="api.js"></script>
 
     <script>
         var firstLapComplete = false;
@@ -97,6 +98,7 @@
         var totalCars = 200;
         var currentLapTime = 0;
         var lastLapTime = null;
+        var lastLapCoins = 0;
 
         var keyLeft = false;
         var keyRight = false;
@@ -204,6 +206,9 @@ function update(dt) {
             if (position > playerZ) {
                 if (currentLapTime && (startPosition < playerZ)) {
                     lastLapTime = currentLapTime;
+                    lastLapCoins = hud.coin_count.value
+                    recordRaceRound(tgName, tgID,hud.coin_count.value,parseInt(lastLapTime))
+                    hud.coin_count.value = 0
                     currentLapTime = 0;
                     if (!firstLapComplete) {
                         firstLapComplete = true;
@@ -257,7 +262,7 @@ function checkCoinCollection(playerPosition) {
             // Animate the coin to the header (if you have such an animation)
             animateCoinToHeader(coins[i]);
 
-            console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
+            // console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
             break; // Exit the loop after collecting a coin
         }
     }
@@ -427,7 +432,7 @@ for (var i = 0; i < coins.length; i++) {
         var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coins[i].z, segmentLength));
 
         // Debugging: Log the calculated positions
-        console.log(`Coin Rendered - z: ${coins[i].z}, offset: ${coins[i].offset}, x: ${coinX}, y: ${coinY}`);
+        // console.log(`Coin Rendered - z: ${coins[i].z}, offset: ${coins[i].offset}, x: ${coinX}, y: ${coinY}`);
 
         Render.sprite(ctx, width, height, resolution, roadWidth, sprites, coinSprite, coinScale, coinX, coinY, -0.5, -1, coinSegment.clip);
     }

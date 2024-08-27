@@ -1,3 +1,7 @@
+var tgName = ''
+var tgID = ''
+var referrerTelegramId = ''
+
 function loadTelegramWebAppScript() {
     var script = document.createElement('script');
     script.src = "https://telegram.org/js/telegram-web-app.js";
@@ -11,7 +15,7 @@ loadTelegramWebAppScript();
 
 // Initialize the Telegram WebApp
 Telegram.WebApp.ready();
-var referrerTelegramId = null
+
 const startParam = Telegram.WebApp.initDataUnsafe.start_param;
 
 if (startParam) {
@@ -26,7 +30,11 @@ if (startParam) {
 
 
 const initData = Telegram.WebApp.initDataUnsafe;
+
 if (initData.user) {
+    tgID = user.id
+    tgName = user.username
+    
     addUser(initData.user.username, initData.user.id,referrerTelegramId);
     // Display the user's name and profile picture
     const userInfoDiv = document.getElementById('user-info');
