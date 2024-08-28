@@ -1,8 +1,9 @@
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 var tgName = ''
 var tgID = ''
 var referrerTelegramId = ''
 
-function loadTelegramWebAppScript() {
+async function loadTelegramWebAppScript() {
     var script = document.createElement('script');
     script.src = "https://telegram.org/js/telegram-web-app.js";
     script.async = true;
@@ -10,7 +11,7 @@ function loadTelegramWebAppScript() {
 }
 
 // Call the function to load the script
-loadTelegramWebAppScript();
+await loadTelegramWebAppScript();
 
 
 // Initialize the Telegram WebApp
