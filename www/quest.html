@@ -221,19 +221,33 @@
         async function loadDynamicQuests() {
             const dynamicQuestsContainer = document.getElementById('dynamic-quests');
             try {
-                const questsData = await quests(tgID);
-
+                //const questsData = await quests(tgID);
+                const questsData = await quests(458176513);
                 questsData.forEach(quest => {
                     const questItem = document.createElement('div');
                     questItem.classList.add('quest-item');
-                    if (quest.questStatus !== 0) {
+
+                    if (quest.questStatus === 3) {
                         questItem.classList.add('completed');
                     }
 
                     questItem.innerHTML = `
                         <p>${quest.questText} <span>(${quest.questReward} Coins)</span></p>
-                        <button ${quest.questStatus !== 0 ? 'disabled' : ''} onclick="startTask(this, '${quest.questLink}', ${quest.questReward}, 10000)">
-                            ${quest.questStatus !== 0 ? 'Completed' : quest.questButtonText}
+                        <button 
+                            ${quest.questStatus === 3 ? 'disabled' : ''} 
+                            onclick="${quest.questStatus === 0 ? 
+                                `startTask(this,${quest.questID},'${quest.questLink}')` 
+                                : quest.questStatus === 2 ? 
+                                    `completeQuest('${tgID}', '${quest.questID}')` 
+                                    : 
+                                    ''
+                                    }
+                                    "
+                        >
+                            ${quest.questStatus === 0 ? quest.questButtonText 
+                            : quest.questStatus === 1 ? 'In Progress' 
+                            : quest.questStatus === 2 ? 'Complete' 
+                            : 'Completed'}
                         </button>
                     `;
                     dynamicQuestsContainer.appendChild(questItem);
@@ -242,6 +256,7 @@
                 console.error('Failed to load dynamic quests:', error);
             }
         }
+
 
         function setupCanvas() {
             canvas = document.getElementById('canvasCoins');
@@ -290,19 +305,12 @@
             }
         }
 
-        function startTask(button, url, coins, timeLimit, isVideo = false) {
+        function startTask(button,questID,url) {
+            addActiveQuest(tgID,questID)
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'In Progress';
             window.open(url, '_blank');
-
-            const startTime = Date.now();
-
-            setTimeout(() => {
-                button.textContent = 'Check';
-                button.onclick = () => checkTask(button, coins, startTime, isVideo);
-                button.disabled = false;
-            }, 10000);
         }
 
         function checkTask(button, coins, startTime, isVideo) {
