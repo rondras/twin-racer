@@ -238,7 +238,7 @@
                             onclick="${quest.questStatus === 0 ? 
                                 `startTask(this,${quest.questID},'${quest.questLink}')` 
                                 : quest.questStatus === 2 ? 
-                                    `completeQuest('${tgID}', '${quest.questID}')` 
+                                    `completeTask(this,'${quest.questID}','${tgID}' )` 
                                     : 
                                     ''
                                     }
@@ -266,7 +266,7 @@
             if (canvas.getContext) {
                 ctx = canvas.getContext('2d');
                 imgCoin = new Image();
-                imgCoin.src = 'images/coin.png';
+                imgCoin.src = 'images/sprites/coin.png';
 
                 for (var i = 0; i < noOfCoins; i++) {
                     fallingCoins.push({
@@ -311,8 +311,18 @@
             button.disabled = true;
             button.textContent = 'In Progress';
             window.open(url, '_blank');
+            setupCanvas();
+            loadDynamicQuests()
         }
-
+        function completeTask(button,questID) {
+            completeQuest(tgID,questID)
+            const questItem = button.closest('.quest-item');
+            button.disabled = true;
+            button.textContent = 'Completed';
+            setupCanvas();
+            loadDynamicQuests()
+            startCoinRain()
+        }
         function checkTask(button, coins, startTime, isVideo) {
             const questItem = button.closest('.quest-item');
             const currentTime = Date.now();
