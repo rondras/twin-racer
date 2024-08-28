@@ -221,7 +221,7 @@
 
         async function loadDynamicQuests() {
             var dynamicQuestsContainer = document.getElementById('dynamic-quests');
-            dynamicQuestsContainer = ``
+            dynamicQuestsContainer.innerHTML = '';
             try {
                 //const questsData = await quests(tgID);
                 const questsData = await quests(tgID);
