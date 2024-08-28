@@ -243,37 +243,28 @@ function update(dt) {
         }
 
 function checkCoinCollection(playerPosition) {
-    for (var i = 0; i < coins.length; i++) {
-        var laneThreshold = 0.5; // Threshold for lane comparison
+    const roadWidthFactor = roadWidth / 2000; // Normalize based on initial road width
+    const laneThreshold = 0.5 * roadWidthFactor;
+    const collectionDistance = 100 * roadWidthFactor;
+
+    for (let i = 0; i < coins.length; i++) {
         if (!coins[i].collected && 
-            Math.abs(playerPosition.z - coins[i].z) < 100 && // Z position threshold
+            Math.abs(playerPosition.z - coins[i].z) < collectionDistance && 
             Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) { 
-            
-            // Mark coin as collected
+
             coins[i].collected = true;
             hud.coin_count.value++;
-            
-            // Update the HUD directly
             document.getElementById('coin_count_value').innerText = hud.coin_count.value;
-            
-            // Play the coin sound
             playCoinSound();
-
-            // Animate the coin to the header (if you have such an animation)
             animateCoinToHeader(coins[i]);
-
-            // console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
-            break; // Exit the loop after collecting a coin
+            break;
         }
     }
 
-    // Remove collected coins from the array
     coins = coins.filter(c => !c.collected);
-
-    // Remove associated DOM elements if any exist
     document.querySelectorAll('.coin-animation').forEach(element => {
         if (element.style.opacity === "0") {
-            element.remove(); // Remove the element if it's no longer visible
+            element.remove();
         }
     });
 }
@@ -281,19 +272,24 @@ function checkCoinCollection(playerPosition) {
 
 
 
-        function playCoinSound() {
-            var coinSound = document.getElementById('coinSound');
-            coinSound.currentTime = 0;
-            coinSound.volume = 1;
+function playCoinSound() {
+    const coinSound = document.getElementById('coinSound');
+    if (!coinSound) {
+        console.error("Coin sound element not found");
+        return;
+    }
 
-            if (!coinSound.paused) {
-                coinSound.pause();
-            }
+    coinSound.currentTime = 0;
+    coinSound.volume = 0.5; // Reduced volume
 
-            coinSound.play().catch(function(error) {
-                console.error("Coin sound could not be played:", error);
-            });
-        }
+    if (!coinSound.paused) {
+        coinSound.pause();
+    }
+
+    coinSound.play().catch(function(error) {
+        console.error("Coin sound could not be played:", error);
+    });
+}
 
         function animateCoinToHeader(coin) {
             var coinElement = document.createElement('div');
