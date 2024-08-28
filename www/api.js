@@ -113,7 +113,6 @@ async function quests(tgID) {
 
 async function addActiveQuest(tgID,questID) {
     // for testing - take out
-    tgID = 458176513
     // API endpoint URL
     const apiUrl = apiBase + 'addActiveQuest';
     
@@ -160,7 +159,6 @@ async function addActiveQuest(tgID,questID) {
 async function completeQuest(tgID,questID) {
     console.log("Debug")
     // for testing - take out
-    tgID = 458176513
     // API endpoint URL
     const apiUrl = apiBase + 'completeQuest';
     

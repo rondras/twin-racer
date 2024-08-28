@@ -222,7 +222,7 @@
             const dynamicQuestsContainer = document.getElementById('dynamic-quests');
             try {
                 //const questsData = await quests(tgID);
-                const questsData = await quests(458176513);
+                const questsData = await quests(tgID);
                 questsData.forEach(quest => {
                     const questItem = document.createElement('div');
                     questItem.classList.add('quest-item');
