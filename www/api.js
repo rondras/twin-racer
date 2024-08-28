@@ -201,3 +201,35 @@ async function completeQuest(tgID,questID) {
         alert('Failed due to network error.');
     }
 }
+
+// Function to get the quests Data
+async function userData(tgID) {
+    // API endpoint URL
+    const apiUrl = apiBase + 'userData?tgID=' + tgID;
+    console.log(apiUrl)
+    
+    try {
+        // Make the GET request to the API
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            console.log(result);
+            return (result)
+
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error getting data:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed to get data due to network error.');
+    }
+}

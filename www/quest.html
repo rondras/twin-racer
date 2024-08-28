@@ -218,6 +218,7 @@
         var fallingCoins = [];
         var coinRainInterval;
         var coinRainDuration = 3000; // 3 seconds
+        var userData = {}
 
         async function loadDynamicQuests() {
             var dynamicQuestsContainer = document.getElementById('dynamic-quests');
@@ -369,6 +370,8 @@
 
         // Load dynamic quests when the page is loaded
         window.onload = () => {
+            userData = userData(tgID)
+            console.log(userData)
             setupCanvas();
             loadDynamicQuests();
         };
