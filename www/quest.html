@@ -372,6 +372,7 @@
         window.onload = () => {
             userData = userData(tgID)
             console.log(userData)
+            updateTotalCoins(userData.points)
             setupCanvas();
             loadDynamicQuests();
         };
