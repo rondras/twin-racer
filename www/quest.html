@@ -357,6 +357,10 @@
             }
         }
 
+        async function updateCoins() {
+            userData = await userData(tgID)
+            updateTotalCoins(userData.points)
+        }
         function updateTotalCoins(coins) {
             let totalCoinsElement = document.getElementById('coin-overview');
             let totalCoins = parseInt(totalCoinsElement.textContent.replace(/\D/g, '')) + coins;
@@ -370,9 +374,7 @@
 
         // Load dynamic quests when the page is loaded
         window.onload = () => {
-            userData = userData(tgID)
-            console.log(userData)
-            updateTotalCoins(userData.points)
+            updateCoins(); 
             setupCanvas();
             loadDynamicQuests();
         };
