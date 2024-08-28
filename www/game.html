@@ -126,26 +126,27 @@
         var coinTimer = 0;
         var coinDropInterval = 3000;
 
-        document.addEventListener("DOMContentLoaded", function() {
-            var music = document.getElementById('music');
-            music.volume = 0.2;
+document.addEventListener("DOMContentLoaded", function() {
+    const music = document.getElementById('music');
+    music.volume = 0.2;
 
-            function startMusic() {
-                music.play().then(function() {
-                    console.log("Background music is playing.");
-                }).catch(function(error) {
-                    console.error("Background music could not be played:", error);
-                });
-            }
-
-            document.body.addEventListener('click', function() {
-                startMusic();
-            }, { once: true });
-
-            document.body.addEventListener('keydown', function() {
-                startMusic();
-            }, { once: true });
+    function startMusic() {
+        music.play().then(function() {
+            console.log("Background music is playing.");
+        }).catch(function(error) {
+            console.error("Background music could not be played:", error);
         });
+    }
+
+    document.body.addEventListener('click', function() {
+        startMusic();
+    }, { once: true });
+
+    document.body.addEventListener('keydown', function() {
+        startMusic();
+    }, { once: true });
+});
+
 
 function update(dt) {
     var playerSegment = findSegment(position + playerZ);
@@ -243,37 +244,29 @@ function update(dt) {
         }
 
 function checkCoinCollection(playerPosition) {
-    for (var i = 0; i < coins.length; i++) {
-        var laneThreshold = 0.5; // Threshold for lane comparison
+    const roadWidthFactor = roadWidth / 2000; // Normalize based on initial road width
+    const laneThreshold = 0.5 * roadWidthFactor;
+    const collectionDistance = 100 * roadWidthFactor;
+
+    for (let i = 0; i < coins.length; i++) {
         if (!coins[i].collected && 
-            Math.abs(playerPosition.z - coins[i].z) < 100 && // Z position threshold
-            Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) { 
-            
-            // Mark coin as collected
+            Math.abs(playerPosition.z - coins[i].z) < collectionDistance && 
+            Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) {
+
             coins[i].collected = true;
             hud.coin_count.value++;
-            
-            // Update the HUD directly
             document.getElementById('coin_count_value').innerText = hud.coin_count.value;
-            
-            // Play the coin sound
             playCoinSound();
-
-            // Animate the coin to the header (if you have such an animation)
             animateCoinToHeader(coins[i]);
-
-            // console.log("Coin collected at z:", coins[i].z, "and lane:", coins[i].offset);
-            break; // Exit the loop after collecting a coin
+            break;
         }
     }
 
-    // Remove collected coins from the array
+    // Remove collected coins from the array and recycle animations
     coins = coins.filter(c => !c.collected);
-
-    // Remove associated DOM elements if any exist
     document.querySelectorAll('.coin-animation').forEach(element => {
         if (element.style.opacity === "0") {
-            element.remove(); // Remove the element if it's no longer visible
+            element.remove();
         }
     });
 }
@@ -281,51 +274,71 @@ function checkCoinCollection(playerPosition) {
 
 
 
-        function playCoinSound() {
-            var coinSound = document.getElementById('coinSound');
-            coinSound.currentTime = 0;
-            coinSound.volume = 1;
 
-            if (!coinSound.paused) {
-                coinSound.pause();
-            }
+function playCoinSound() {
+    const coinSound = document.getElementById('coinSound');
+    if (!coinSound) {
+        console.error("Coin sound element not found");
+        return;
+    }
 
-            coinSound.play().catch(function(error) {
-                console.error("Coin sound could not be played:", error);
-            });
-        }
+    coinSound.currentTime = 0;
+    coinSound.volume = 0.5; // Reduced volume
 
-        function animateCoinToHeader(coin) {
-            var coinElement = document.createElement('div');
-            coinElement.classList.add('coin-animation');
-            document.body.appendChild(coinElement);
+    // Improved audio handling
+    if (!coinSound.paused) {
+        coinSound.pause();
+        coinSound.currentTime = 0; // Reset to start before replaying
+    }
 
-            var coinSegment = findSegment(coin.z);
-            var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * 0.07;
-            var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * width / 2);
-            var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
+    coinSound.play().catch(function(error) {
+        console.error("Coin sound could not be played:", error);
+    });
+}
 
-            var canvasRect = canvas.getBoundingClientRect();
 
-            coinElement.style.left = (canvasRect.left + coinX) + 'px';
-            coinElement.style.top = (canvasRect.top + coinY) + 'px';
+const coinElementPool = [];
 
-            var coinCounter = document.getElementById('coin_count_value');
-            var counterRect = coinCounter.getBoundingClientRect();
+function animateCoinToHeader(coin) {
+    let coinElement;
+    if (coinElementPool.length > 0) {
+        coinElement = coinElementPool.pop();
+    } else {
+        coinElement = document.createElement('div');
+        coinElement.classList.add('coin-animation');
+        document.body.appendChild(coinElement);
+    }
 
-            coinElement.animate([
-                { transform: `translate(${canvasRect.left + coinX}px, ${canvasRect.top + coinY}px)` },
-                { transform: `translate(${counterRect.left}px, ${counterRect.top}px)` }
-            ], {
-                duration: 1000,
-                easing: 'ease-in-out',
-                fill: 'forwards'
-            });
+    // Calculate the position of the coin on the canvas
+    const coinSegment = findSegment(coin.z);
+    const coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * 0.07;
+    const coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * canvas.width / 2);
+    const coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
 
-            setTimeout(() => {
-                coinElement.remove();
-            }, 1000);
-        }
+    // Get the current positions for animation
+    const canvasRect = canvas.getBoundingClientRect();
+    const coinCounter = document.getElementById('coin_count_value');
+    const counterRect = coinCounter.getBoundingClientRect();
+
+    coinElement.style.display = 'block';
+    coinElement.style.left = (canvasRect.left + coinX) + 'px';
+    coinElement.style.top = (canvasRect.top + coinY) + 'px';
+
+    // Animation from the coin's position to the HUD
+    const animation = coinElement.animate([
+        { transform: `translate(0, 0)` },
+        { transform: `translate(${counterRect.left - (canvasRect.left + coinX)}px, ${counterRect.top - (canvasRect.top + coinY)}px)` }
+    ], {
+        duration: 800,
+        easing: 'ease-in-out',
+    });
+
+    animation.onfinish = () => {
+        coinElement.style.display = 'none';
+        coinElementPool.push(coinElement);
+    };
+}
+
 
         function updateCars(dt, playerSegment, playerW) {
             for (var n = 0; n < cars.length; n++) {
@@ -387,88 +400,85 @@ function checkCoinCollection(playerPosition) {
                 return seconds + "." + tenths;
         }
 
-        function render() {
-            var baseSegment = findSegment(position);
-            var basePercent = Util.percentRemaining(position, segmentLength);
-            var playerSegment = findSegment(position + playerZ);
-            var playerPercent = Util.percentRemaining(position + playerZ, segmentLength);
-            var playerY = Util.interpolate(playerSegment.p1.world.y, playerSegment.p2.world.y, playerPercent);
-            var maxy = height;
+function render() {
+    const baseSegment = findSegment(position);
+    const basePercent = Util.percentRemaining(position, segmentLength);
+    const playerSegment = findSegment(position + playerZ);
+    const playerPercent = Util.percentRemaining(position + playerZ, segmentLength);
+    const playerY = Util.interpolate(playerSegment.p1.world.y, playerSegment.p2.world.y, playerPercent);
+    let maxy = height;
 
-            var x = 0;
-            var dx = -(baseSegment.curve * basePercent);
+    let x = 0;
+    let dx = -(baseSegment.curve * basePercent);
 
-            ctx.clearRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, height);
 
-            Render.background(ctx, backgroundSky, width, height, { w: backgroundSky.width, h: backgroundSky.height }, skyOffset, resolution * skySpeed * playerY);
-            Render.background(ctx, backgroundHills, width, height, { w: backgroundHills.width, h: backgroundHills.height }, hillOffset, resolution * hillSpeed * playerY);
-            Render.background(ctx, backgroundTrees, width, height, { w: backgroundTrees.width, h: backgroundTrees.height }, treeOffset, resolution * treeSpeed * playerY);
+    Render.background(ctx, backgroundSky, width, height, { w: backgroundSky.width, h: backgroundSky.height }, skyOffset, resolution * skySpeed * playerY);
+    Render.background(ctx, backgroundHills, width, height, { w: backgroundHills.width, h: backgroundHills.height }, hillOffset, resolution * hillSpeed * playerY);
+    Render.background(ctx, backgroundTrees, width, height, { w: backgroundTrees.width, h: backgroundTrees.height }, treeOffset, resolution * treeSpeed * playerY);
 
-            for (var n = 0; n < drawDistance; n++) {
-                var segment = segments[(baseSegment.index + n) % segments.length];
-                segment.looped = segment.index < baseSegment.index;
-                segment.fog = Util.exponentialFog(n / drawDistance, fogDensity);
-                segment.clip = maxy;
+    for (let n = 0; n < drawDistance; n++) {
+        const segment = segments[(baseSegment.index + n) % segments.length];
+        segment.looped = segment.index < baseSegment.index;
+        segment.fog = Util.exponentialFog(n / drawDistance, fogDensity);
+        segment.clip = maxy;
 
-                Util.project(segment.p1, (playerX * roadWidth) - x, playerY + cameraHeight, position - (segment.looped ? trackLength : 0), cameraDepth, width, height, roadWidth);
-                Util.project(segment.p2, (playerX * roadWidth) - x - dx, playerY + cameraHeight, position - (segment.looped ? trackLength : 0), cameraDepth, width, height, roadWidth);
+        Util.project(segment.p1, (playerX * roadWidth) - x, playerY + cameraHeight, position - (segment.looped ? trackLength : 0), cameraDepth, width, height, roadWidth);
+        Util.project(segment.p2, (playerX * roadWidth) - x - dx, playerY + cameraHeight, position - (segment.looped ? trackLength : 0), cameraDepth, width, height, roadWidth);
 
-                x += dx;
-                dx += segment.curve;
+        x += dx;
+        dx += segment.curve;
 
-                if ((segment.p1.camera.z <= cameraDepth) || (segment.p2.screen.y >= segment.p1.screen.y) || (segment.p2.screen.y >= maxy))
-                    continue;
+        if ((segment.p1.camera.z <= cameraDepth) || (segment.p2.screen.y >= segment.p1.screen.y) || (segment.p2.screen.y >= maxy))
+            continue;
 
-                Render.segment(ctx, width, lanes, segment.p1.screen.x, segment.p1.screen.y, segment.p1.screen.w, segment.p2.screen.x, segment.p2.screen.y, segment.p2.screen.w, segment.fog, segment.color);
+        Render.segment(ctx, width, lanes, segment.p1.screen.x, segment.p1.screen.y, segment.p1.screen.w, segment.p2.screen.x, segment.p2.screen.y, segment.p2.screen.w, segment.fog, segment.color);
 
-                maxy = segment.p1.screen.y;
-            }
+        maxy = segment.p1.screen.y;
+    }
 
-for (var i = 0; i < coins.length; i++) {
-    if (!coins[i].collected) {
-        var coinSegment = findSegment(coins[i].z);
-        var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coins[i].z, segmentLength)) * 0.03;
-        var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coins[i].z, segmentLength)) + (coinScale * coins[i].offset * roadWidth * width / 2);
-        var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coins[i].z, segmentLength));
+    for (let i = 0; i < coins.length; i++) {
+        if (!coins[i].collected) {
+            const coinSegment = findSegment(coins[i].z);
+            const coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coins[i].z, segmentLength)) * 0.03;
+            const coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coins[i].z, segmentLength)) + (coinScale * coins[i].offset * roadWidth * width / 2);
+            const coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coins[i].z, segmentLength));
 
-        // Debugging: Log the calculated positions
-        // console.log(`Coin Rendered - z: ${coins[i].z}, offset: ${coins[i].offset}, x: ${coinX}, y: ${coinY}`);
+            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, coinSprite, coinScale, coinX, coinY, -0.5, -1, coinSegment.clip);
+        }
+    }
 
-        Render.sprite(ctx, width, height, resolution, roadWidth, sprites, coinSprite, coinScale, coinX, coinY, -0.5, -1, coinSegment.clip);
+    for (let n = (drawDistance - 1); n > 0; n--) {
+        const segment = segments[(baseSegment.index + n) % segments.length];
+
+        for (let i = 0; i < segment.cars.length; i++) {
+            const car = segment.cars[i];
+            const sprite = car.sprite;
+            const spriteScale = Util.interpolate(segment.p1.screen.scale, segment.p2.screen.scale, car.percent);
+            const spriteX = Util.interpolate(segment.p1.screen.x, segment.p2.screen.x, car.percent) + (spriteScale * car.offset * roadWidth * width / 2);
+            const spriteY = Util.interpolate(segment.p1.screen.y, segment.p2.screen.y, car.percent);
+            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, car.sprite, spriteScale, spriteX, spriteY, -0.5, -1, segment.clip);
+        }
+
+        for (let i = 0; i < segment.sprites.length; i++) {
+            const sprite = segment.sprites[i];
+            const spriteScale = segment.p1.screen.scale;
+            const spriteX = segment.p1.screen.x + (spriteScale * sprite.offset * roadWidth * width / 2);
+            const spriteY = segment.p1.screen.y;
+            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
+        }
+
+        if (segment == playerSegment) {
+            Render.player(ctx, width, height, resolution, roadWidth, sprites, speed / maxSpeed,
+                cameraDepth / playerZ,
+                width / 2,
+                (height / 2) - (cameraDepth / playerZ * Util.interpolate(playerSegment.p1.camera.y, playerSegment.p2.camera.y, playerPercent) * height / 2),
+                speed * (keyLeft ? -1 : keyRight ? 1 : 0),
+                playerSegment.p2.world.y - playerSegment.p1.world.y);
+        }
     }
 }
 
-
-            for (var n = (drawDistance - 1); n > 0; n--) {
-                var segment = segments[(baseSegment.index + n) % segments.length];
-
-                for (var i = 0; i < segment.cars.length; i++) {
-                    var car = segment.cars[i];
-                    var sprite = car.sprite;
-                    var spriteScale = Util.interpolate(segment.p1.screen.scale, segment.p2.screen.scale, car.percent);
-                    var spriteX = Util.interpolate(segment.p1.screen.x, segment.p2.screen.x, car.percent) + (spriteScale * car.offset * roadWidth * width / 2);
-                    var spriteY = Util.interpolate(segment.p1.screen.y, segment.p2.screen.y, car.percent);
-                    Render.sprite(ctx, width, height, resolution, roadWidth, sprites, car.sprite, spriteScale, spriteX, spriteY, -0.5, -1, segment.clip);
-                }
-
-                for (var i = 0; i < segment.sprites.length; i++) {
-                    var sprite = segment.sprites[i];
-                    var spriteScale = segment.p1.screen.scale;
-                    var spriteX = segment.p1.screen.x + (spriteScale * sprite.offset * roadWidth * width / 2);
-                    var spriteY = segment.p1.screen.y;
-                    Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
-                }
-
-                if (segment == playerSegment) {
-                    Render.player(ctx, width, height, resolution, roadWidth, sprites, speed / maxSpeed,
-                        cameraDepth / playerZ,
-                        width / 2,
-                        (height / 2) - (cameraDepth / playerZ * Util.interpolate(playerSegment.p1.camera.y, playerSegment.p2.camera.y, playerPercent) * height / 2),
-                        speed * (keyLeft ? -1 : keyRight ? 1 : 0),
-                        playerSegment.p2.world.y - playerSegment.p1.world.y);
-                }
-            }
-        }
 
         function findSegment(z) {
             return segments[Math.floor(z / segmentLength) % segments.length];
@@ -907,25 +917,34 @@ function dropCoins() {
             }
         });
 
-        function reset(options) {
-            options = options || {};
-            canvas.width = width = window.innerWidth;
-            canvas.height = height = window.innerHeight;
-            lanes = 3;
-            roadWidth = 2000;
-            cameraHeight = 1000;
-            drawDistance = 300;
-            fogDensity = 5;
-            fieldOfView = 100;
-            segmentLength = 200;
-            rumbleLength = 3;
-            cameraDepth = 1 / Math.tan((fieldOfView / 2) * Math.PI / 180);
-            playerZ = (cameraHeight * cameraDepth);
-            resolution = height / 480;
+function reset(options) {
+    options = options || {};
+    canvas.width = width = window.innerWidth;
+    canvas.height = height = window.innerHeight;
+    lanes = 3;
+    roadWidth = Math.min(2000, width * 0.8); // Adjust road width based on screen size
+    cameraHeight = 1000;
+    drawDistance = 300;
+    fogDensity = 5;
+    fieldOfView = 100;
+    segmentLength = 200;
+    rumbleLength = 3;
+    cameraDepth = 1 / Math.tan((fieldOfView / 2) * Math.PI / 180);
+    playerZ = (cameraHeight * cameraDepth);
+    resolution = height / 480;
 
-            if ((segments.length == 0) || (options.segmentLength) || (options.rumbleLength))
-                resetRoad();
-        }
+    // Adjust HUD position
+    const hud = document.getElementById('hud');
+    if (hud) {
+        hud.style.fontSize = `${Math.max(12, width / 50)}px`;
+    }
+
+    if ((segments.length == 0) || (options.segmentLength) || (options.rumbleLength))
+        resetRoad();
+
+    // Ensure the player is centered after resize
+    playerX = 0;
+}
 
     </script>
 
