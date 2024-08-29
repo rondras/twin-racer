@@ -185,6 +185,7 @@ var Game = {
   //---------------------------------------------------------------------------
 
   setKeyListener: function(keys) {
+    if (gameStarted != true){return}
     var onkey = function(keyCode, mode) {
       var n, k;
       for(n = 0 ; n < keys.length ; n++) {

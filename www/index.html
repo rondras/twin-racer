@@ -7,50 +7,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="X-Compatible" content="IE=edge" />
     <link href="common.css" rel="stylesheet" type="text/css" />
-    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        .coin-animation {
-            position: absolute;
-            width: 20px;
-            height: 20px;
-            background-image: url('sprites/coin.png');
-            background-size: cover;
-            pointer-events: none;
-            z-index: 1000;
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
 
-        /* Style for the quest button */
+        #racer {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: black;
+        }
+
+        /* HUD Styles */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: yellow;
+            z-index: 20;
+            font-size: 3.5vw; /* Adjusted for better visibility */
+            padding: 5px 0;
+        }
+
+        /* Button Styles */
+        #leaderboardButton,
+        #boosterButton,
         #questButton {
             position: absolute;
-            top: 50px; /* First button at the top */
-            right: 20px;
-            width: 150px; /* Match the size with other buttons */
-            height: auto; /* Maintain aspect ratio */
-            z-index: 2000;
+            z-index: 10;
             cursor: pointer;
+            width: 16vw; /* Increased size for better visibility */
+            height: auto;
+            max-width: 100px;
         }
 
-        /* Style for the leaderboard button on the left side */
         #leaderboardButton {
-            position: absolute;
-            top: 120px; /* Move the button higher */
-            left: 20px; /* Positioned on the left side */
-            width: 150px; /* Match the size with other buttons */
-            height: auto; /* Maintain aspect ratio */
-            z-index: 2000;
-            cursor: pointer;
+            top: 8vh;
+            left: 3vw;
         }
 
-        /* Style for the booster button */
         #boosterButton {
-            position: absolute;
-            top: 160px; /* Align with the quest button */
-            right: 20px;
-            width: 150px; /* Match the size with the other buttons */
-            height: auto; /* Maintain aspect ratio */
-            z-index: 2000;
-            cursor: pointer;
+            top: 8vh;
+            right: 3vw;
+        }
+
+        #questButton {
+            top: 15vh;
+            right: 3vw;
+        }
+
+        /* Sound Button */
+        #soundButton {
+            top: 8vh;
+            right: 3vw;
         }
     </style>
 </head>
@@ -61,27 +84,25 @@
         <div id="countdown" style="display: none; font-size: 48px; color: white;"></div>
     </div>
     <div id="racer">
+        <!-- HUD -->
         <div id="hud">
             <span id="speed" class="hud"><span id="speed_value" class="value">0</span> mph</span>
             <span id="current_lap_time" class="hud">Time: <span id="current_lap_time_value" class="value">0.0</span></span>
-            <span id="last_lap_time" class="hud">Last Lap: <span id="last_lap_time_value" class="value">0.0</span></span>
             <span id="fast_lap_time" class="hud">Fastest Lap: <span id="fast_lap_time_value" class="value">0.0</span></span>
             <span id="coin_count" class="hud">Coins: <span id="coin_count_value" class="value">0</span></span>
         </div>
+
         <canvas id="canvas">
             Sorry, this example cannot be run because your browser does not support the &lt;canvas&gt; element
         </canvas>
-        Loading...
+
+        <!-- Buttons -->
+        <img id="leaderboardButton" src="./images/leaderboard.png" alt="Leaderboard" onclick="location.href='leaderboard.html';" />
+        <img id="boosterButton" src="./images/xbooster_button_2.webp" alt="Booster" onclick="location.href='booster.html';" />
+        <img id="questButton" src="./images/xquest_button_0_1.webp" alt="Quest" onclick="location.href='quest.html';" />
+
+        <div id="loading-screen">Loading...</div>
     </div>
-
-    <!-- Quest Button -->
-    <img id="questButton" src="./images/xquest_button_0_1.webp" alt="Quest Button" onclick="openQuest()" />
-
-    <!-- Leaderboard Button -->
-    <img id="leaderboardButton" src="./images/leaderboard.png" alt="Leaderboard Button" onclick="openLeaderboard()" />
-
-    <!-- Booster Button -->
-    <img id="boosterButton" src="./images/xbooster_button.webp" alt="Booster Button" onclick="openBooster()" />
 
     <audio id="music" loop>
         <source src="music/racer.ogg" type="audio/ogg">
@@ -99,28 +120,17 @@
     <script src="tg.js"></script>
     <script src="api.js"></script>
 
-    <script>
-        function openQuest() {
-            window.location.href = 'quest.html';
-        }
-
-        function openLeaderboard() {
-            window.location.href = 'leaderboard.html';
-        }
-
-        function openBooster() {
-            window.location.href = 'booster.html';
-        }
-    </script>
 
     <script>
+        const COIN_SCALE_FACTOR = 0.03;
+        const DEFAULT_COIN_DROP_INTERVAL = 3000;
+        const VISIBLE_DISTANCE = 5000; // Only update cars within this distance
 
-        
         var firstLapComplete = false;
         var fps = 60;
         var step = 1 / fps;
-        var width = 1024;
-        var height = 768;
+        var width = window.innerWidth;
+        var height = window.innerHeight;
         var centrifugal = 0.3;
         var offRoadDecel = 0.99;
         var skySpeed = 0.001;
@@ -135,7 +145,7 @@
         var ctx = canvas.getContext('2d');
         var background = null;
         var sprites = null;
-        var resolution = null;
+        var resolution = height / 480;
         var roadWidth = 2000;
         var segmentLength = 200;
         var rumbleLength = 3;
@@ -143,10 +153,10 @@
         var lanes = 3;
         var fieldOfView = 100;
         var cameraHeight = 1000;
-        var cameraDepth = null;
+        var cameraDepth = 1 / Math.tan((fieldOfView / 2) * Math.PI / 180);
         var drawDistance = 300;
         var playerX = 0;
-        var playerZ = null;
+        var playerZ = cameraHeight * cameraDepth;
         var fogDensity = 5;
         var position = 0;
         var speed = 0;
@@ -185,8 +195,8 @@
 
         var coins = [];
         var coinTimer = 0;
-        var coinDropInterval = 3000;
-        
+        var coinDropInterval = DEFAULT_COIN_DROP_INTERVAL;
+
         function startMusic() {
             music.play().then(function() {
                 console.log("Background music is playing.");
@@ -195,227 +205,206 @@
             });
         }
         document.addEventListener("DOMContentLoaded", function () {
-    const startButton = document.getElementById("startButton");
-    const countdownElement = document.getElementById("countdown");
-    const startContainer = document.getElementById("startContainer");
+            const startButton = document.getElementById("startButton");
+            const countdownElement = document.getElementById("countdown");
+            const startContainer = document.getElementById("startContainer");
 
-    startButton.addEventListener("click", function () {
-        startMusic();
-        countdownElement.style.display = "block";
-        startButton.style.display = "none";
+            startButton.addEventListener("click", function () {
+                startMusic();
+                countdownElement.style.display = "block";
+                startButton.style.display = "none";
 
-        if (typeof DeviceMotionEvent.requestPermission === 'function') {
-            // Check if we've already asked for permission
-            if (!localStorage.getItem('deviceMotionPermission')) {
-                DeviceMotionEvent.requestPermission()
-                    .then(permissionState => {
-                        if (permissionState === 'granted') {
-                            console.log("Device Motion Permission granted");
-                            // Store that permission has been granted
-                            localStorage.setItem('deviceMotionPermission', 'granted');
-                        } else {
-                            alert('Permission to access device motion was denied.');
-                            // Store that permission was denied
-                            localStorage.setItem('deviceMotionPermission', 'denied');
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    // Check if we've already asked for permission
+                    if (!localStorage.getItem('deviceMotionPermission')) {
+                        DeviceMotionEvent.requestPermission()
+                            .then(permissionState => {
+                                if (permissionState === 'granted') {
+                                    console.log("Device Motion Permission granted");
+                                    // Store that permission has been granted
+                                    localStorage.setItem('deviceMotionPermission', 'granted');
+                                } else {
+                                    alert('Permission to access device motion was denied.');
+                                    // Store that permission was denied
+                                    localStorage.setItem('deviceMotionPermission', 'denied');
+                                }
+                            })
+                            .catch(console.error);
+                    } else {
+                        console.log("Device Motion Permission already handled");
+                    }
+                }
+            });
+        });
+
+        function update(dt) {
+            var playerSegment = findSegment(position + playerZ);
+            var playerW = playerStraightSprite.width * SPRITES.SCALE;
+            var speedPercent = speed / maxSpeed;
+            var dx = dt * 2 * speedPercent;
+            var startPosition = position;
+
+            updateCars(dt, playerSegment, playerW);
+
+            position = Util.increase(position, dt * speed, trackLength);
+
+            if (keyLeft) playerX -= dx;
+            else if (keyRight) playerX += dx;
+
+            playerX -= dx * speedPercent * playerSegment.curve * centrifugal;
+
+            if (keyFaster) speed = Util.accelerate(speed, accel, dt);
+            else if (keySlower) speed = Util.accelerate(speed, breaking, dt);
+            else speed = Util.accelerate(speed, decel, dt);
+
+            if ((playerX < -1) || (playerX > 1)) {
+                if (speed > offRoadLimit) speed = Util.accelerate(speed, offRoadDecel, dt);
+
+                for (var n = 0; n < playerSegment.sprites.length; n++) {
+                    var sprite = playerSegment.sprites[n];
+                    var spriteW = sprite.source.width * SPRITES.SCALE;
+                    if (Util.overlap(playerX, playerW, sprite.offset + spriteW / 2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
+                        if (sprite.source !== palmTreeSprite) {
+                            speed = maxSpeed / 5;
+                            position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength);
+                            break;
                         }
-                    })
-                    .catch(console.error);
-            } else {
-                console.log("Device Motion Permission already handled");
+                    }
+                }
+            }
+
+            for (var n = 0; n < playerSegment.cars.length; n++) {
+                var car = playerSegment.cars[n];
+                var carW = car.sprite.width * SPRITES.SCALE;
+                if (speed > car.speed) {
+                    if (Util.overlap(playerX, playerW, car.offset, carW, 0.8)) {
+                        speed = car.speed * (car.speed / speed);
+                        position = Util.increase(car.z, -playerZ, trackLength);
+                        break;
+                    }
+                }
+            }
+
+            playerX = Util.limit(playerX, -3, 3);
+            speed = Util.limit(speed, 0, maxSpeed);
+
+            skyOffset = Util.increase(skyOffset, skySpeed * playerSegment.curve * (position - startPosition) / segmentLength, 1);
+            hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position - startPosition) / segmentLength, 1);
+            treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position - startPosition) / segmentLength, 1);
+
+            if (position > playerZ) {
+                if (currentLapTime && (startPosition < playerZ)) {
+                    lastLapTime = currentLapTime;
+                    lastLapCoins = hud.coin_count.value;
+                    recordRaceRound(tgName, tgID, hud.coin_count.value, parseInt(lastLapTime));
+                    hud.coin_count.value = 0;
+                    currentLapTime = 0;
+                    if (!firstLapComplete) {
+                        firstLapComplete = true;
+                    }
+                    if (lastLapTime <= Util.toFloat(localStorage.fast_lap_time)) {
+                        localStorage.fast_lap_time = lastLapTime;
+                        updateHud('fast_lap_time', formatTime(lastLapTime));
+                        document.getElementById('fast_lap_time').classList.add('fastest');
+                        document.getElementById('last_lap_time').classList.add('fastest');
+                    } else {
+                        document.getElementById('fast_lap_time').classList.remove('fastest');
+                        document.getElementById('last_lap_time').classList.remove('fastest');
+                    }
+                    updateHud('last_lap_time', formatTime(lastLapTime));
+                    document.getElementById('last_lap_time').style.display = 'inline';
+                } else {
+                    currentLapTime += dt;
+                }
+            }
+
+            updateHud('speed', 5 * Math.round(speed / 500));
+            updateHud('current_lap_time', formatTime(currentLapTime));
+
+            checkCoinCollection({ x: playerX, z: position + playerZ });
+
+            coinTimer += dt * 1000;
+            if (coinTimer >= coinDropInterval) {
+                dropCoins();
+                coinTimer = 0;
+                coinDropInterval = Util.randomInt(2000, DEFAULT_COIN_DROP_INTERVAL);
             }
         }
-    });
-});
 
+        function checkCoinCollection(playerPosition) {
+            let coinsToRemove = [];
+            for (let i = 0; i < coins.length; i++) {
+                var laneThreshold = 0.5;
+                if (!coins[i].collected &&
+                    Math.abs(playerPosition.z - coins[i].z) < 100 &&
+                    Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) {
 
-function update(dt) {
-    var playerSegment = findSegment(position + playerZ);
-    var playerW = playerStraightSprite.width * SPRITES.SCALE;
-    var speedPercent = speed / maxSpeed;
-    var dx = dt * 2 * speedPercent;
-    var startPosition = position;
-
-    updateCars(dt, playerSegment, playerW);
-
-    position = Util.increase(position, dt * speed, trackLength);
-
-    if (keyLeft) playerX -= dx;
-    else if (keyRight) playerX += dx;
-
-    playerX -= dx * speedPercent * playerSegment.curve * centrifugal;
-
-    if (keyFaster) speed = Util.accelerate(speed, accel, dt);
-    else if (keySlower) speed = Util.accelerate(speed, breaking, dt);
-    else speed = Util.accelerate(speed, decel, dt);
-
-    if ((playerX < -1) || (playerX > 1)) {
-        if (speed > offRoadLimit) speed = Util.accelerate(speed, offRoadDecel, dt);
-
-        for (var n = 0; n < playerSegment.sprites.length; n++) {
-            var sprite = playerSegment.sprites[n];
-            var spriteW = sprite.source.width * SPRITES.SCALE;
-            if (Util.overlap(playerX, playerW, sprite.offset + spriteW / 2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
-                if (sprite.source !== palmTreeSprite) {
-                    speed = maxSpeed / 5;
-                    position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength);
+                    coins[i].collected = true;
+                    hud.coin_count.value++;
+                    document.getElementById('coin_count_value').innerText = hud.coin_count.value;
+                    playCoinSound();
+                    animateCoinToHeader(coins[i]);
+                    coinsToRemove.push(i);
                     break;
                 }
             }
-        }
-    }
 
-    for (var n = 0; n < playerSegment.cars.length; n++) {
-        var car = playerSegment.cars[n];
-        var carW = car.sprite.width * SPRITES.SCALE;
-        if (speed > car.speed) {
-            if (Util.overlap(playerX, playerW, car.offset, carW, 0.8)) {
-                speed = car.speed * (car.speed / speed);
-                position = Util.increase(car.z, -playerZ, trackLength);
-                break;
+            for (let i = coinsToRemove.length - 1; i >= 0; i--) {
+                coins.splice(coinsToRemove[i], 1);
             }
+
+            document.querySelectorAll('.coin-animation').forEach(element => {
+                if (element.style.opacity === "0") {
+                    element.remove();
+                }
+            });
         }
-    }
 
-    playerX = Util.limit(playerX, -3, 3);
-    speed = Util.limit(speed, 0, maxSpeed);
+        function playCoinSound() {
+            var coinSound = document.getElementById('coinSound');
+            coinSound.currentTime = 0;
+            coinSound.volume = 1;
 
-    skyOffset = Util.increase(skyOffset, skySpeed * playerSegment.curve * (position - startPosition) / segmentLength, 1);
-    hillOffset = Util.increase(hillOffset, hillSpeed * playerSegment.curve * (position - startPosition) / segmentLength, 1);
-    treeOffset = Util.increase(treeOffset, treeSpeed * playerSegment.curve * (position - startPosition) / segmentLength, 1);
+            if (!coinSound.paused) {
+                coinSound.pause();
+            }
 
-    if (position > trackLength) {
-        position = position % trackLength;
-        currentLapTime = 0; // Reset lap time for the new lap
-        playerZ = cameraHeight * cameraDepth; // Recalculate playerZ for the new lap
-        resetCoins(); // Reset or drop new coins for the new lap
-        resetCars(); // Reset or reposition cars for the new lap
-    }
-
-    currentLapTime += dt;
-
-    updateHud('speed', 5 * Math.round(speed / 500));
-    updateHud('current_lap_time', formatTime(currentLapTime));
-
-    checkCoinCollection({ x: playerX, z: position + playerZ });
-
-    coinTimer += dt * 1000;
-    if (coinTimer >= coinDropInterval) {
-        dropCoins();
-        coinTimer = 0;
-        coinDropInterval = Util.randomInt(2000, 5000);
-    }
-}
-
-function resetCoins() {
-    coins = [];
-    dropCoins();
-}
-
-function checkCoinCollection(playerPosition) {
-    const roadWidthFactor = roadWidth / 2000; // Normalize based on initial road width
-    const laneThreshold = 0.5 * roadWidthFactor;
-    const collectionDistance = 100 * roadWidthFactor;
-
-    for (let i = 0; i < coins.length; i++) {
-        if (!coins[i].collected && 
-            Math.abs(playerPosition.z - coins[i].z) < collectionDistance && 
-            Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) {
-
-            coins[i].collected = true;
-            hud.coin_count.value++;
-            document.getElementById('coin_count_value').innerText = hud.coin_count.value;
-            playCoinSound();
-            animateCoinToHeader(coins[i]);
-            break;
+            coinSound.play().catch(function(error) {
+                console.error("Coin sound could not be played:", error);
+            });
         }
-    }
 
-    // Remove collected coins from the array and recycle animations
-    coins = coins.filter(c => !c.collected);
-    document.querySelectorAll('.coin-animation').forEach(element => {
-        if (element.style.opacity === "0") {
-            element.remove();
+        function animateCoinToHeader(coin) {
+            var coinElement = document.createElement('div');
+            coinElement.classList.add('coin-animation');
+            document.body.appendChild(coinElement);
+
+            var coinSegment = findSegment(coin.z);
+            var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * COIN_SCALE_FACTOR;
+            var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * width / 2);
+            var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
+
+            var canvasRect = canvas.getBoundingClientRect();
+
+            coinElement.style.left = (canvasRect.left + coinX) + 'px';
+            coinElement.style.top = (canvasRect.top + coinY) + 'px';
+
+            var coinCounter = document.getElementById('coin_count_value');
+            var counterRect = coinCounter.getBoundingClientRect();
+
+            var animation = coinElement.animate([
+                { transform: `translate(${canvasRect.left + coinX}px, ${canvasRect.top + coinY}px)` },
+                { transform: `translate(${counterRect.left}px, ${counterRect.top}px)` }
+            ], {
+                duration: 1000,
+                easing: 'ease-in-out',
+                fill: 'forwards'
+            });
+
+            animation.onfinish = function() {
+                coinElement.remove();
+            };
         }
-    });
-}
-
-
-
-
-
-function playCoinSound() {
-    const coinSound = document.getElementById('coinSound');
-    if (!coinSound) {
-        console.error("Coin sound element not found");
-        return;
-    }
-
-    coinSound.currentTime = 0;
-    coinSound.volume = 0.5; // Reduced volume
-
-    // Improved audio handling
-    if (!coinSound.paused) {
-        coinSound.pause();
-        coinSound.currentTime = 0; // Reset to start before replaying
-    }
-
-    coinSound.play().catch(function (error) {
-        console.error("Coin sound could not be played:", error);
-    });
-}
-
-
-
-const coinElementPool = [];
-
-function animateCoinToHeader(coin) {
-    let coinElement;
-    if (coinElementPool.length > 0) {
-        coinElement = coinElementPool.pop();
-    } else {
-        coinElement = document.createElement('div');
-        coinElement.classList.add('coin-animation');
-        document.body.appendChild(coinElement);
-    }
-
-    // Calculate the position of the coin on the canvas
-    const coinSegment = findSegment(coin.z);
-    const coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * 0.07;
-    const coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * canvas.width / 2);
-    const coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
-
-    // Get the current positions for animation
-    const canvasRect = canvas.getBoundingClientRect();
-    const coinCounter = document.getElementById('coin_count_value');
-    const counterRect = coinCounter.getBoundingClientRect();
-
-    coinElement.style.display = 'block';
-    coinElement.style.left = (canvasRect.left + coinX) + 'px';
-    coinElement.style.top = (canvasRect.top + coinY) + 'px';
-
-    // Animation from the coin's position to the HUD
-    const animation = coinElement.animate([
-        { transform: `translate(0, 0)` },
-        { transform: `translate(${counterRect.left - (canvasRect.left + coinX)}px, ${counterRect.top - (canvasRect.top + coinY)}px)` }
-    ], {
-        duration: 800,
-        easing: 'ease-in-out',
-    });
-
-    animation.onfinish = () => {
-        coinElement.style.display = 'none';
-        coinElementPool.push(coinElement);
-    };
-
-    // Ensure the element is removed after animation completes
-    setTimeout(() => {
-        if (coinElement.parentNode) {
-            coinElement.parentNode.removeChild(coinElement);
-        }
-    }, 1000); // Delay slightly longer than animation duration
-}
-
-
 
         function updateCars(dt, playerSegment, playerW) {
             for (var n = 0; n < cars.length; n++) {
@@ -477,91 +466,84 @@ function animateCoinToHeader(coin) {
                 return seconds + "." + tenths;
         }
 
-function render() {
-    const baseSegment = findSegment(position);
-    const basePercent = Util.percentRemaining(position, segmentLength);
-    const playerSegment = findSegment(position + playerZ);
-    const playerPercent = Util.percentRemaining(position + playerZ, segmentLength);
-    const playerY = Util.interpolate(playerSegment.p1.world.y, playerSegment.p2.world.y, playerPercent);
-    let maxy = height;
+        function render() {
+            var baseSegment = findSegment(position);
+            var basePercent = Util.percentRemaining(position, segmentLength);
+            var playerSegment = findSegment(position + playerZ);
+            var playerPercent = Util.percentRemaining(position + playerZ, segmentLength);
+            var playerY = Util.interpolate(playerSegment.p1.world.y, playerSegment.p2.world.y, playerPercent);
+            var maxy = height;
 
-    let x = 0;
-    let dx = -(baseSegment.curve * basePercent);
+            var x = 0;
+            var dx = -(baseSegment.curve * basePercent);
 
-    ctx.clearRect(0, 0, width, height);
+            ctx.clearRect(0, 0, width, height);
 
-    Render.background(ctx, backgroundSky, width, height, { w: backgroundSky.width, h: backgroundSky.height }, skyOffset, resolution * skySpeed * playerY);
-    Render.background(ctx, backgroundHills, width, height, { w: backgroundHills.width, h: backgroundHills.height }, hillOffset, resolution * hillSpeed * playerY);
-    Render.background(ctx, backgroundTrees, width, height, { w: backgroundTrees.width, h: backgroundTrees.height }, treeOffset, resolution * treeSpeed * playerY);
+            Render.background(ctx, backgroundSky, width, height, { w: backgroundSky.width, h: backgroundSky.height }, skyOffset, resolution * skySpeed * playerY);
+            Render.background(ctx, backgroundHills, width, height, { w: backgroundHills.width, h: backgroundHills.height }, hillOffset, resolution * hillSpeed * playerY);
+            Render.background(ctx, backgroundTrees, width, height, { w: backgroundTrees.width, h: backgroundTrees.height }, treeOffset, resolution * treeSpeed * playerY);
 
-    for (let n = 0; n < drawDistance; n++) {
-        const segment = segments[(baseSegment.index + n) % segments.length];
-        segment.looped = segment.index < baseSegment.index;
-        segment.fog = Util.exponentialFog(n / drawDistance, fogDensity);
-        segment.clip = maxy;
+            for (var n = 0; n < drawDistance; n++) {
+                var segment = segments[(baseSegment.index + n) % segments.length];
+                segment.looped = segment.index < baseSegment.index;
+                segment.fog = Util.exponentialFog(n / drawDistance, fogDensity);
+                segment.clip = maxy;
 
-        Util.project(segment.p1, (playerX * roadWidth) - x, playerY + cameraHeight, position - (segment.looped ? trackLength : 0), cameraDepth, width, height, roadWidth);
-        Util.project(segment.p2, (playerX * roadWidth) - x - dx, playerY + cameraHeight, position - (segment.looped ? trackLength : 0), cameraDepth, width, height, roadWidth);
+                Util.project(segment.p1, (playerX * roadWidth) - x, playerY + cameraHeight, position - (segment.looped ? trackLength : 0), cameraDepth, width, height, roadWidth);
+                Util.project(segment.p2, (playerX * roadWidth) - x - dx, playerY + cameraHeight, position - (segment.looped ? trackLength : 0), cameraDepth, width, height, roadWidth);
 
-        x += dx;
-        dx += segment.curve;
+                x += dx;
+                dx += segment.curve;
 
-        if ((segment.p1.camera.z <= cameraDepth) || (segment.p2.screen.y >= segment.p1.screen.y) || (segment.p2.screen.y >= maxy))
-            continue;
+                if ((segment.p1.camera.z <= cameraDepth) || (segment.p2.screen.y >= segment.p1.screen.y) || (segment.p2.screen.y >= maxy))
+                    continue;
 
-        Render.segment(ctx, width, lanes, segment.p1.screen.x, segment.p1.screen.y, segment.p1.screen.w, segment.p2.screen.x, segment.p2.screen.y, segment.p2.screen.w, segment.fog, segment.color);
+                Render.segment(ctx, width, lanes, segment.p1.screen.x, segment.p1.screen.y, segment.p1.screen.w, segment.p2.screen.x, segment.p2.screen.y, segment.p2.screen.w, segment.fog, segment.color);
 
-        maxy = segment.p1.screen.y;
-    }
+                maxy = segment.p1.screen.y;
+            }
 
-    // Cache these values to avoid recalculating within the loop
-    const playerScreenY = (height / 2) - (cameraDepth / playerZ * Util.interpolate(playerSegment.p1.camera.y, playerSegment.p2.camera.y, playerPercent) * height / 2);
-    const cameraDepthDivided = cameraDepth / playerZ;
-    const playerSpeedRatio = speed / maxSpeed;
+            for (var i = 0; i < coins.length; i++) {
+                if (!coins[i].collected) {
+                    var coinSegment = findSegment(coins[i].z);
+                    var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coins[i].z, segmentLength)) * COIN_SCALE_FACTOR;
+                    var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coins[i].z, segmentLength)) + (coinScale * coins[i].offset * roadWidth * width / 2);
+                    var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coins[i].z, segmentLength));
 
-    for (let i = 0; i < coins.length; i++) {
-        if (!coins[i].collected) {
-            const coinSegment = findSegment(coins[i].z);
-            const coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coins[i].z, segmentLength)) * 0.03;
-            const coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coins[i].z, segmentLength)) + (coinScale * coins[i].offset * roadWidth * width / 2);
-            const coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coins[i].z, segmentLength));
+                    Render.sprite(ctx, width, height, resolution, roadWidth, sprites, coinSprite, coinScale, coinX, coinY, -0.5, -1, coinSegment.clip);
+                }
+            }
 
-            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, coinSprite, coinScale, coinX, coinY, -0.5, -1, coinSegment.clip);
+            for (var n = (drawDistance - 1); n > 0; n--) {
+                var segment = segments[(baseSegment.index + n) % segments.length];
+
+                for (var i = 0; i < segment.cars.length; i++) {
+                    var car = segment.cars[i];
+                    var sprite = car.sprite;
+                    var spriteScale = Util.interpolate(segment.p1.screen.scale, segment.p2.screen.scale, car.percent);
+                    var spriteX = Util.interpolate(segment.p1.screen.x, segment.p2.screen.x, car.percent) + (spriteScale * car.offset * roadWidth * width / 2);
+                    var spriteY = Util.interpolate(segment.p1.screen.y, segment.p2.screen.y, car.percent);
+                    Render.sprite(ctx, width, height, resolution, roadWidth, sprites, car.sprite, spriteScale, spriteX, spriteY, -0.5, -1, segment.clip);
+                }
+
+                for (var i = 0; i < segment.sprites.length; i++) {
+                    var sprite = segment.sprites[i];
+                    var spriteScale = segment.p1.screen.scale;
+                    var spriteX = segment.p1.screen.x + (spriteScale * sprite.offset * roadWidth * width / 2);
+                    var spriteY = segment.p1.screen.y;
+                    Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
+                }
+
+                if (segment == playerSegment) {
+                    Render.player(ctx, width, height, resolution, roadWidth, sprites, speed / maxSpeed,
+                        cameraDepth / playerZ,
+                        width / 2,
+                        (height / 2) - (cameraDepth / playerZ * Util.interpolate(playerSegment.p1.camera.y, playerSegment.p2.camera.y, playerPercent) * height / 2),
+                        speed * (keyLeft ? -1 : keyRight ? 1 : 0),
+                        playerSegment.p2.world.y - playerSegment.p1.world.y);
+                }
+            }
         }
-    }
-
-    for (let n = (drawDistance - 1); n > 0; n--) {
-        const segment = segments[(baseSegment.index + n) % segments.length];
-
-        for (let i = 0; i < segment.cars.length; i++) {
-            const car = segment.cars[i];
-            const sprite = car.sprite;
-            const spriteScale = Util.interpolate(segment.p1.screen.scale, segment.p2.screen.scale, car.percent);
-            const spriteX = Util.interpolate(segment.p1.screen.x, segment.p2.screen.x, car.percent) + (spriteScale * car.offset * roadWidth * width / 2);
-            const spriteY = Util.interpolate(segment.p1.screen.y, segment.p2.screen.y, car.percent);
-            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, car.sprite, spriteScale, spriteX, spriteY, -0.5, -1, segment.clip);
-        }
-
-        for (let i = 0; i < segment.sprites.length; i++) {
-            const sprite = segment.sprites[i];
-            const spriteScale = segment.p1.screen.scale;
-            const spriteX = segment.p1.screen.x + (spriteScale * sprite.offset * roadWidth * width / 2);
-            const spriteY = segment.p1.screen.y;
-            Render.sprite(ctx, width, height, resolution, roadWidth, sprites, sprite.source, spriteScale, spriteX, spriteY, (sprite.offset < 0 ? -1 : 0), -1, segment.clip);
-        }
-
-        if (segment == playerSegment) {
-            Render.player(ctx, width, height, resolution, roadWidth, sprites, playerSpeedRatio,
-                cameraDepthDivided,
-                width / 2,
-                playerScreenY,
-                speed * (keyLeft ? -1 : keyRight ? 1 : 0),
-                playerSegment.p2.world.y - playerSegment.p1.world.y);
-        }
-    }
-}
-
-
 
         function findSegment(z) {
             return segments[Math.floor(z / segmentLength) % segments.length];
@@ -698,48 +680,47 @@ function render() {
             trackLength = segments.length * segmentLength;
         }
 
-function resetSprites() {
-    addSprite(20, billboard01Sprite, -1);
-    addSprite(40, billboard02Sprite, -1);
-    addSprite(60, billboard03Sprite, -1);
-    addSprite(80, billboard04Sprite, -1);
-    addSprite(100, billboard05Sprite, -1);
-    addSprite(120, billboard06Sprite, -1);
-    addSprite(140, billboard07Sprite, -1);
-    addSprite(160, billboard08Sprite, -1);
-    addSprite(180, billboard09Sprite, -1);
+        function resetSprites() {
+            addSprite(20, billboard01Sprite, -1);
+            addSprite(40, billboard02Sprite, -1);
+            addSprite(60, billboard03Sprite, -1);
+            addSprite(80, billboard04Sprite, -1);
+            addSprite(100, billboard05Sprite, -1);
+            addSprite(120, billboard06Sprite, -1);
+            addSprite(140, billboard07Sprite, -1);
+            addSprite(160, billboard08Sprite, -1);
+            addSprite(180, billboard09Sprite, -1);
 
-    addSprite(240, billboard01Sprite, -1.2);
-    addSprite(240, billboard02Sprite, 1.2);
-    addSprite(segments.length - 25, billboard03Sprite, -1.2);
-    addSprite(segments.length - 25, billboard04Sprite, 1.2);
+            addSprite(240, billboard01Sprite, -1.2);
+            addSprite(240, billboard02Sprite, 1.2);
+            addSprite(segments.length - 25, billboard03Sprite, -1.2);
+            addSprite(segments.length - 25, billboard04Sprite, 1.2);
 
-    for (var n = 10; n < 200; n += 4 + Math.floor(n / 100)) {
-        addSprite(n, palmTreeSprite, 1 + Math.random() * 0.5); // Right side of the road
-        addSprite(n, palmTreeSprite, -1 - Math.random() * 0.5); // Left side of the road
-    }
+            for (var n = 10; n < 200; n += 4 + Math.floor(n / 100)) {
+                addSprite(n, palmTreeSprite, 1 + Math.random() * 0.5);
+                addSprite(n, palmTreeSprite, -1 - Math.random() * 0.5);
+            }
 
-    for (var n = 250; n < 1000; n += 5) {
-        addSprite(n, columnSprite, 1.1);
-        addSprite(n + Util.randomInt(0, 5), tree1Sprite, -1 - (Math.random() * 2));
-        addSprite(n + Util.randomInt(0, 5), tree1Sprite, -1 - (Math.random() * 2));
-    }
+            for (var n = 250; n < 1000; n += 5) {
+                addSprite(n, columnSprite, 1.1);
+                addSprite(n + Util.randomInt(0, 5), tree1Sprite, -1 - (Math.random() * 2));
+                addSprite(n + Util.randomInt(0, 5), tree1Sprite, -1 - (Math.random() * 2));
+            }
 
-    for (var n = 200; n < segments.length; n += 3) {
-        addSprite(n, Util.randomChoice(spritesPlants), Util.randomChoice([1, -1]) * (2 + Math.random() * 5));
-    }
+            for (var n = 200; n < segments.length; n += 3) {
+                addSprite(n, Util.randomChoice(spritesPlants), Util.randomChoice([1, -1]) * (2 + Math.random() * 5));
+            }
 
-    for (var n = 1000; n < (segments.length - 50); n += 100) {
-        var side = Util.randomChoice([1, -1]);
-        addSprite(n + Util.randomInt(0, 50), Util.randomChoice(spritesBillboards), -side);
-        for (var i = 0; i < 20; i++) {
-            var sprite = Util.randomChoice(spritesPlants);
-            var offset = side * (1.5 + Math.random());
-            addSprite(n + Util.randomInt(0, 50), sprite, offset);
+            for (var n = 1000; n < (segments.length - 50); n += 100) {
+                var side = Util.randomChoice([1, -1]);
+                addSprite(n + Util.randomInt(0, 50), Util.randomChoice(spritesBillboards), -side);
+                for (var i = 0; i < 20; i++) {
+                    var sprite = Util.randomChoice(spritesPlants);
+                    var offset = side * (1.5 + Math.random());
+                    addSprite(n + Util.randomInt(0, 50), sprite, offset);
+                }
+            }
         }
-    }
-}
-
 
         function resetCars() {
             cars = [];
@@ -760,23 +741,31 @@ function resetSprites() {
             dropCoins();
         }
 
-function dropCoins() {
-    var zStart = position + playerZ + 8000; // starting z position
-    var zSpacing = 2000; // spacing between coins
-    // Randomly choose the number of coins to drop: either 3, 4, or 6
-    var numberOfCoins = [3, 4, 6][Math.floor(Math.random() * 3)]; 
-    var minSpacing = 300; // Minimum random spacing between coins
-    var maxSpacing = 600; // Maximum random spacing between coins
+        function dropCoins() {
+            var zStart = position + playerZ + 8000;
+            var zSpacing = 2000;
+            var numberOfCoins = [3, 4, 6][Math.floor(Math.random() * 3)];
+            var minSpacing = 300;
+            var maxSpacing = 600;
 
-    for (var i = 0; i < numberOfCoins; i++) {
-        var offset = 0
-        var zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
+            for (var i = 0; i < numberOfCoins; i++) {
+                var offset = 0;
+                var zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
 
-        coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
-    }
-}
+                coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
+            }
+        }
 
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            width = canvas.width;
+            height = canvas.height;
+            resolution = height / 480;
+        }
 
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // Initial call
 
         Game.run({
             canvas: canvas,
@@ -873,161 +862,155 @@ function dropCoins() {
             ],
 
             keys: [
-                { keys: [KEY.LEFT, KEY.A], mode: 'down', action: function () { keyLeft = true; } },
-                { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function () { keyRight = true; } },
-                { keys: [KEY.UP, KEY.W], mode: 'down', action: function () { keyFaster = true; } },
-                { keys: [KEY.DOWN, KEY.S], mode: 'down', action: function () { keySlower = true; } },
-                { keys: [KEY.LEFT, KEY.A], mode: 'up', action: function () { keyLeft = false; } },
-                { keys: [KEY.RIGHT, KEY.D], mode: 'up', action: function () { keyRight = false; } },
-                { keys: [KEY.UP, KEY.W], mode: 'up', action: function () { keyFaster = false; } },
-                { keys: [KEY.DOWN, KEY.S], mode: 'up', action: function () { keySlower = false; } }
+                { keys: [KEY.LEFT, KEY.A], mode: 'down', action: function() { keyLeft = true; } },
+                { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight = true; } },
+                { keys: [KEY.UP, KEY.W], mode: 'down', action: function() { keyFaster = true; } },
+                { keys: [KEY.DOWN, KEY.S], mode: 'down', action: function() { keySlower = true; } },
+                { keys: [KEY.LEFT, KEY.A], mode: 'up', action: function() { keyLeft = false; } },
+                { keys: [KEY.RIGHT, KEY.D], mode: 'up', action: function() { keyRight = false; } },
+                { keys: [KEY.UP, KEY.W], mode: 'up', action: function() { keyFaster = false; } },
+                { keys: [KEY.DOWN, KEY.S], mode: 'up', action: function() { keySlower = false; } }
             ],
-            ready: function (images) {
+            ready: function(images) {
                 background = images[0];
-    sprites = images[1];
-    playerStraightSprite = images[2];
-    playerUphillStraightSprite = images[3];
-    playerUphillLeftSprite = images[4];
-    playerUphillRightSprite = images[5];
-    playerRightSprite = images[6];
-    playerLeftSprite = images[7];
-    billboard01Sprite = images[8];
-    billboard02Sprite = images[9];
-    billboard03Sprite = images[10];
-    billboard04Sprite = images[11];
-    billboard05Sprite = images[12];
-    billboard06Sprite = images[13];
-    billboard07Sprite = images[14];
-    billboard08Sprite = images[15];
-    billboard09Sprite = images[16];
-    tree1Sprite = images[17];
-    tree2Sprite = images[18];
-    deadTree1Sprite = images[19];
-    deadTree2Sprite = images[20];
-    palmTreeSprite = images[21];
-    columnSprite = images[22];
-    boulder1Sprite = images[23];
-    boulder2Sprite = images[24];
-    boulder3Sprite = images[25];
-    bush1Sprite = images[26];
-    bush2Sprite = images[27];
-    bush3Sprite = images[28];
-    bush4Sprite = images[29];
-    bush5Sprite = images[30];
-    bush6Sprite = images[31];
-    bush7Sprite = images[32];
-    bush8Sprite = images[33];
-    bush9Sprite = images[34];
-    bush10Sprite = images[35];
-    cactusSprite = images[36];
-    cactus1Sprite = images[37];
-    cactus2Sprite = images[38];
-    cactus3Sprite = images[39];
-    cactus4Sprite = images[40];
-    cactus5Sprite = images[41];
-    stumpSprite = images[42];
-    semiSprite = images[43];
-    truckSprite = images[44];
-    car01Sprite = images[45];
-    car02Sprite = images[46];
-    car03Sprite = images[47];
-    car04Sprite = images[48];
-    backgroundSky = images[49];
-    backgroundHills = images[50];
-    backgroundTrees = images[51];
-    truck1Sprite = images[52];
-    truck2Sprite = images[53];
-    truck3Sprite = images[54];
-    truck4Sprite = images[55];
-    truck5Sprite = images[56];
-    truck6Sprite = images[57];
-    truck7Sprite = images[58];
-    truck8Sprite = images[59];
-    truck9Sprite = images[60];
-    truck10Sprite = images[61];
-    truck11Sprite = images[62];
-    truck12Sprite = images[63];
-    truck13Sprite = images[64];
-    truck14Sprite = images[65];
-    truck15Sprite = images[66];
-    truck16Sprite = images[67];
-    truck17Sprite = images[68];
-    truck18Sprite = images[69];
-    truck19Sprite = images[70];
-    truck20Sprite = images[71];
-    truck21Sprite = images[72];
-    truck22Sprite = images[73];
-    truck23Sprite = images[74];
-    semi1Sprite = images[75];
-    semi2Sprite = images[76];
-    semi3Sprite = images[77];
-    semi4Sprite = images[78];
-    semi5Sprite = images[79];
-    semi6Sprite = images[80];
-    semi7Sprite = images[81];
-    semi8Sprite = images[82];
-    semi9Sprite = images[83];
-    semi10Sprite = images[84];
-    coinSprite = images[85];
+                sprites = images[1];
+                playerStraightSprite = images[2];
+                playerUphillStraightSprite = images[3];
+                playerUphillLeftSprite = images[4];
+                playerUphillRightSprite = images[5];
+                playerRightSprite = images[6];
+                playerLeftSprite = images[7];
+                billboard01Sprite = images[8];
+                billboard02Sprite = images[9];
+                billboard03Sprite = images[10];
+                billboard04Sprite = images[11];
+                billboard05Sprite = images[12];
+                billboard06Sprite = images[13];
+                billboard07Sprite = images[14];
+                billboard08Sprite = images[15];
+                billboard09Sprite = images[16];
+                tree1Sprite = images[17];
+                tree2Sprite = images[18];
+                deadTree1Sprite = images[19];
+                deadTree2Sprite = images[20];
+                palmTreeSprite = images[21];
+                columnSprite = images[22];
+                boulder1Sprite = images[23];
+                boulder2Sprite = images[24];
+                boulder3Sprite = images[25];
+                bush1Sprite = images[26];
+                bush2Sprite = images[27];
+                bush3Sprite = images[28];
+                bush4Sprite = images[29];
+                bush5Sprite = images[30];
+                bush6Sprite = images[31];
+                bush7Sprite = images[32];
+                bush8Sprite = images[33];
+                bush9Sprite = images[34];
+                bush10Sprite = images[35];
+                cactusSprite = images[36];
+                cactus1Sprite = images[37];
+                cactus2Sprite = images[38];
+                cactus3Sprite = images[39];
+                cactus4Sprite = images[40];
+                cactus5Sprite = images[41];
+                stumpSprite = images[42];
+                semiSprite = images[43];
+                truckSprite = images[44];
+                car01Sprite = images[45];
+                car02Sprite = images[46];
+                car03Sprite = images[47];
+                car04Sprite = images[48];
+                backgroundSky = images[49];
+                backgroundHills = images[50];
+                backgroundTrees = images[51];
+                truck1Sprite = images[52];
+                truck2Sprite = images[53];
+                truck3Sprite = images[54];
+                truck4Sprite = images[55];
+                truck5Sprite = images[56];
+                truck6Sprite = images[57];
+                truck7Sprite = images[58];
+                truck8Sprite = images[59];
+                truck9Sprite = images[60];
+                truck10Sprite = images[61];
+                truck11Sprite = images[62];
+                truck12Sprite = images[63];
+                truck13Sprite = images[64];
+                truck14Sprite = images[65];
+                truck15Sprite = images[66];
+                truck16Sprite = images[67];
+                truck17Sprite = images[68];
+                truck18Sprite = images[69];
+                truck19Sprite = images[70];
+                truck20Sprite = images[71];
+                truck21Sprite = images[72];
+                truck22Sprite = images[73];
+                truck23Sprite = images[74];
+                semi1Sprite = images[75];
+                semi2Sprite = images[76];
+                semi3Sprite = images[77];
+                semi4Sprite = images[78];
+                semi5Sprite = images[79];
+                semi6Sprite = images[80];
+                semi7Sprite = images[81];
+                semi8Sprite = images[82];
+                semi9Sprite = images[83];
+                semi10Sprite = images[84];
+                coinSprite = images[85];
 
-    spritesBillboards = [
-        billboard01Sprite, billboard02Sprite, billboard03Sprite,
-        billboard04Sprite, billboard05Sprite, billboard06Sprite,
-        billboard07Sprite, billboard08Sprite, billboard09Sprite
-    ];
-    spritesPlants = [
-        tree1Sprite, tree2Sprite, deadTree1Sprite, deadTree2Sprite,
-        palmTreeSprite, boulder1Sprite, boulder2Sprite, boulder3Sprite,
-        bush1Sprite, bush2Sprite, bush3Sprite, bush4Sprite, bush5Sprite,
-        bush6Sprite, bush7Sprite, bush8Sprite, bush9Sprite, bush10Sprite,
-        cactusSprite, cactus1Sprite, cactus2Sprite, cactus3Sprite, cactus4Sprite, cactus5Sprite,
-        stumpSprite
-    ];
-    spritesCars = [
-        semiSprite, truckSprite, car01Sprite, car02Sprite, car03Sprite, car04Sprite,
-        truck1Sprite, truck2Sprite, truck3Sprite, truck4Sprite,
-        truck5Sprite, truck6Sprite, truck7Sprite, truck8Sprite, truck9Sprite,
-        truck10Sprite, truck11Sprite, truck12Sprite, truck13Sprite, truck14Sprite,
-        truck15Sprite, truck16Sprite, truck17Sprite, truck18Sprite, truck19Sprite,
-        truck20Sprite, truck21Sprite, truck22Sprite, truck23Sprite,
-        semiSprite, semi1Sprite, semi2Sprite, semi3Sprite, semi4Sprite,
-        semi5Sprite, semi6Sprite, semi7Sprite, semi8Sprite, semi9Sprite,
-        semi10Sprite
-    ];
+                spritesBillboards = [
+                    billboard01Sprite, billboard02Sprite, billboard03Sprite,
+                    billboard04Sprite, billboard05Sprite, billboard06Sprite,
+                    billboard07Sprite, billboard08Sprite, billboard09Sprite
+                ];
+                spritesPlants = [
+                    tree1Sprite, tree2Sprite, deadTree1Sprite, deadTree2Sprite,
+                    palmTreeSprite, boulder1Sprite, boulder2Sprite, boulder3Sprite,
+                    bush1Sprite, bush2Sprite, bush3Sprite, bush4Sprite, bush5Sprite,
+                    bush6Sprite, bush7Sprite, bush8Sprite, bush9Sprite, bush10Sprite,
+                    cactusSprite, cactus1Sprite, cactus2Sprite, cactus3Sprite, cactus4Sprite, cactus5Sprite,
+                    stumpSprite
+                ];
+                spritesCars = [
+                    semiSprite, truckSprite, car01Sprite, car02Sprite, car03Sprite, car04Sprite,
+                    truck1Sprite, truck2Sprite, truck3Sprite, truck4Sprite,
+                    truck5Sprite, truck6Sprite, truck7Sprite, truck8Sprite, truck9Sprite,
+                    truck10Sprite, truck11Sprite, truck12Sprite, truck13Sprite, truck14Sprite,
+                    truck15Sprite, truck16Sprite, truck17Sprite, truck18Sprite, truck19Sprite,
+                    truck20Sprite, truck21Sprite, truck22Sprite, truck23Sprite,
+                    semiSprite, semi1Sprite, semi2Sprite, semi3Sprite, semi4Sprite,
+                    semi5Sprite, semi6Sprite, semi7Sprite, semi8Sprite, semi9Sprite,
+                    semi10Sprite
+                ];
+
+                document.getElementById('loading-screen').style.display = 'none'; // Hide loading screen
+
                 reset();
                 localStorage.fast_lap_time = localStorage.fast_lap_time || 180;
                 updateHud('fast_lap_time', formatTime(Util.toFloat(localStorage.fast_lap_time)));
             }
         });
 
-function reset(options) {
-    options = options || {};
-    canvas.width = width = window.innerWidth;
-    canvas.height = height = window.innerHeight;
-    lanes = 3;
-    roadWidth = Math.min(2000, width * 0.8); // Adjust road width based on screen size
-    cameraHeight = 1000;
-    drawDistance = 300;
-    fogDensity = 5;
-    fieldOfView = 100;
-    segmentLength = 200;
-    rumbleLength = 3;
-    cameraDepth = 1 / Math.tan((fieldOfView / 2) * Math.PI / 180);
-    playerZ = (cameraHeight * cameraDepth);
-    resolution = height / 480;
+        function reset(options) {
+            options = options || {};
+            canvas.width = width = window.innerWidth;
+            canvas.height = height = window.innerHeight;
+            lanes = 3;
+            roadWidth = 2000;
+            cameraHeight = 1000;
+            drawDistance = 300;
+            fogDensity = 5;
+            fieldOfView = 100;
+            segmentLength = 200;
+            rumbleLength = 3;
+            cameraDepth = 1 / Math.tan((fieldOfView / 2) * Math.PI / 180);
+            playerZ = (cameraHeight * cameraDepth);
+            resolution = height / 480;
 
-    // Adjust HUD position
-    const hud = document.getElementById('hud');
-    if (hud) {
-        hud.style.fontSize = `${Math.max(12, width / 50)}px`;
-    }
-
-    if ((segments.length == 0) || (options.segmentLength) || (options.rumbleLength))
-        resetRoad();
-
-    // Ensure the player is centered after resize
-    playerX = 0;
-}
+            if ((segments.length == 0) || (options.segmentLength) || (options.rumbleLength))
+                resetRoad();
+        }
 
     </script>
 
