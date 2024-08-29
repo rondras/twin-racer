@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twin Racer Booster</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/leaderboard.css">
+    <style>
+        /* Basic styles for the page */
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #f3f3f3;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header, footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .tagline {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .main-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .purchase-info {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #e74c3c;
+            line-height: 1.5;
+        }
+
+        .purchase-button {
+            background-color: #e74c3c;
+            border: none;
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: center;
+            transition: background-color 0.3s ease;
+            text-transform: uppercase;
+            margin-top: 10px;
+        }
+
+        .purchase-button:hover {
+            opacity: 0.8;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 180px;  /* Increased width */
+            height: 120px; /* Increased height */
+            cursor: pointer;
+        }
+
+        .confirmation-message {
+            margin-top: 20px;
+            font-size: 1rem;
+            color: #333;
+            text-align: center;
+            display: none;
+        }
+
+        .upgrade-description {
+            font-size: 1rem;
+            margin-top: 5px;
+            color: #e74c3c;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <img src="xhome_button_0.webp" alt="Home" class="home-button" onclick="window.location.href='game.html'">
+            <h1 class="game-title">Twin Racer</h1>
+            <p class="tagline">Auto-Farmer</p>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <video autoplay loop muted playsinline>
+            <source src="Auto-Farmer4.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <div class="purchase-info" id="purchaseInfo">
+            Purchase Auto-Farmer for 1 TON.<br>
+            It will collect coins for 2 hours while you are offline.
+        </div>
+        <button class="purchase-button" id="purchaseButton" onclick="purchaseAutoFarmer()">Enable Auto-Farmer</button>
+        <div id="upgradeButtons" style="display:none;">
+            <button class="purchase-button" id="upgradeButton1" onclick="upgradeAutoFarmer(2)">
+                Upgrade to LVL 2 (50 Telegram Stars)
+            </button>
+            <div id="upgradeDesc1" class="upgrade-description" style="display:none;">
+                Collect coins for 4 hours while offline.
+            </div>
+
+            <button class="purchase-button" id="upgradeButton2" style="display:none;" onclick="upgradeAutoFarmer(3)">
+                Upgrade to LVL 3 (100 Telegram Stars)
+            </button>
+            <div id="upgradeDesc2" class="upgrade-description" style="display:none;">
+                Collect coins for 8 hours while offline.
+            </div>
+
+            <button class="purchase-button" id="upgradeButton3" style="display:none;" onclick="upgradeAutoFarmer(4)">
+                Upgrade to LVL 4 (250 Telegram Stars)
+            </button>
+            <div id="upgradeDesc3" class="upgrade-description" style="display:none;">
+                Collect coins for 12 hours while offline.
+            </div>
+
+            <button class="purchase-button" id="upgradeButton4" style="display:none;" onclick="upgradeAutoFarmer(5)">
+                Upgrade to LVL 5 (500 Telegram Stars)
+            </button>
+            <div id="upgradeDesc4" class="upgrade-description" style="display:none;">
+                Collect coins for 12 hours while offline.
+            </div>
+        </div>
+        <div id="confirmationMessage" class="confirmation-message">
+            Auto-Farmer enabled! It will collect coins for 2 hours while you are offline.
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>Follow Us</p>
+            <div class="social-icons">
+                <a href="#"><img src="./images/facebook-icon.png" alt="Facebook"></a>
+                <a href="#"><img src="./images/twitter-icon.png" alt="Twitter"></a>
+                <a href="#"><img src="./images/instagram-icon.png" alt="Instagram"></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let currentLevel = 1;
+
+        function purchaseAutoFarmer() {
+            // Display confirmation message
+            document.getElementById('confirmationMessage').style.display = 'block';
+
+            // Disable the button after purchase
+            document.getElementById('purchaseButton').disabled = true;
+            document.getElementById('purchaseButton').textContent = 'Auto-Farmer Enabled';
+
+            // Update the purchase info to the next upgrade
+            document.getElementById('purchaseInfo').innerHTML = 'Upgrade to Level 2.<br>Collect coins for 4 hours while offline.';
+
+            // Show the upgrade buttons
+            document.getElementById('upgradeButtons').style.display = 'block';
+        }
+
+        function upgradeAutoFarmer(level) {
+            if (level === 2) {
+                // Upgrade to level 2 functionality
+                currentLevel = 2;
+                document.getElementById('purchaseInfo').innerHTML = 'Upgrade to Level 3.<br>Collect coins for 6 hours while offline.';
+                document.getElementById('upgradeButton1').style.display = 'none';
+                document.getElementById('upgradeDesc1').style.display = 'none';
+                document.getElementById('upgradeButton2').style.display = 'block';
+                document.getElementById('confirmationMessage').textContent = `Auto-Farmer LVL ${level} enabled! It will collect coins for 4 hours while you are offline.`;
+            } else if (level === 3) {
+                // Upgrade to level 3 functionality
+                currentLevel = 3;
+                document.getElementById('purchaseInfo').innerHTML = 'Upgrade to Level 4.<br>Collect coins for 8 hours while offline.';
+                document.getElementById('upgradeButton2').style.display = 'none';
+                document.getElementById('upgradeDesc2').style.display = 'none';
+                document.getElementById('upgradeButton3').style.display = 'block';
+                document.getElementById('confirmationMessage').textContent = `Auto-Farmer LVL ${level} enabled! It will collect coins for 6 hours while you are offline.`;
+            } else if (level === 4) {
+                // Upgrade to level 4 functionality
+                currentLevel = 4;
+                document.getElementById('purchaseInfo').innerHTML = 'Upgrade to Level 5.<br>Collect coins for 12 hours while offline.';
+                document.getElementById('upgradeButton3').style.display = 'none';
+                document.getElementById('upgradeDesc3').style.display = 'none';
+                document.getElementById('upgradeButton4').style.display = 'block';
+                document.getElementById('confirmationMessage').textContent = `Auto-Farmer LVL ${level} enabled! It will collect coins for 8 hours while you are offline.`;
+            } else if (level === 5) {
+                // Upgrade to level 5 functionality
+                currentLevel = 5;
+                document.getElementById('purchaseInfo').innerHTML = 'Auto-Farmer LVL 5 active.<br>Collect coins for 12 hours while offline.';
+                document.getElementById('upgradeButton4').style.display = 'none';
+                document.getElementById('upgradeDesc4').style.display = 'none';
+                document.getElementById('confirmationMessage').textContent = `Auto-Farmer LVL ${level} enabled! It will collect coins for 12 hours while you are offline.`;
+            }
+            document.getElementById('confirmationMessage').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
