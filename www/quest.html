@@ -6,7 +6,7 @@
     <title>Canvas Coin Rain</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="tg.js" defer></script>
     <script src="api.js" defer></script>
     <style>
@@ -182,7 +182,7 @@
 
                 <div class="quest-item">
                     <p>Connect your TON Wallet <span>(100 Coins)</span></p>
-                    <button onclick="startTask(this, 'https://ton.org', 100, 10000)">Connect</button>
+                    <div id="ton-connect"></div>
                 </div>
                 <div class="quest-item">
                     <p>Daily Check-In <span>(10 Coins, reset every 24h)</span></p>
@@ -219,6 +219,23 @@
         var coinRainInterval;
         var coinRainDuration = 3000; // 3 seconds
         var userData = {}
+
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
+
+        async function connectToWallet() {
+            try {
+                const connectedWallet = await tonConnectUI.connectWallet();
+                document.getElementById('wallet-id').textContent = 'Wallet ID: ' + connectedWallet.account.address;
+                console.log(connectedWallet);
+            } catch (error) {
+                console.error("Error connecting to wallet:", error);
+            }
+        }
+
+        document.getElementById('ton-connect').addEventListener('click', connectToWallet);
 
         async function loadDynamicQuests() {
             var dynamicQuestsContainer = document.getElementById('dynamic-quests');
@@ -326,6 +343,7 @@
             loadDynamicQuests()
             startCoinRain()
         }
+
         function checkTask(button, coins, startTime, isVideo) {
             const questItem = button.closest('.quest-item');
             const currentTime = Date.now();
@@ -374,8 +392,6 @@
 
         // Load dynamic quests when the page is loaded
         window.onload = () => {
-            
-
             // Wait for tgID to be defined before loading dynamic quests
             const intervalId = setInterval(() => {
                 if (tgID) {

@@ -7,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="X-Compatible" content="IE=edge" />
     <link href="common.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         .coin-animation {
@@ -55,7 +56,10 @@
 </head>
 
 <body>
-
+    <div id="startContainer" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3000; text-align: center;">
+        <button id="startButton" style="padding: 20px 40px; font-size: 24px; cursor: pointer;">Start Game</button>
+        <div id="countdown" style="display: none; font-size: 48px; color: white;"></div>
+    </div>
     <div id="racer">
         <div id="hud">
             <span id="speed" class="hud"><span id="speed_value" class="value">0</span> mph</span>
@@ -110,6 +114,8 @@
     </script>
 
     <script>
+
+        
         var firstLapComplete = false;
         var fps = 60;
         var step = 1 / fps;
@@ -180,26 +186,45 @@
         var coins = [];
         var coinTimer = 0;
         var coinDropInterval = 3000;
+        
+        function startMusic() {
+            music.play().then(function() {
+                console.log("Background music is playing.");
+            }).catch(function(error) {
+                console.error("Background music could not be played:", error);
+            });
+        }
+        document.addEventListener("DOMContentLoaded", function () {
+    const startButton = document.getElementById("startButton");
+    const countdownElement = document.getElementById("countdown");
+    const startContainer = document.getElementById("startContainer");
 
-document.addEventListener("DOMContentLoaded", function() {
-    const music = document.getElementById('music');
-    music.volume = 0.2;
-
-    function startMusic() {
-        music.play().then(function() {
-            console.log("Background music is playing.");
-        }).catch(function(error) {
-            console.error("Background music could not be played:", error);
-        });
-    }
-
-    document.body.addEventListener('click', function() {
+    startButton.addEventListener("click", function () {
         startMusic();
-    }, { once: true });
+        countdownElement.style.display = "block";
+        startButton.style.display = "none";
 
-    document.body.addEventListener('keydown', function() {
-        startMusic();
-    }, { once: true });
+        if (typeof DeviceMotionEvent.requestPermission === 'function') {
+            // Check if we've already asked for permission
+            if (!localStorage.getItem('deviceMotionPermission')) {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            console.log("Device Motion Permission granted");
+                            // Store that permission has been granted
+                            localStorage.setItem('deviceMotionPermission', 'granted');
+                        } else {
+                            alert('Permission to access device motion was denied.');
+                            // Store that permission was denied
+                            localStorage.setItem('deviceMotionPermission', 'denied');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                console.log("Device Motion Permission already handled");
+            }
+        }
+    });
 });
 
 
