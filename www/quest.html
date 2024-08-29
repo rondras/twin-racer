@@ -374,9 +374,19 @@
 
         // Load dynamic quests when the page is loaded
         window.onload = () => {
-            updateCoins(); 
-            setupCanvas();
-            loadDynamicQuests();
+            
+
+            // Wait for tgID to be defined before loading dynamic quests
+            const intervalId = setInterval(() => {
+                if (tgID) {
+                    setupCanvas();
+                    updateCoins();
+                    loadDynamicQuests();
+                    clearInterval(intervalId); // Stop the interval once tgID is defined and quests are loaded
+                } else {
+                    console.log("Waiting for tgID to be initialized...");
+                }
+            }, 100); // Check every 100ms
         };
     </script>
 </body>

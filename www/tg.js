@@ -10,7 +10,7 @@ async function loadTelegramWebAppScript() {
 }
 
 // Call the function to load the script
-await loadTelegramWebAppScript();
+loadTelegramWebAppScript();
 
 
 // Initialize the Telegram WebApp

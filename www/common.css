@@ -61,7 +61,7 @@ body {
 
 #hud .hud {
     padding: 5px 10px;
-    border: 1px solid black;
+    border: 0px solid black;
     margin: 0 5px;
     transition: background-color 2s;
 }

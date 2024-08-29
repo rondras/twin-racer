@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start Game</title>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="tg.js"></script>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #333;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div id="user-info">
+            <!-- User's profile picture and name will be displayed here -->
+        </div>
+        <!-- Section for TON Connect button and Wallet ID display -->
+        <div class="walletConnectTONSection">
+            <div id="ton-connect"></div>
+        </div>
+        
+        <button id="startGameButton">Start Game</button>
+        <button id="leaderBoard">Leaderboard</button>
+        <button id="sendMessageButton">Invite Friends</button>
+        <button id="quests">Quests</button>
+    </div>
+
+
+    
+    <script>
+        // Initialize the Telegram WebApp
+        Telegram.WebApp.ready();
+        // Expand the Mini App to full screen
+        Telegram.WebApp.expand();
+        
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
+
+        async function connectToWallet() {
+            try {
+                const connectedWallet = await tonConnectUI.connectWallet();
+                document.getElementById('wallet-id').textContent = 'Wallet ID: ' + connectedWallet.account.address;
+                console.log(connectedWallet);
+            } catch (error) {
+                console.error("Error connecting to wallet:", error);
+            }
+        }
+
+        document.getElementById('ton-connect').addEventListener('click', connectToWallet);
+
+        document.getElementById('startGameButton').addEventListener('click', function () {
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        window.location.href = "game.html";
+                    } else {
+                        alert('Permission to access device motion was denied.');
+                    }
+                })
+                .catch(console.error);
+            } else {
+                // If permissions are not needed (non-iOS or old iOS versions)
+                window.location.href = "game.html";
+            }
+        });
+        document.getElementById('leaderBoard').addEventListener('click', function () {
+            window.location.href = "leaderboard.html";
+        });
+
+        document.getElementById('sendMessageButton').addEventListener('click', function() {
+            // Define the message you want the user to send
+            var message = `Check out this awesome Mini App!  `
+            message += `https://t.me/TwinRacer_bot/TwinRacer?startapp=ref`
+            message += initData.user.id
+
+
+            // Construct the Telegram link; user will choose the recipient
+            const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
+
+            // Open the Telegram link
+            Telegram.WebApp.openTelegramLink(telegramLink);
+        });
+        document.getElementById('quests').addEventListener('click', function() {
+            window.location.href = "quest.html";
+        });
+
+    </script>
+
+</body>
+</html>
