@@ -39,7 +39,7 @@
             background-color: rgba(0, 0, 0, 0.5);
             color: yellow;
             z-index: 20;
-            font-size: 3.5vw;
+            font-size: 3.5vw; /* Adjusted for better visibility */
             padding: 5px 0;
         }
 
@@ -50,7 +50,7 @@
             position: absolute;
             z-index: 10;
             cursor: pointer;
-            width: 16vw;
+            width: 16vw; /* Increased size for better visibility */
             height: auto;
             max-width: 100px;
         }
@@ -69,6 +69,12 @@
             top: 15vh;
             right: 3vw;
         }
+
+        /* Sound Button */
+        #soundButton {
+            top: 8vh;
+            right: 3vw;
+        }
     </style>
 </head>
 
@@ -83,7 +89,7 @@
             <span id="speed" class="hud"><span id="speed_value" class="value">0</span> mph</span>
             <span id="current_lap_time" class="hud">Time: <span id="current_lap_time_value" class="value">0.0</span></span>
             <span id="fast_lap_time" class="hud">Fastest Lap: <span id="fast_lap_time_value" class="value">0.0</span></span>
-            <span id="last_lap_time" class="hud">Last Lap: <span id="last_lap_time_value" class="value">0.0</span></span>
+            <span id="last_lap_time"    class="hud">Last Lap: <span id="last_lap_time_value" class="value">0.0</span></span>
             <span id="coin_count" class="hud">Coins: <span id="coin_count_value" class="value">0</span></span>
         </div>
 
@@ -109,25 +115,29 @@
         Your browser does not support the audio element.
     </audio>
     <span id="mute"></span>
-
     <script>
+        // Get the current date
         var today = new Date();
+    
+        // Calculate the day number since a fixed reference date (e.g., January 1, 2024)
         var referenceDate = new Date('2024-01-01');
         var dayNumber = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
+    
+        // Use the day number to determine the style
         var styles = ["grassland", "desert", "ice"];
-        var gameStyle = styles[dayNumber % styles.length];
+        var gameStyle = styles[dayNumber % styles.length]; // Cycles through the styles based on the day number
     </script>
-
     <script src="common.js"></script>
     <script src="game.js"></script>
     <script src="tg.js"></script>
     <script src="api.js"></script>
 
+
     <script>
         const COIN_SCALE_FACTOR = 0.03;
         const DEFAULT_COIN_DROP_INTERVAL = 3000;
-        const VISIBLE_DISTANCE = 5000;
-        var gameStarted = false;
+        const VISIBLE_DISTANCE = 5000; // Only update cars within this distance
+        var gameStarted = false
         var firstLapComplete = false;
         var fps = 60;
         var step = 1 / fps;
@@ -200,13 +210,12 @@
         var coinDropInterval = DEFAULT_COIN_DROP_INTERVAL;
 
         function startMusic() {
-            music.play().then(function () {
+            music.play().then(function() {
                 console.log("Background music is playing.");
-            }).catch(function (error) {
+            }).catch(function(error) {
                 console.error("Background music could not be played:", error);
             });
         }
-
         document.addEventListener("DOMContentLoaded", function () {
             const startButton = document.getElementById("startButton");
             const countdownElement = document.getElementById("countdown");
@@ -218,10 +227,12 @@
                 startButton.style.display = "none";
 
                 if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    // Check the current permission state
                     DeviceMotionEvent.requestPermission()
                         .then(permissionState => {
                             if (permissionState === 'granted') {
                                 console.log("Device Motion Permission granted");
+                                // You can now add the event listener for device motion
                                 addDeviceMotionListener();
                             } else {
                                 alert('Permission to access device motion was denied.');
@@ -231,21 +242,24 @@
                             console.error("Error requesting device motion permission:", error);
                         });
                 } else {
+                    // For browsers where permission request is not required
                     console.log("DeviceMotionEvent.requestPermission is not a function, assuming permission is granted.");
                     addDeviceMotionListener();
                 }
-                gameStarted = true;
+                gameStarted = true
             });
         });
 
+        // Function to add the device motion event listener
         function addDeviceMotionListener() {
             window.addEventListener('devicemotion', (event) => {
                 console.log(event.acceleration);
+                // Handle device motion data here
             });
         }
 
         function update(dt) {
-            if (!gameStarted) { return }
+            if (!gameStarted){return}
             var playerSegment = findSegment(position + playerZ);
             var playerW = playerStraightSprite.width * SPRITES.SCALE;
             var speedPercent = speed / maxSpeed;
@@ -331,6 +345,7 @@
 
             checkCoinCollection({ x: playerX, z: position + playerZ });
 
+            // Drop coins only if the car is moving
             if (speed > 0) {
                 coinTimer += dt * 1000;
                 if (coinTimer >= coinDropInterval) {
@@ -339,31 +354,48 @@
                     coinDropInterval = Util.randomInt(0, DEFAULT_COIN_DROP_INTERVAL);
                 }
             }
-
-            cleanupCoins();
         }
 
-        function checkCoinCollection(playerPosition) {
-            coins = coins.filter(coin => {
-                if (!coin.collected &&
-                    Math.abs(playerPosition.z - coin.z) < 100 &&
-                    Math.abs(playerPosition.x - coin.offset) < 0.5) {
 
-                    hud.coin_count.value++;
-                    requestAnimationFrame(() => {
-                        document.getElementById('coin_count_value').innerText = hud.coin_count.value;
-                    });
-                    playCoinSound();
-                    return false;
-                }
-                return true;
+function checkCoinCollection(playerPosition) {
+    let coinsToRemove = [];
+    for (let i = 0; i < coins.length; i++) {
+        var laneThreshold = 0.5;
+        if (!coins[i].collected &&
+            Math.abs(playerPosition.z - coins[i].z) < 100 &&
+            Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) {
+
+            coins[i].collected = true;
+            hud.coin_count.value++;
+
+            // Only update the coin count in the HUD
+            requestAnimationFrame(() => {
+                document.getElementById('coin_count_value').innerText = hud.coin_count.value;
             });
-        }
 
-        function cleanupCoins() {
-            const cleanupDistance = 1000;
-            coins = coins.filter(coin => coin.z > position - cleanupDistance);
+            playCoinSound();  // Play the sound after DOM update
+            coinsToRemove.push(i);
+            break;  // Exit after collecting one coin to minimize DOM updates
         }
+    }
+
+    for (let i = coinsToRemove.length - 1; i >= 0; i--) {
+        coins.splice(coinsToRemove[i], 1);  // Remove collected coins
+    }
+
+    // Avoid creating and removing DOM elements frequently for animations
+    cleanUpCoinAnimations();
+}
+
+function cleanUpCoinAnimations() {
+    document.querySelectorAll('.coin-animation').forEach(element => {
+        if (element.style.opacity === "0") {
+            element.remove();  // Clean up finished animations
+        }
+    });
+}
+
+
 
         function playCoinSound() {
             var coinSound = document.getElementById('coinSound');
@@ -374,10 +406,43 @@
                 coinSound.pause();
             }
 
-            coinSound.play().catch(function (error) {
+            coinSound.play().catch(function(error) {
                 console.error("Coin sound could not be played:", error);
             });
         }
+
+function animateCoinToHeader(coin) {
+    var coinElement = document.createElement('div');
+    coinElement.classList.add('coin-animation');
+    document.body.appendChild(coinElement);
+
+    var coinSegment = findSegment(coin.z);
+    var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * COIN_SCALE_FACTOR;
+    var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * width / 2);
+    var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
+
+    var canvasRect = canvas.getBoundingClientRect();
+
+    coinElement.style.left = (canvasRect.left + coinX) + 'px';
+    coinElement.style.top = (canvasRect.top + coinY) + 'px';
+
+    var coinCounter = document.getElementById('coin_count_value');
+    var counterRect = coinCounter.getBoundingClientRect();
+
+    var animation = coinElement.animate([
+        { transform: `translate(${canvasRect.left + coinX}px, ${canvasRect.top + coinY}px)` },
+        { transform: `translate(${counterRect.left}px, ${counterRect.top}px)` }
+    ], {
+        duration: 1000,
+        easing: 'ease-in-out',
+        fill: 'forwards'
+    });
+
+    animation.onfinish = function() {
+        coinElement.remove();
+    };
+}
+
 
         function updateCars(dt, playerSegment, playerW) {
             for (var n = 0; n < cars.length; n++) {
@@ -709,36 +774,36 @@
             }
         }
 
-        function resetCoinSequence() {
-            coins = [];
-            dropCoins(true);
+function resetCoinSequence() {
+    coins = [];
+    dropCoins(true);  // Drop all coins at the start
+}
+
+function dropCoins(isInitialDrop = false) {
+    if (isInitialDrop) {
+        let numberOfCoins = 50;  // Adjust this number based on track length
+
+        for (let i = 0; i < numberOfCoins; i++) {
+            let zPosition = i * 2000 + Util.randomInt(1000, 2000);  // Spread coins along the track
+            let offset = Util.randomChoice([-0.5, 0, 0.5]);
+
+            coins.push({ id: i, offset: offset, z: zPosition, collected: false });
         }
+    } else {
+        let zStart = position + playerZ + 8000;
+        let zSpacing = 2000;
+        let numberOfCoins = [3, 4, 6][Math.floor(Math.random() * 3)];
+        let minSpacing = 300;
+        let maxSpacing = 600;
 
-        function dropCoins(isInitialDrop = false) {
-            if (isInitialDrop) {
-                let numberOfCoins = 50;
+        for (let i = 0; i < numberOfCoins; i++) {
+            let offset = 0;
+            let zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
 
-                for (let i = 0; i < numberOfCoins; i++) {
-                    let zPosition = i * 2000 + Util.randomInt(1000, 2000);
-                    let offset = Util.randomChoice([-0.5, 0, 0.5]);
-
-                    coins.push({ id: i, offset: offset, z: zPosition, collected: false });
-                }
-            } else {
-                let zStart = position + playerZ + 8000;
-                let zSpacing = 2000;
-                let numberOfCoins = [3, 4, 6][Math.floor(Math.random() * 3)];
-                let minSpacing = 300;
-                let maxSpacing = 600;
-
-                for (let i = 0; i < numberOfCoins; i++) {
-                    let offset = 0;
-                    let zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
-
-                    coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
-                }
-            }
+            coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
         }
+    }
+}
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -749,16 +814,16 @@
         }
 
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        resizeCanvas(); // Initial call
         style = ["grassland", "desert", "ice"][Math.floor(Math.random() * 3)];
-        backgroundLink = 'backGround/grassland';
-        if (gameStyle == 'desert') {
-            backgroundLink = 'backGround/desert';
-            spriteLink = 'sprites/desert';
+        backgroundLink = 'background/grassland'
+        if (gameStyle == 'desert'){
+            backgroundLink = 'background/desert'
+            spriteLink = 'sprites/desert'
         }
-        if (gameStyle == 'ice') {
-            backgroundLink = 'backGround/ice';
-            spriteLink = 'sprites/ice';
+        if (gameStyle == 'ice'){
+            backgroundLink = 'background/ice'
+            spriteLink = 'sprites/ice'
         }
         Game.run({
             canvas: canvas,
@@ -855,16 +920,16 @@
             ],
 
             keys: [
-                { keys: [KEY.LEFT, KEY.A], mode: 'down', action: function () { keyLeft = true; } },
-                { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function () { keyRight = true; } },
-                { keys: [KEY.UP, KEY.W], mode: 'down', action: function () { keyFaster = true; } },
-                { keys: [KEY.DOWN, KEY.S], mode: 'down', action: function () { keySlower = true; } },
-                { keys: [KEY.LEFT, KEY.A], mode: 'up', action: function () { keyLeft = false; } },
-                { keys: [KEY.RIGHT, KEY.D], mode: 'up', action: function () { keyRight = false; } },
-                { keys: [KEY.UP, KEY.W], mode: 'up', action: function () { keyFaster = false; } },
-                { keys: [KEY.DOWN, KEY.S], mode: 'up', action: function () { keySlower = false; } }
+                { keys: [KEY.LEFT, KEY.A], mode: 'down', action: function() { keyLeft = true; } },
+                { keys: [KEY.RIGHT, KEY.D], mode: 'down', action: function() { keyRight = true; } },
+                { keys: [KEY.UP, KEY.W], mode: 'down', action: function() { keyFaster = true; } },
+                { keys: [KEY.DOWN, KEY.S], mode: 'down', action: function() { keySlower = true; } },
+                { keys: [KEY.LEFT, KEY.A], mode: 'up', action: function() { keyLeft = false; } },
+                { keys: [KEY.RIGHT, KEY.D], mode: 'up', action: function() { keyRight = false; } },
+                { keys: [KEY.UP, KEY.W], mode: 'up', action: function() { keyFaster = false; } },
+                { keys: [KEY.DOWN, KEY.S], mode: 'up', action: function() { keySlower = false; } }
             ],
-            ready: function (images) {
+            ready: function(images) {
                 background = images[0];
                 sprites = images[1];
                 playerStraightSprite = images[2];
@@ -977,7 +1042,7 @@
                     semi10Sprite
                 ];
 
-                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('loading-screen').style.display = 'none'; // Hide loading screen
 
                 reset();
                 localStorage.fast_lap_time = localStorage.fast_lap_time || 180;
