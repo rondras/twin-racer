@@ -350,9 +350,7 @@
                     Math.abs(playerPosition.x - coin.offset) < 0.5) {
 
                     hud.coin_count.value++;
-                    requestAnimationFrame(() => {
-                        document.getElementById('coin_count_value').innerText = hud.coin_count.value;
-                    });
+                    document.getElementById('coin_count_value').innerText = hud.coin_count.value;
                     playCoinSound();
                     return false;
                 }
