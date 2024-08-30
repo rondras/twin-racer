@@ -112,7 +112,7 @@
 
     <script>
         var today = new Date();
-        var referenceDate = new Date('2024-01-01');
+        var referenceDate = new Date('2024-01-03');
         var dayNumber = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
         var styles = ["grassland", "desert", "ice"];
         var gameStyle = styles[dayNumber % styles.length];
@@ -752,6 +752,8 @@
         resizeCanvas();
         style = ["grassland", "desert", "ice"][Math.floor(Math.random() * 3)];
         backgroundLink = 'background/grassland';
+        spriteLink = 'sprites/grassland';
+
         if (gameStyle == 'desert') {
             backgroundLink = 'background/desert';
             spriteLink = 'sprites/desert';
