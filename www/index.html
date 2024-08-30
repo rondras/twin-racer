@@ -751,13 +751,13 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
         style = ["grassland", "desert", "ice"][Math.floor(Math.random() * 3)];
-        backgroundLink = 'backGround/grassland';
+        backgroundLink = 'background/grassland';
         if (gameStyle == 'desert') {
-            backgroundLink = 'backGround/desert';
+            backgroundLink = 'background/desert';
             spriteLink = 'sprites/desert';
         }
         if (gameStyle == 'ice') {
-            backgroundLink = 'backGround/ice';
+            backgroundLink = 'background/ice';
             spriteLink = 'sprites/ice';
         }
         Game.run({
