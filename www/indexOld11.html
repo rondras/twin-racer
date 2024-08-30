@@ -257,7 +257,7 @@
                 // Handle device motion data here
             });
         }
-
+        
         function update(dt) {
             if (!gameStarted){return}
             var playerSegment = findSegment(position + playerZ);
@@ -345,57 +345,42 @@
 
             checkCoinCollection({ x: playerX, z: position + playerZ });
 
-            // Drop coins only if the car is moving
-            if (speed > 0) {
-                coinTimer += dt * 1000;
-                if (coinTimer >= coinDropInterval) {
-                    dropCoins();
-                    coinTimer = 0;
-                    coinDropInterval = Util.randomInt(0, DEFAULT_COIN_DROP_INTERVAL);
-                }
+            coinTimer += dt * 1000;
+            if (coinTimer >= coinDropInterval) {
+                dropCoins();
+                coinTimer = 0;
+                coinDropInterval = Util.randomInt(2000, DEFAULT_COIN_DROP_INTERVAL);
             }
         }
 
+        function checkCoinCollection(playerPosition) {
+            let coinsToRemove = [];
+            for (let i = 0; i < coins.length; i++) {
+                var laneThreshold = 0.5;
+                if (!coins[i].collected &&
+                    Math.abs(playerPosition.z - coins[i].z) < 100 &&
+                    Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) {
 
-function checkCoinCollection(playerPosition) {
-    let coinsToRemove = [];
-    for (let i = 0; i < coins.length; i++) {
-        var laneThreshold = 0.5;
-        if (!coins[i].collected &&
-            Math.abs(playerPosition.z - coins[i].z) < 100 &&
-            Math.abs(playerPosition.x - coins[i].offset) < laneThreshold) {
+                    coins[i].collected = true;
+                    hud.coin_count.value++;
+                    document.getElementById('coin_count_value').innerText = hud.coin_count.value;
+                    playCoinSound();
+                    animateCoinToHeader(coins[i]);
+                    coinsToRemove.push(i);
+                    break;
+                }
+            }
 
-            coins[i].collected = true;
-            hud.coin_count.value++;
+            for (let i = coinsToRemove.length - 1; i >= 0; i--) {
+                coins.splice(coinsToRemove[i], 1);
+            }
 
-            // Only update the coin count in the HUD
-            requestAnimationFrame(() => {
-                document.getElementById('coin_count_value').innerText = hud.coin_count.value;
+            document.querySelectorAll('.coin-animation').forEach(element => {
+                if (element.style.opacity === "0") {
+                    element.remove();
+                }
             });
-
-            playCoinSound();  // Play the sound after DOM update
-            coinsToRemove.push(i);
-            break;  // Exit after collecting one coin to minimize DOM updates
         }
-    }
-
-    for (let i = coinsToRemove.length - 1; i >= 0; i--) {
-        coins.splice(coinsToRemove[i], 1);  // Remove collected coins
-    }
-
-    // Avoid creating and removing DOM elements frequently for animations
-    cleanUpCoinAnimations();
-}
-
-function cleanUpCoinAnimations() {
-    document.querySelectorAll('.coin-animation').forEach(element => {
-        if (element.style.opacity === "0") {
-            element.remove();  // Clean up finished animations
-        }
-    });
-}
-
-
 
         function playCoinSound() {
             var coinSound = document.getElementById('coinSound');
@@ -411,38 +396,37 @@ function cleanUpCoinAnimations() {
             });
         }
 
-function animateCoinToHeader(coin) {
-    var coinElement = document.createElement('div');
-    coinElement.classList.add('coin-animation');
-    document.body.appendChild(coinElement);
+        function animateCoinToHeader(coin) {
+            var coinElement = document.createElement('div');
+            coinElement.classList.add('coin-animation');
+            document.body.appendChild(coinElement);
 
-    var coinSegment = findSegment(coin.z);
-    var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * COIN_SCALE_FACTOR;
-    var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * width / 2);
-    var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
+            var coinSegment = findSegment(coin.z);
+            var coinScale = Util.interpolate(coinSegment.p1.screen.scale, coinSegment.p2.screen.scale, Util.percentRemaining(coin.z, segmentLength)) * COIN_SCALE_FACTOR;
+            var coinX = Util.interpolate(coinSegment.p1.screen.x, coinSegment.p2.screen.x, Util.percentRemaining(coin.z, segmentLength)) + (coinScale * coin.offset * roadWidth * width / 2);
+            var coinY = Util.interpolate(coinSegment.p1.screen.y, coinSegment.p2.screen.y, Util.percentRemaining(coin.z, segmentLength));
 
-    var canvasRect = canvas.getBoundingClientRect();
+            var canvasRect = canvas.getBoundingClientRect();
 
-    coinElement.style.left = (canvasRect.left + coinX) + 'px';
-    coinElement.style.top = (canvasRect.top + coinY) + 'px';
+            coinElement.style.left = (canvasRect.left + coinX) + 'px';
+            coinElement.style.top = (canvasRect.top + coinY) + 'px';
 
-    var coinCounter = document.getElementById('coin_count_value');
-    var counterRect = coinCounter.getBoundingClientRect();
+            var coinCounter = document.getElementById('coin_count_value');
+            var counterRect = coinCounter.getBoundingClientRect();
 
-    var animation = coinElement.animate([
-        { transform: `translate(${canvasRect.left + coinX}px, ${canvasRect.top + coinY}px)` },
-        { transform: `translate(${counterRect.left}px, ${counterRect.top}px)` }
-    ], {
-        duration: 1000,
-        easing: 'ease-in-out',
-        fill: 'forwards'
-    });
+            var animation = coinElement.animate([
+                { transform: `translate(${canvasRect.left + coinX}px, ${canvasRect.top + coinY}px)` },
+                { transform: `translate(${counterRect.left}px, ${counterRect.top}px)` }
+            ], {
+                duration: 1000,
+                easing: 'ease-in-out',
+                fill: 'forwards'
+            });
 
-    animation.onfinish = function() {
-        coinElement.remove();
-    };
-}
-
+            animation.onfinish = function() {
+                coinElement.remove();
+            };
+        }
 
         function updateCars(dt, playerSegment, playerW) {
             for (var n = 0; n < cars.length; n++) {
@@ -681,7 +665,7 @@ function animateCoinToHeader(coin) {
 
         function resetRoad() {
             segments = [];
-
+            addCurve(ROAD.LENGTH.MEDIUM, ROAD.CURVE.MEDIUM, ROAD.HILL.LOW);
             addStraight(ROAD.LENGTH.SHORT);
             addLowRollingHills();
             addSCurves();
@@ -774,36 +758,25 @@ function animateCoinToHeader(coin) {
             }
         }
 
-function resetCoinSequence() {
-    coins = [];
-    dropCoins(true);  // Drop all coins at the start
-}
-
-function dropCoins(isInitialDrop = false) {
-    if (isInitialDrop) {
-        let numberOfCoins = 50;  // Adjust this number based on track length
-
-        for (let i = 0; i < numberOfCoins; i++) {
-            let zPosition = i * 2000 + Util.randomInt(1000, 2000);  // Spread coins along the track
-            let offset = Util.randomChoice([-0.5, 0, 0.5]);
-
-            coins.push({ id: i, offset: offset, z: zPosition, collected: false });
+        function resetCoinSequence() {
+            coins = [];
+            dropCoins();
         }
-    } else {
-        let zStart = position + playerZ + 8000;
-        let zSpacing = 2000;
-        let numberOfCoins = [3, 4, 6][Math.floor(Math.random() * 3)];
-        let minSpacing = 300;
-        let maxSpacing = 600;
 
-        for (let i = 0; i < numberOfCoins; i++) {
-            let offset = 0;
-            let zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
+        function dropCoins() {
+            var zStart = position + playerZ + 8000;
+            var zSpacing = 2000;
+            var numberOfCoins = [3, 4, 6][Math.floor(Math.random() * 3)];
+            var minSpacing = 300;
+            var maxSpacing = 600;
 
-            coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
+            for (var i = 0; i < numberOfCoins; i++) {
+                var offset = 0;
+                var zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
+
+                coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
+            }
         }
-    }
-}
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
@@ -815,14 +788,14 @@ function dropCoins(isInitialDrop = false) {
 
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas(); // Initial call
-        style = ["grassland", "desert", "ice"][Math.floor(Math.random() * 3)];
-        backgroundLink = 'backGround/grassland'
+        spriteLink = 'sprites/grassland'
+        backgroundLink = 'background/grassland'
         if (gameStyle == 'desert'){
-            backgroundLink = 'backGround/desert'
+            backgroundLink = 'background/desert'
             spriteLink = 'sprites/desert'
         }
         if (gameStyle == 'ice'){
-            backgroundLink = 'backGround/ice'
+            backgroundLink = 'background/ice'
             spriteLink = 'sprites/ice'
         }
         Game.run({
