@@ -116,7 +116,16 @@
     </audio>
     <span id="mute"></span>
     <script>
-        var gameStyle = ["grassland", "desert", "ice"][Math.floor(Math.random() * 3)];
+        // Get the current date
+        var today = new Date();
+    
+        // Calculate the day number since a fixed reference date (e.g., January 1, 2024)
+        var referenceDate = new Date('2024-01-03');
+        var dayNumber = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
+    
+        // Use the day number to determine the style
+        var styles = ["grassland", "desert", "ice"];
+        var gameStyle = styles[dayNumber % styles.length]; // Cycles through the styles based on the day number
     </script>
     <script src="common.js"></script>
     <script src="game.js"></script>
@@ -769,14 +778,13 @@
 
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas(); // Initial call
-        style = ["grassland", "desert", "ice"][Math.floor(Math.random() * 3)];
         spriteLink = 'sprites/grassland'
         backgroundLink = 'backGround/grassland'
-        if (style == 'desert'){
+        if (gameStyle == 'desert'){
             backgroundLink = 'backGround/desert'
             spriteLink = 'sprites/desert'
         }
-        if (style == 'ice'){
+        if (gameStyle == 'ice'){
             backgroundLink = 'backGround/ice'
             spriteLink = 'sprites/ice'
         }
