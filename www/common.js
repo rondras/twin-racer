@@ -387,6 +387,60 @@ var Render = {
 // RACING GAME CONSTANTS
 //=============================================================================
 
+// Get the game style from the global variable set in index.html
+var gameStyle = window.gameStyle || "grassland"; // Default to grassland if undefined
+
+var COLORS = {};
+
+switch (gameStyle) {
+    case 'grassland':
+        COLORS = {
+            SKY: '#72D7EE',
+            TREE: '#005108',
+            FOG: '#005108',
+            LIGHT: { road: '#6B6B6B', grass: '#10AA10', rumble: '#555555', lane: '#CCCCCC' },
+            DARK: { road: '#696969', grass: '#009A00', rumble: '#BBBBBB' },
+            START: { road: 'white', grass: 'white', rumble: 'white' },
+            FINISH: { road: 'black', grass: 'black', rumble: 'black' }
+        };
+        break;
+    case 'desert':
+        COLORS = {
+            SKY: '#FFCC33',
+            TREE: '#A67B5B',
+            FOG: '#A67B5B',
+            LIGHT: { road: '#E0C68C', grass: '#E6D3A3', rumble: '#D4B284', lane: '#F3E3BD' },
+            DARK: { road: '#D4B284', grass: '#E0C68C', rumble: '#E6D3A3' },
+            START: { road: '#FFEBB7', grass: '#E6D3A3', rumble: '#FFEBB7' },
+            FINISH: { road: '#A67B5B', grass: '#A67B5B', rumble: '#A67B5B' }
+        };
+        break;
+    case 'ice':
+        COLORS = {
+            SKY: '#B3E5FC',
+            TREE: '#81D4FA',
+            FOG: '#81D4FA',
+            LIGHT: { road: '#A7C4D7', grass: '#B3E5FC', rumble: '#81D4FA', lane: '#D9EAF2' },
+            DARK: { road: '#81D4FA', grass: '#A7C4D7', rumble: '#B3E5FC' },
+            START: { road: '#D9EAF2', grass: '#B3E5FC', rumble: '#D9EAF2' },
+            FINISH: { road: '#4FC3F7', grass: '#4FC3F7', rumble: '#4FC3F7' }
+        };
+        break;
+    default:
+        COLORS = {
+            SKY: '#72D7EE',
+            TREE: '#005108',
+            FOG: '#005108',
+            LIGHT: { road: '#6B6B6B', grass: '#10AA10', rumble: '#555555', lane: '#CCCCCC' },
+            DARK: { road: '#696969', grass: '#009A00', rumble: '#BBBBBB' },
+            START: { road: 'white', grass: 'white', rumble: 'white' },
+            FINISH: { road: 'black', grass: 'black', rumble: 'black' }
+        };
+        break;
+}
+
+console.log("Current game style:", gameStyle); // You can remove this after testing
+
 var KEY = {
   LEFT:  37,
   UP:    38,
@@ -398,15 +452,6 @@ var KEY = {
   W:     87
 };
 
-var COLORS = {
-  SKY:  '#72D7EE',
-  TREE: '#005108',
-  FOG:  '#005108',
-  LIGHT:  { road: '#6B6B6B', grass: '#10AA10', rumble: '#555555', lane: '#CCCCCC'  },
-  DARK:   { road: '#696969', grass: '#009A00', rumble: '#BBBBBB'                   },
-  START:  { road: 'white',   grass: 'white',   rumble: 'white'                     },
-  FINISH: { road: 'black',   grass: 'black',   rumble: 'black'                     }
-};
 
 var BACKGROUND = {
   HILLS: { x:   5, y:   5, w: 1280, h: 480 },
