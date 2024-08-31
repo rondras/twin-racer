@@ -322,9 +322,13 @@ var Render = {
   //---------------------------------------------------------------------------
 
   sprite: function(ctx, width, height, resolution, roadWidth, sprites, sprite, scale, destX, destY, offsetX, offsetY, clipY) {
-    // Scale for projection AND relative to roadWidth (for tweakUI)
-    var destW = (sprite.width * scale * width / 2) * (SPRITES.SCALE * roadWidth);
-    var destH = (sprite.height * scale * width / 2) * (SPRITES.SCALE * roadWidth);
+    var scaleFactor = (SPRITES.SCALE * roadWidth)
+
+    if (sprite.src && (sprite.src.includes('tree') || (sprite.src.includes('billboard'))|| (sprite.src.includes('bush'))|| (sprite.src.includes('boulder'))|| (sprite.src.includes('stump'))|| (sprite.src.includes('cactus'))|| (sprite.src.includes('column')))) {
+      scaleFactor *= 6; // Increase scale by factor 2 for tree sprites
+    }
+    var destW = (sprite.width * scale * width / 2) * scaleFactor;
+    var destH = (sprite.height * scale * width / 2) * scaleFactor;
 
     destX = destX + (destW * (offsetX || 0));
     destY = destY + (destH * (offsetY || 0));
