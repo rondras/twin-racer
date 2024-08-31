@@ -211,6 +211,7 @@
     </footer>
 
     <script>
+        const tgID = "458176513"
         var ctx;
         var canvas;
         var imgCoin;
@@ -227,8 +228,11 @@
 
         async function connectToWallet() {
             try {
-                const connectedWallet = await tonConnectUI.connectWallet();
-                document.getElementById('wallet-id').textContent = 'Wallet ID: ' + connectedWallet.account.address;
+                await tonConnectUI.connectWallet();
+                const connectedWallet = tonConnectUI.wallet; // Get the connected wallet instance
+                const walletAddress = connectedWallet.account.address; // Access the wallet address
+
+                document.getElementById('wallet-id').textContent = 'Wallet ID: ' + walletAddress;
                 console.log(connectedWallet);
             } catch (error) {
                 console.error("Error connecting to wallet:", error);
@@ -236,6 +240,7 @@
         }
 
         document.getElementById('ton-connect').addEventListener('click', connectToWallet);
+
 
         async function loadDynamicQuests() {
             var dynamicQuestsContainer = document.getElementById('dynamic-quests');
@@ -390,14 +395,39 @@
             canvas.height = window.innerHeight;
         });
 
+
+        async function checkConnectedWallet() {
+            try {
+                // Check if a wallet is already connected
+                const connectedWallet = tonConnectUI.wallet;
+                if (connectedWallet && connectedWallet.account && connectedWallet.account.address) {
+                    const walletAddress = connectedWallet.account.address;
+                    console.log('Connected Wallet Address:', walletAddress);
+                    result = await addTONWallet(tgID,walletAddress)
+                    if (result = 'TON wallet address added successfully!'){
+                        startCoinRain()
+                    }
+                } else {
+                    console.log('No wallet connected.');
+                }
+            } catch (error) {
+                console.error("Error checking connected wallet:", error);
+            }
+        }
+
+
+
         // Load dynamic quests when the page is loaded
         window.onload = () => {
             // Wait for tgID to be defined before loading dynamic quests
+            
             const intervalId = setInterval(() => {
                 if (tgID) {
                     setupCanvas();
                     updateCoins();
+                    checkConnectedWallet()
                     loadDynamicQuests();
+                    
                     clearInterval(intervalId); // Stop the interval once tgID is defined and quests are loaded
                 } else {
                     console.log("Waiting for tgID to be initialized...");

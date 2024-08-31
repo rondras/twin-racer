@@ -202,6 +202,55 @@ async function completeQuest(tgID,questID) {
     }
 }
 
+
+async function addTONWallet(tgID,walletAddress) {
+    console.log("Debug")
+    // for testing - take out
+    // API endpoint URL
+    const apiUrl = apiBase + 'addTONWallet';
+    
+    if (walletAddress == '' || tgID == '' ){
+        console.log("Inputs missing")
+        return
+    }
+
+    // Create the payload object
+    const data = {
+        tgID: tgID,
+        tonWalletAddress: walletAddress
+    };
+    console.log(data)
+    try {
+        // Make the POST request to the API
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            console.log('TON Wallet added successfully:', result);
+            return(result.message)
+            
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error adding wallet address:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed due to network error.');
+    }
+}
+
+
 // Function to get the quests Data
 async function userData(tgID) {
     // API endpoint URL
