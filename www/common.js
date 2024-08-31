@@ -426,6 +426,20 @@ switch (gameStyle) {
             FINISH: { road: '#4FC3F7', grass: '#4FC3F7', rumble: '#4FC3F7' }
         };
         break;
+
+    case 'midnight':
+        COLORS = {
+          SKY: '#0A0A2A',
+          TREE: '#005108',
+          FOG: '#005108',
+          LIGHT: { road: '#3A3A3A', grass: '#004400', rumble: '#333333', lane: '#888888' },
+          DARK: { road: '#2F2F2F', grass: '#003300', rumble: '#666666' },
+          START: { road: 'white', grass: 'white', rumble: 'white' },
+          FINISH: { road: 'black', grass: 'black', rumble: 'black' }
+        };
+        break;
+      
+    
     default:
         COLORS = {
             SKY: '#72D7EE',
@@ -460,7 +474,7 @@ var BACKGROUND = {
 };
 
 var SPRITES = {
-  PLAYER_STRAIGHT:        { x: 1085, y:  480, w:   80, h:   41 }
+  PLAYER_STRAIGHT:        { x: 1085, y:  480, w:   284, h:   41 }
 };
 
 SPRITES.SCALE = 0.3 * (1/SPRITES.PLAYER_STRAIGHT.w) // the reference sprite width should be 1/3rd the (half-)roadWidth
