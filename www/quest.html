@@ -184,6 +184,11 @@
                     <p>Connect your TON Wallet <span>(100 Coins)</span></p>
                     <div id="ton-connect"></div>
                 </div>
+                
+                <div class="quest-item">
+                    <p>Invite<span>(100 Coins, 5% on earned coins)</span></p>
+                    <button id="sendMessageButton">Invite</button>
+                </div>
                 <div class="quest-item">
                     <p>Daily Check-In <span>(10 Coins, reset every 24h)</span></p>
                     <button onclick="startTask(this, '#', 10, 10000)">Check In</button>
@@ -241,6 +246,19 @@
 
         document.getElementById('ton-connect').addEventListener('click', connectToWallet);
 
+        document.getElementById('sendMessageButton').addEventListener('click', function() {
+            // Define the message you want the user to send
+            var message = `Check out this awesome Mini App!  `
+            message += `https://t.me/TwinRacer_bot/TwinRacer?startapp=ref`
+            message += initData.user.id
+
+
+            // Construct the Telegram link; user will choose the recipient
+            const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
+
+            // Open the Telegram link
+            Telegram.WebApp.openTelegramLink(telegramLink);
+        });
 
         async function loadDynamicQuests() {
             var dynamicQuestsContainer = document.getElementById('dynamic-quests');
