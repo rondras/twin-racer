@@ -196,6 +196,7 @@
                 <div class="quest-item">
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
                     <button onclick="sendTonTransaction()">Log In</button>
+                    <div id="loading" style="display:none;">Processing transaction, please wait...</div>
                 </div>
                 <!-- Placeholder for dynamic quests -->
                 <div id="dynamic-quests"></div>
@@ -430,25 +431,39 @@
         });
 
 
-        // Function to send a TON transaction
         async function sendTonTransaction() {
-            const transaction = {
-                validUntil: Math.floor(Date.now() / 1000) + 360, // Valid for 6 minutes
-                messages: [
-                    {
-                        address: "0:281fa2e973d8a0d9685321cd5c579bdae62512a831fa987eb2d2ca24e8d04621",
-                        amount: "20000000" // 0.02 Toncoin in nanotons
-                    }
-                ]
-            };
+    // Show the loading message
+    document.getElementById('loading').style.display = 'block';
 
-            try {
-                const result = await tonConnectUI.sendTransaction(transaction);
-                console.log('Transaction successful:', result);
-            } catch (error) {
-                console.error('Transaction failed:', error);
+    const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 360, // Valid for 6 minutes
+        messages: [
+            {
+                address: "0:281fa2e973d8a0d9685321cd5c579bdae62512a831fa987eb2d2ca24e8d04621",
+                amount: "20000000" // 0.02 Toncoin in nanotons
             }
-        }
+        ]
+    };
+
+    try {
+        console.log('Sending transaction...');
+        const result = await tonConnectUI.sendTransaction(transaction);
+        console.log('Transaction successful:', result);
+
+        // Hide the loading message
+        document.getElementById('loading').style.display = 'none';
+
+        // Redirect the user to quest.html after the transaction is successful
+        window.location.href = 'quest.html';
+
+    } catch (error) {
+        console.error('Transaction failed:', error);
+        alert('Transaction failed. Please try again.');
+
+        // Hide the loading message in case of an error
+        document.getElementById('loading').style.display = 'none';
+    }
+}
 
         async function checkConnectedWallet() {
             try {
