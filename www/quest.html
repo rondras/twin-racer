@@ -310,16 +310,23 @@
                 imgCoin = new Image();
                 imgCoin.src = 'images/coin.png';
 
-                for (var i = 0; i < noOfCoins; i++) {
-                    fallingCoins.push({
-                        x: Math.random() * canvas.width,
-                        y: Math.random() * canvas.height,
-                        speed: Math.random() * 3 + 2,
-                        size: Math.random() * 10 + 20
-                    });
-                }
+                imgCoin.onload = function() {
+                    for (var i = 0; i < noOfCoins; i++) {
+                        fallingCoins.push({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            speed: Math.random() * 3 + 2,
+                            size: Math.random() * 10 + 20
+                        });
+                    }
+                };
+
+                imgCoin.onerror = function() {
+                    console.error('Coin image failed to load.');
+                };
             }
         }
+
 
         function startCoinRain() {
             coinRainInterval = setInterval(drawCoinRain, 30);
