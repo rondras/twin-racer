@@ -437,62 +437,34 @@ function delay(ms) {
 }
 
 async function sendTonTransaction() {
-    // Ensure the DOM is fully loaded before starting
-    if (document.readyState !== 'complete') {
-        console.log('Waiting for document to fully load...');
-        await delay(100); // wait a bit and check again
-    }
-
-    // Show the loading message
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.style.display = 'block';
-        console.log('Loading message displayed.');
-    } else {
-        console.error('Loading element not found.');
-        return;
-    }
-
-    await delay(500); // Delay to ensure the loading message is visible
-
     const transaction = {
-        validUntil: Math.floor(Date.now() / 1000) + 360, // Valid for 6 minutes
+        validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
         messages: [
             {
-                address: "0:281fa2e973d8a0d9685321cd5c579bdae62512a831fa987eb2d2ca24e8d04621",
-                amount: "20000000" // 0.02 Toncoin in nanotons
+                address: "281fa2e973d8a0d9685321cd5c579bdae62512a831fa987eb2d2ca24e8d04621",
+                amount: "20000000",
+            // stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
             }
-        ],
-        return_url: 'https://t.me/twin-racer_bot?start=after_transaction',
-    };
+        
+        ]
+    }
 
     try {
-        console.log('Sending transaction...');
-        const result = await tonConnectUI.sendTransaction(transaction);
-        console.log('Transaction successful:', result);
-
-        await delay(500); // Optional delay before hiding the loading message
-
-        // Hide the loading message
-        loadingElement.style.display = 'none';
-        console.log('Loading message hidden.');
-
-        await delay(500); // Ensure the loading message is fully hidden before redirecting
-
-        // Redirect the user to quest.html after the transaction is successful
-        console.log('Redirecting to quest.html...');
-        window.location.href = 'quest.html';
-
-    } catch (error) {
-        console.error('Transaction failed:', error);
-        alert('Transaction failed. Please try again.');
-
-        // Hide the loading message in case of an error
-        loadingElement.style.display = 'none';
-        await delay(500); // Optional delay to ensure proper UX flow
+        const result = await connector.sendTransaction(transaction);
+        
+        // you can use signed boc to find the transaction 
+        const someTxData = await myAppExplorerService.getTransaction(result.boc);
+        alert('Transaction was sent successfully', someTxData);
+    } catch (e) {
+        if (e instanceof UserRejectedError) {
+            alert('You rejected the transaction. Please confirm it to send to the blockchain');
+        } else {
+            alert('Unknown error happened', e);
+        }
     }
 }
-        async function checkConnectedWallet() {
+
+async function checkConnectedWallet() {
             try {
                 // Check if a wallet is already connected
                 const connectedWallet = tonConnectUI.wallet;
