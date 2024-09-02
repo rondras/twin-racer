@@ -473,6 +473,7 @@
                     const walletAddress = connectedWallet.account.address;
                     console.log('Connected Wallet Address:', walletAddress);
                     result = await addTONWallet(tgID,walletAddress)
+                    console.log(result)
                     if (result = 'TON wallet address added successfully!'){
                         startCoinRain()
                     }
