@@ -195,7 +195,7 @@
                 </div>
                 <div class="quest-item">
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
-                    <button onclick="startTask(this, '#', 100, 10000)">Log In</button>
+                    <button onclick="sendTonTransaction()">Log In</button>
                 </div>
                 <!-- Placeholder for dynamic quests -->
                 <div id="dynamic-quests"></div>
@@ -419,6 +419,25 @@
             canvas.height = window.innerHeight;
         });
 
+
+        // Function to send a TON transaction
+        async function sendTonTransaction() {
+            const transaction = {
+                messages: [
+                    {
+                        address: "0:UQAoH6Lpc9ig2WhTIc1cV5va5iUSqDH6mH6y0sok6NBGIZfV", // destination address
+                        amount: "20000000" // 0.02 Toncoin in nanotons
+                    }
+                ]
+            };
+
+            try {
+                const result = await tonConnectUI.sendTransaction(transaction);
+                console.log('Transaction successful:', result);
+            } catch (error) {
+                console.error('Transaction failed:', error);
+            }
+        }
 
         async function checkConnectedWallet() {
             try {
