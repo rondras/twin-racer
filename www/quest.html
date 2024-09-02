@@ -347,8 +347,8 @@
             }
         }
 
-        function startTask(button,questID,url) {
-            addActiveQuest(tgID,questID)
+        async function startTask(button,questID,url) {
+            await addActiveQuest(tgID,questID)
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'In Progress';
