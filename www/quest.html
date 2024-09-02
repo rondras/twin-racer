@@ -431,30 +431,10 @@
         });
 
 
-    // Utility function to create a delay
-function delay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 async function sendTonTransaction() {
     // Ensure the DOM is fully loaded before starting
-    if (document.readyState !== 'complete') {
-        console.log('Waiting for document to fully load...');
-        await delay(100); // wait a bit and check again
-    }
-
-    // Show the loading message
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.style.display = 'block';
-        console.log('Loading message displayed.');
-    } else {
-        console.error('Loading element not found.');
-        return;
-    }
-
-    await delay(500); // Delay to ensure the loading message is visible
-
+    
     const transaction = {
         validUntil: Math.floor(Date.now() / 1000) + 360, // Valid for 6 minutes
         messages: [
@@ -471,25 +451,10 @@ async function sendTonTransaction() {
         const result = await tonConnectUI.sendTransaction(transaction);
         console.log('Transaction successful:', result);
 
-        await delay(500); // Optional delay before hiding the loading message
-
-        // Hide the loading message
-        loadingElement.style.display = 'none';
-        console.log('Loading message hidden.');
-
-        await delay(500); // Ensure the loading message is fully hidden before redirecting
-
-        // Redirect the user to quest.html after the transaction is successful
-        console.log('Redirecting to quest.html...');
-        window.location.href = 'quest.html';
-
     } catch (error) {
         console.error('Transaction failed:', error);
         alert('Transaction failed. Please try again.');
 
-        // Hide the loading message in case of an error
-        loadingElement.style.display = 'none';
-        await delay(500); // Optional delay to ensure proper UX flow
     }
 }
         async function checkConnectedWallet() {
