@@ -231,19 +231,29 @@
         });
 
         async function connectToWallet() {
-            try {
-                await tonConnectUI.connectWallet();
-                const connectedWallet = tonConnectUI.wallet; // Get the connected wallet instance
-                const walletAddress = connectedWallet.account.address; // Access the wallet address
+    try {
+        await tonConnectUI.connectWallet();
+        const connectedWallet = tonConnectUI.wallet; // Get the connected wallet instance
+        const walletAddress = connectedWallet.account.address; // Access the wallet address
 
-                document.getElementById('wallet-id').textContent = 'Wallet ID: ' + walletAddress;
-                console.log(connectedWallet);
-            } catch (error) {
-                console.error("Error connecting to wallet:", error);
-            }
-        }
+        // Update the button to show the wallet address and a copy option
+        const tonConnectElement = document.getElementById('ton-connect');
+        tonConnectElement.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <span id="wallet-id">Wallet: ${walletAddress}</span>
+                <button onclick="copyToClipboard('${walletAddress}')">Copy</button>
+            </div>
+        `;
+
+        console.log(connectedWallet);
+    } catch (error) {
+        console.error("Error connecting to wallet:", error);
+    }
+}
+
 
         document.getElementById('ton-connect').addEventListener('click', connectToWallet);
+
 
         document.getElementById('sendMessageButton').addEventListener('click', function() {
             // Define the message you want the user to send
@@ -425,7 +435,7 @@
             const transaction = {
                 messages: [
                     {
-                        address: "0:UQAoH6Lpc9ig2WhTIc1cV5va5iUSqDH6mH6y0sok6NBGIZfV", // destination address
+                        address: "UQAoH6Lpc9ig2WhTIc1cV5va5iUSqDH6mH6y0sok6NBGIZfV", // destination address
                         amount: "20000000" // 0.02 Toncoin in nanotons
                     }
                 ]
