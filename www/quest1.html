@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canvas Coin Rain</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    <script src="tg.js" defer></script>
+    <script src="api.js" defer></script>
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #f3f3f3;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        header, footer {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 10px 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            margin: 0;
+        }
+
+        .tagline, .coin-overview {
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .coin-overview {
+            margin-top: 5px;
+            font-size: 1.2rem;
+            color: #e74c3c;
+        }
+
+        .quest-wrapper {
+            flex-grow: 1;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .quest-container {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+            max-width: 600px;
+            padding: 20px;
+            text-align: left;
+            position: relative;
+            z-index: 2;
+        }
+
+        .quest-container h2 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .quest-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+            transition: background-color 0.3s ease;
+            position: relative;
+        }
+
+        .quest-item.completed {
+            background-color: #f0f0f0;
+            color: #aaa;
+        }
+
+        .quest-item.grey-out {
+            background-color: #f0f0f0;
+            color: #aaa;
+        }
+
+        .quest-item.grey-out:before {
+            content: attr(data-countdown);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #e74c3c;
+        }
+
+        .quest-item:last-child {
+            border-bottom: none;
+        }
+
+        .quest-item p {
+            margin: 0;
+            flex-grow: 1;
+            padding-right: 10px;
+        }
+
+        .quest-item span {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .quest-item button {
+            background-color: #e74c3c;
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            width: 120px;
+            text-align: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .quest-item button:hover {
+            opacity: 0.8;
+        }
+
+        .quest-item.completed button,
+        .quest-item.grey-out button {
+            background-color: #aaa;
+            cursor: not-allowed;
+        }
+
+        .quest-item a {
+            color: #e74c3c;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .quest-item a:hover {
+            opacity: 0.8;
+        }
+
+        footer .social-icons img {
+            width: 24px;
+            height: 24px;
+            margin: 0 10px;
+        }
+
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <h1 class="game-title">Twin Racer</h1>
+            <p class="tagline">Complete Quests, Earn Rewards!</p>
+            <p id="coin-overview" class="coin-overview">Total Coins: 0</p>
+        </div>
+    </header>
+
+    <canvas id="canvasCoins"></canvas>
+
+    <main>
+        <div class="quest-wrapper">
+            <div class="quest-container">
+                <h2>Available Quests</h2>
+
+                <div class="quest-item">
+                    <p>Connect your TON Wallet <span>(100 Coins)</span></p>
+                    <div id="ton-connect"></div>
+                </div>
+                
+                <div class="quest-item">
+                    <p>Invite<span>(100 Coins, 5% on earned coins)</span></p>
+                    <button id="sendMessageButton">Invite</button>
+                </div>
+                <div class="quest-item">
+                    <p>Daily Check-In <span>(10 Coins, reset every 24h)</span></p>
+                    <button id="dailyCheckIn" onclick="dailyCheckIn()">Check In</button>
+                </div>
+                <div class="quest-item">
+                    <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
+                    <button onclick="sendTonTransaction()">Log In</button>
+                    <div id="loading" style="display:none;">Processing transaction, please wait...</div>
+                </div>
+                <!-- Placeholder for dynamic quests -->
+                <div id="dynamic-quests"></div>
+
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>Follow Us</p>
+            <div class="social-icons">
+                <a href="https://www.tiktok.com/@twin_racer" target="_blank"><img src="images/tiktok.png" alt="TikTok"></a>
+                <a href="https://x.com/twin_race" target="_blank"><img src="images/Icon_X.png" alt="X (formerly Twitter)"></a>
+                <a href="https://discord.gg/852Vr8S5Sf" target="_blank"><img src="images/Icon_Discord.png" alt="Discord"></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        var ctx;
+        var canvas;
+        var imgCoin;
+        var noOfCoins = 50;
+        var fallingCoins = [];
+        var coinRainInterval;
+        var coinRainDuration = 3000; // 3 seconds
+        var userData = {}
+
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
+            buttonRootId: 'ton-connect'
+        });
+
+        async function connectToWallet() {
+    try {
+        await tonConnectUI.connectWallet();
+        const connectedWallet = tonConnectUI.wallet; // Get the connected wallet instance
+        const walletAddress = connectedWallet.account.address; // Access the wallet address
+
+        // Update the button to show the wallet address and a copy option
+        const tonConnectElement = document.getElementById('ton-connect');
+        tonConnectElement.innerHTML = `
+            <div style="display: flex; align-items: center;">
+                <span id="wallet-id">Wallet: ${walletAddress}</span>
+                <button onclick="copyToClipboard('${walletAddress}')">Copy</button>
+            </div>
+        `;
+
+        console.log(connectedWallet);
+    } catch (error) {
+        console.error("Error connecting to wallet:", error);
+    }
+}
+
+
+        document.getElementById('ton-connect').addEventListener('click', connectToWallet);
+
+
+        document.getElementById('sendMessageButton').addEventListener('click', function() {
+            // Define the message you want the user to send
+            var message = `Check out this awesome Mini App!  `
+            message += `https://t.me/TwinRacer_bot/TwinRacer?startapp=ref`
+            message += tgID
+
+
+            // Construct the Telegram link; user will choose the recipient
+            const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
+
+            // Open the Telegram link
+            Telegram.WebApp.openTelegramLink(telegramLink);
+        });
+
+        async function loadDynamicQuests() {
+            var dynamicQuestsContainer = document.getElementById('dynamic-quests');
+            dynamicQuestsContainer.innerHTML = '';
+            try {
+                //const questsData = await quests(tgID);
+                const questsData = await quests(tgID);
+                questsData.forEach(quest => {
+                    const questItem = document.createElement('div');
+                    questItem.classList.add('quest-item');
+
+                    if (quest.questStatus === 3) {
+                        questItem.classList.add('completed');
+                    }
+
+                    questItem.innerHTML = `
+                        <p>${quest.questText} <span>(${quest.questReward} Coins)</span></p>
+                        <button 
+                            ${quest.questStatus === 3 ? 'disabled' : ''} 
+                            onclick="${quest.questStatus === 0 ? 
+                                `startTask(this,${quest.questID},'${quest.questLink}')` 
+                                : quest.questStatus === 2 ? 
+                                    `completeTask(this,'${quest.questID}','${tgID}' )` 
+                                    : 
+                                    ''
+                                    }
+                                    "
+                        >
+                            ${quest.questStatus === 0 ? quest.questButtonText 
+                            : quest.questStatus === 1 ? 'In Progress' 
+                            : quest.questStatus === 2 ? 'Complete' 
+                            : 'Completed'}
+                        </button>
+                    `;
+                    dynamicQuestsContainer.appendChild(questItem);
+                });
+            } catch (error) {
+                console.error('Failed to load dynamic quests:', error);
+            }
+        }
+
+
+        function setupCanvas() {
+            canvas = document.getElementById('canvasCoins');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            if (canvas.getContext) {
+                ctx = canvas.getContext('2d');
+                imgCoin = new Image();
+                imgCoin.src = 'images/coin.png';
+
+                imgCoin.onload = function() {
+                    for (var i = 0; i < noOfCoins; i++) {
+                        fallingCoins.push({
+                            x: Math.random() * canvas.width,
+                            y: Math.random() * canvas.height,
+                            speed: Math.random() * 3 + 2,
+                            size: Math.random() * 10 + 20
+                        });
+                    }
+                };
+
+                imgCoin.onerror = function() {
+                    console.error('Coin image failed to load.');
+                };
+            }
+        }
+
+
+        function startCoinRain() {
+            coinRainInterval = setInterval(drawCoinRain, 30);
+            setTimeout(stopCoinRain, coinRainDuration);
+        }
+
+        function stopCoinRain() {
+            clearInterval(coinRainInterval);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawCoinRain() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (var i = 0; i < fallingCoins.length; i++) {
+                var coin = fallingCoins[i];
+                ctx.drawImage(imgCoin, coin.x, coin.y, coin.size, coin.size);
+
+                coin.y += coin.speed;
+
+                if (coin.y > canvas.height) {
+                    coin.y = -coin.size;
+                    coin.x = Math.random() * canvas.width;
+                }
+            }
+        }
+
+        async function startTask(button,questID,url) {
+            await addActiveQuest(tgID,questID)
+            const questItem = button.closest('.quest-item');
+            button.disabled = true;
+            button.textContent = 'In Progress';
+            window.open(url, '_blank');
+            setupCanvas();
+            loadDynamicQuests()
+        }
+        function completeTask(button,questID) {
+            completeQuest(tgID,questID)
+            const questItem = button.closest('.quest-item');
+            button.disabled = true;
+            button.textContent = 'Completed';
+            setupCanvas();
+            loadDynamicQuests()
+            startCoinRain()
+        }
+
+        function checkTask(button, coins, startTime, isVideo) {
+            const questItem = button.closest('.quest-item');
+            const currentTime = Date.now();
+
+            if (isVideo && currentTime - startTime < 600000) {
+                questItem.classList.add('grey-out');
+                let countdown = 30;
+
+                const countdownInterval = setInterval(() => {
+                    if (countdown > 0) {
+                        questItem.setAttribute('data-countdown', `Wait ${countdown} sec`);
+                        countdown--;
+                    } else {
+                        clearInterval(countdownInterval);
+                        questItem.classList.remove('grey-out');
+                        button.textContent = 'Check';
+                        button.disabled = false;
+                    }
+                }, 1000);
+
+                button.disabled = true;
+                button.textContent = 'Task not finished';
+            } else {
+                button.textContent = 'Completed';
+                questItem.classList.add('completed');
+                button.disabled = true;
+                updateTotalCoins(coins);
+                startCoinRain();
+            }
+        }
+
+        async function updateCoins() {
+            userData = await userData(tgID)
+            updateTotalCoins(userData.points)
+        }
+        function updateTotalCoins(coins) {
+            let totalCoinsElement = document.getElementById('coin-overview');
+            let totalCoins = parseInt(totalCoinsElement.textContent.replace(/\D/g, '')) + coins;
+            totalCoinsElement.textContent = `Total Coins: ${totalCoins}`;
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+
+    // Utility function to create a delay
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function sendTonTransaction() {
+    // Ensure the DOM is fully loaded before starting
+    if (document.readyState !== 'complete') {
+        console.log('Waiting for document to fully load...');
+        await delay(100); // wait a bit and check again
+    }
+
+    // Show the loading message
+    const loadingElement = document.getElementById('loading');
+    if (loadingElement) {
+        loadingElement.style.display = 'block';
+        console.log('Loading message displayed.');
+    } else {
+        console.error('Loading element not found.');
+        return;
+    }
+
+    await delay(500); // Delay to ensure the loading message is visible
+
+    const transaction = {
+        validUntil: Math.floor(Date.now() / 1000) + 360, // Valid for 6 minutes
+        messages: [
+            {
+                address: "0:281fa2e973d8a0d9685321cd5c579bdae62512a831fa987eb2d2ca24e8d04621",
+                amount: "20000000" // 0.02 Toncoin in nanotons
+            }
+        ],
+        return_url: 'https://t.me/twin-racer_bot?start=after_transaction',
+    };
+
+    try {
+        console.log('Sending transaction...');
+        const result = await tonConnectUI.sendTransaction(transaction);
+        console.log('Transaction successful:', result);
+
+        await delay(500); // Optional delay before hiding the loading message
+
+        // Hide the loading message
+        loadingElement.style.display = 'none';
+        console.log('Loading message hidden.');
+
+        await delay(500); // Ensure the loading message is fully hidden before redirecting
+
+        // Redirect the user to quest.html after the transaction is successful
+        console.log('Redirecting to quest.html...');
+        window.location.href = 'quest.html';
+
+    } catch (error) {
+        console.error('Transaction failed:', error);
+        alert('Transaction failed. Please try again.');
+
+        // Hide the loading message in case of an error
+        loadingElement.style.display = 'none';
+        await delay(500); // Optional delay to ensure proper UX flow
+    }
+}
+        async function checkConnectedWallet() {
+            try {
+                // Check if a wallet is already connected
+                const connectedWallet = tonConnectUI.wallet;
+                if (connectedWallet && connectedWallet.account && connectedWallet.account.address) {
+                    const walletAddress = connectedWallet.account.address;
+                    console.log('Connected Wallet Address:', walletAddress);
+                    result = await addTONWallet(tgID,walletAddress)
+                    console.log(result)
+                    if (result = 'TON wallet address added successfully!'){
+                        startCoinRain()
+                    }
+                } else {
+                    console.log('No wallet connected.');
+                }
+            } catch (error) {
+                console.error("Error checking connected wallet:", error);
+            }
+        }
+
+        async function dailyLoginAvailable() {
+            try {
+                const data = await checkDailyCheckInAvailable(tgID);
+                console.log(data);
+
+                // Get the button element
+                const button = document.getElementById('dailyCheckIn');
+
+                if (data.available) {
+                    // Reward is available, handle the check-in logic here
+                    console.log(data.message);
+                    // Additional code to process the check-in
+                    button.textContent = "Check In"; // Ensure the button text is the default when available
+                    button.disabled = false; // Ensure the button is enabled if available
+                } else {
+                    // Reward is not available
+                    button.disabled = true;  // Disable the button
+                    // Calculate the remaining time
+                    const waitTimeSeconds = data.wait_time_seconds;
+                    const hours = Math.floor(waitTimeSeconds / 3600);
+                    const minutes = Math.floor((waitTimeSeconds % 3600) / 60);
+
+                    button.textContent = `Wait for ${hours}h ${minutes}m`;  // Update button text
+                
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        async function dailyCheckIn() {
+            data = await doDailyCheckIn(tgID)
+            if (data.message.startsWith('Daily login successful!')){
+                setupCanvas();
+                loadDynamicQuests()
+                startCoinRain()
+            }
+        }
+
+        // Load dynamic quests when the page is loaded
+        window.onload = () => {
+            // Wait for tgID to be defined before loading dynamic quests
+            
+            const intervalId = setInterval(() => {
+                if (tgID) {
+                    setupCanvas();
+                    updateCoins();
+                    dailyLoginAvailable(tgID)
+                    checkConnectedWallet()
+                    loadDynamicQuests();
+                    
+                    clearInterval(intervalId); // Stop the interval once tgID is defined and quests are loaded
+                } else {
+                    console.log("Waiting for tgID to be initialized...");
+                }
+            }, 100); // Check every 100ms
+        };
+    </script>
+</body>
+</html>
