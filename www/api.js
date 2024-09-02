@@ -282,3 +282,78 @@ async function userData(tgID) {
         alert('Failed to get data due to network error.');
     }
 }
+
+// Function to get the quests Data
+async function checkDailyCheckInAvailable(tgID) {
+    // API endpoint URL
+    const apiUrl = apiBase + 'dailyLoginAvailable?tgID=' + tgID;
+    console.log(apiUrl)
+    
+    try {
+        // Make the GET request to the API
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            return result
+
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error getting data:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed to get data due to network error.');
+    }
+}
+
+// Function to get the quests Data
+async function doDailyCheckIn(tgID) {
+    // API endpoint URL
+    const apiUrl = apiBase + 'dailyLogin';
+    
+    if (tgID == '' ){
+        console.log("no user found")
+        return
+    }
+
+    // Create the payload object
+    const data = {
+        tgID: tgID
+    };
+
+    try {
+        // Make the POST request to the API
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            console.log('Checkin performed:', result);
+            
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed record round due to network error.');
+    }
+}

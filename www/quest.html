@@ -191,7 +191,7 @@
                 </div>
                 <div class="quest-item">
                     <p>Daily Check-In <span>(10 Coins, reset every 24h)</span></p>
-                    <button onclick="startTask(this, '#', 10, 10000)">Check In</button>
+                    <button id="dailyCheckIn" onclick="dailyCheckIn()">Check In</button>
                 </div>
                 <div class="quest-item">
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
@@ -433,7 +433,43 @@
             }
         }
 
+        async function dailyLoginAvailable() {
+            try {
+                const data = await checkDailyCheckInAvailable(tgID);
+                console.log(data);
 
+                // Get the button element
+                const button = document.getElementById('dailyCheckIn');
+
+                if (data.available) {
+                    // Reward is available, handle the check-in logic here
+                    console.log(data.message);
+                    // Additional code to process the check-in
+                    button.textContent = "Check In"; // Ensure the button text is the default when available
+                    button.disabled = false; // Ensure the button is enabled if available
+                } else {
+                    // Reward is not available
+                    button.disabled = true;  // Disable the button
+                    // Calculate the remaining time
+                    const waitTimeSeconds = data.wait_time_seconds;
+                    const hours = Math.floor(waitTimeSeconds / 3600);
+                    const minutes = Math.floor((waitTimeSeconds % 3600) / 60);
+
+                    button.textContent = `Wait for ${hours}h ${minutes}m`;  // Update button text
+                
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        async function dailyCheckIn() {
+            data = await doDailyCheckIn(tgID)
+            if (data.message.startsWith('Daily login successful!')){
+                setupCanvas();
+                loadDynamicQuests()
+                startCoinRain()
+            }
+        }
 
         // Load dynamic quests when the page is loaded
         window.onload = () => {
@@ -443,6 +479,7 @@
                 if (tgID) {
                     setupCanvas();
                     updateCoins();
+                    dailyLoginAvailable(tgID)
                     checkConnectedWallet()
                     loadDynamicQuests();
                     
