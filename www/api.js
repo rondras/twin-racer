@@ -286,7 +286,7 @@ async function userData(tgID) {
 // Function to get the quests Data
 async function checkDailyCheckInAvailable(tgID) {
     // API endpoint URL
-    const apiUrl = apiBase + 'dailyCheckinAvailable?tgID=' + tgID;
+    const apiUrl = apiBase + 'dailyLoginAvailable?tgID=' + tgID;
     console.log(apiUrl)
     
     try {

@@ -553,6 +553,7 @@ async function sendTonTransaction() {
             if (data.message.startsWith('Daily login successful!')){
                 setupCanvas();
                 loadDynamicQuests()
+                dailyLoginAvailable(tgID)
                 startCoinRain()
             }
 }
