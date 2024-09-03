@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/@tonconnect/ui@2.0.6/dist/tonconnect-ui.min.js"></script>
     <script src="tg.js" defer></script>
     <script src="api.js" defer></script>
-    <script src="tonweb.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.41/dist/tonweb.js"></script>
 
 
     <style>
@@ -463,10 +463,10 @@ async function sendTonTransaction() {
         });
 
         // you can use signed boc to find the transaction 
-        //const TonWeb = new window.TonWeb();
-        const bocCellBytes = await TonWeb.boc.Cell.oneFromBoc(TonWeb.utils.base64ToBytes(result.boc)).hash();
+        const tonweb = new TonWeb();
+        const bocCellBytes = await tonweb.boc.Cell.oneFromBoc(tonweb.utils.base64ToBytes(result.boc)).hash();
 
-        const hashBase64 = TonWeb.utils.bytesToBase64(bocCellBytes);
+        const hashBase64 = tonweb.utils.bytesToBase64(bocCellBytes);
 
         return (hashBase64)
     } catch (e) {
