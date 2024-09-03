@@ -286,7 +286,7 @@ async function userData(tgID) {
 // Function to get the quests Data
 async function checkDailyCheckInAvailable(tgID) {
     // API endpoint URL
-    const apiUrl = apiBase + 'dailyLoginAvailable?tgID=' + tgID;
+    const apiUrl = apiBase + 'dailyCheckinAvailable?tgID=' + tgID;
     console.log(apiUrl)
     
     try {
@@ -317,7 +317,7 @@ async function checkDailyCheckInAvailable(tgID) {
 // Function to get the quests Data
 async function doDailyCheckIn(tgID) {
     // API endpoint URL
-    const apiUrl = apiBase + 'dailyLogin';
+    const apiUrl = apiBase + 'dailyCheckin';
     
     if (tgID == '' ){
         console.log("no user found")
