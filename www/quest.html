@@ -435,16 +435,7 @@
             canvas.height = window.innerHeight;
         });
 
-async function dailyLogin(){
-    trxID = await sendTonTransaction()
-    data = await doDailyLogIn(tgID,trxID)
-    alert(data)
-    if (data.message.startsWith('Daily checkin successful!')){
-                setupCanvas();
-                loadDynamicQuests()
-                startCoinRain()
-            }
-}
+
 function base64ToHex(base64) {
     // Base64-String dekodieren in ein Bytearray
     const raw = atob(base64);
@@ -554,6 +545,17 @@ async function sendTonTransaction() {
                 startCoinRain()
             }
         }
+        async function dailyLogin(){
+            //trxID = await sendTonTransaction()
+            trxID = "xxxxx"
+            data = await doDailyLogIn(tgID,trxID)
+            console.log(data)
+            if (data.message.startsWith('Daily checkin successful!')){
+                        setupCanvas();
+                        loadDynamicQuests()
+                        startCoinRain()
+                    }
+}
 
         // Load dynamic quests when the page is loaded
         window.onload = () => {
