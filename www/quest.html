@@ -198,7 +198,7 @@
                 </div>
                 <div class="quest-item">
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
-                    <button onclick="dailyLogin()">Log In</button>
+                    <button id="dailyLogIn" onclick="dailyLogin()">Log In</button>
                 </div>
                 <!-- Placeholder for dynamic quests -->
                 <div id="dynamic-quests"></div>
@@ -510,7 +510,7 @@ async function sendTonTransaction() {
 
         async function dailyLoginAvailable() {
             try {
-                const data = await checkDailyCheckInAvailable(tgID);
+                const data = await checkDailyLogInAvailable(tgID);
                 console.log(data);
 
                 // Get the button element
@@ -542,6 +542,7 @@ async function sendTonTransaction() {
             if (data.message.startsWith('Daily checkin successful!')){
                 setupCanvas();
                 loadDynamicQuests()
+                dailyCheckinAvailable(tgID)
                 startCoinRain()
             }
         }
@@ -567,6 +568,7 @@ async function sendTonTransaction() {
                     setupCanvas();
                     updateCoins();
                     dailyLoginAvailable(tgID)
+                    dailyCheckinAvailable(tgID)
                     checkConnectedWallet()
                     loadDynamicQuests();
                     
