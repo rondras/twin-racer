@@ -357,3 +357,52 @@ async function doDailyCheckIn(tgID) {
         alert('Failed record round due to network error.');
     }
 }
+
+// Function to get the quests Data
+async function doDailyLogIn(tgID,trxID) {
+    // API endpoint URL
+    const apiUrl = apiBase + 'dailyLogin';
+    
+    if (tgID == '' ){
+        console.log("no user found")
+        return
+    }
+    if (trxID == '' ){
+        console.log("no trxID found")
+        return
+    }
+
+    // Create the payload object
+    const data = {
+        tgID: tgID,
+        trxID: trxID
+    };
+
+    try {
+        // Make the POST request to the API
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            console.log('Checkin performed:', result);
+            
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed record round due to network error.');
+    }
+}

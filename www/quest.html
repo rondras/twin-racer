@@ -195,7 +195,7 @@
                 </div>
                 <div class="quest-item">
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
-                    <button onclick="sendTonTransaction()">Log In</button>
+                    <button onclick="dailyLogin()">Log In</button>
                 </div>
                 <!-- Placeholder for dynamic quests -->
                 <div id="dynamic-quests"></div>
@@ -432,7 +432,10 @@
             canvas.height = window.innerHeight;
         });
 
-
+asnyc function dailyLogin(){
+    result = await sendTonTransaction()
+    alert(result)
+}
 
 async function sendTonTransaction() {
     // Ensure the DOM is fully loaded before starting
@@ -457,8 +460,7 @@ async function sendTonTransaction() {
         });
 
         // you can use signed boc to find the transaction 
-        const someTxData = await myAppExplorerService.getTransaction(result.boc);
-        alert('Transaction was sent successfully', someTxData);
+        return (result.boc)
     } catch (e) {
         console.error(e);
     }
