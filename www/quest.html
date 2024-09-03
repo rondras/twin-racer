@@ -11,7 +11,6 @@
     <script src="api.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.41/dist/tonweb.js"></script>
 
-
     <style>
         body {
             font-family: 'Press Start 2P', cursive;
@@ -200,6 +199,16 @@
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
                     <button id="dailyLogIn" onclick="dailyLogin()">Log In</button>
                 </div>
+                <!-- New Quest: Boost Telegram Channel -->
+                <div class="quest-item">
+                    <p>Boost Telegram Channel <span>(100 Coins)</span></p>
+                    <button id="boostTelegramChannel" onclick="boostTelegramChannel()">Boost</button>
+                </div>
+                <!-- New Quest: Share Telegram Story -->
+                <div class="quest-item">
+                    <p>Share Telegram Story <span>(50 Coins)</span></p>
+                    <button id="telegram-share-button" onclick="shareTelegramStory()">Share</button>
+                </div>
                 <!-- Placeholder for dynamic quests -->
                 <div id="dynamic-quests"></div>
 
@@ -257,16 +266,11 @@
             }
         }
 
-
-        //document.getElementById('ton-connect').addEventListener('click', connectToWallet);
-
-
         document.getElementById('sendMessageButton').addEventListener('click', function() {
             // Define the message you want the user to send
             var message = `Check out this awesome Mini App!  `
             message += `https://t.me/TwinRacer_bot/TwinRacer?startapp=ref`
             message += tgID
-
 
             // Construct the Telegram link; user will choose the recipient
             const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
@@ -279,7 +283,6 @@
             var dynamicQuestsContainer = document.getElementById('dynamic-quests');
             dynamicQuestsContainer.innerHTML = '';
             try {
-                //const questsData = await quests(tgID);
                 const questsData = await quests(tgID);
                 questsData.forEach(quest => {
                     const questItem = document.createElement('div');
@@ -297,8 +300,7 @@
                                 `startTask(this,${quest.questID},'${quest.questLink}')` 
                                 : quest.questStatus === 2 ? 
                                     `completeTask(this,'${quest.questID}','${tgID}' )` 
-                                    : 
-                                    ''
+                                    : ''
                                     }
                                     "
                         >
@@ -314,7 +316,6 @@
                 console.error('Failed to load dynamic quests:', error);
             }
         }
-
 
         function setupCanvas() {
             canvas = document.getElementById('canvasCoins');
@@ -342,7 +343,6 @@
                 };
             }
         }
-
 
         function startCoinRain() {
             coinRainInterval = setInterval(drawCoinRain, 30);
@@ -424,70 +424,49 @@
             userData = await userData(tgID)
             updateTotalCoins(userData.points)
         }
+
         function updateTotalCoins(coins) {
             let totalCoinsElement = document.getElementById('coin-overview');
             let totalCoins = parseInt(totalCoinsElement.textContent.replace(/\D/g, '')) + coins;
             totalCoinsElement.textContent = `Total Coins: ${totalCoins}`;
         }
 
-        window.addEventListener('resize', () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        });
+        async function boostTelegramChannel() {
+            const result = await checkTelegramBoost(tgID); // Implement this function to verify via your backend
 
-
-function base64ToHex(base64) {
-    // Base64-String dekodieren in ein Bytearray
-    const raw = atob(base64);
-    let result = '';
-
-    // Jedes Byte in einen zweistelligen HEX-Wert umwandeln und zum Ergebnis hinzufügen
-    for (let i = 0; i < raw.length; i++) {
-        const hex = raw.charCodeAt(i).toString(16).padStart(2, '0');
-        result += hex;
-    }
-
-    return result;
-}
-
-
-async function sendTonTransaction() {
-    // Ensure the DOM is fully loaded before starting
-    
-    const transaction = {
-    validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
-    messages: [
-        {
-            address: "0:281fa2e973d8a0d9685321cd5c579bdae62512a831fa987eb2d2ca24e8d04621",
-            amount: "200000" // 0.02 Toncoin in nanotons
-         // stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
+            if (result.status === 'success') {
+                updateTotalCoins(100);
+                startCoinRain();
+                document.getElementById('boostTelegramChannel').disabled = true;
+                document.getElementById('boostTelegramChannel').textContent = 'Completed';
+            } else {
+                alert('Please boost the Telegram channel to receive your reward.');
+            }
         }
-    ],
-    
-}
 
-    try {
-        const result = await tonConnectUI.sendTransaction(transaction, {
-            modals: ['before', 'success', 'error'],
-            notifications: ['before', 'success', 'error'],
-            skipRedirectToWallet: 'ios' //'ios' (default), or 'never', or 'always'
-        });
+        function shareTelegramStory() {
+            const message = encodeURIComponent("🚨 Hey, have you checked out Twin Racer yet? 🚀 It's the latest buzz in the TON gaming world, and the airdrop potential is off the charts! Don't miss out—jump in now! 🏁🎮");
+            const imageUrl = encodeURIComponent("https://racer.twinfinance.io/images/telegramshare.webp");
 
-        // you can use signed boc to find the transaction 
-        const tonweb = new TonWeb();
-        const bocCellBytes = await tonweb.boc.Cell.oneFromBoc(tonweb.utils.base64ToBytes(result.boc)).hash();
+            const telegramShareUrl = `https://t.me/share/url?url=${imageUrl}&text=${message}`;
+            window.open(telegramShareUrl, '_blank');
 
-        const hashBase64 = tonweb.utils.bytesToBase64(bocCellBytes);
+            // Wait for 5 seconds to verify the task completion
+            setTimeout(async () => {
+                // Logic to verify the share and reward the user
+                const result = await verifyShare(tgID); // Implement this function to verify via your backend
 
-        return (base64ToHex(hashBase64))
-    } catch (e) {
-        console.error(e);
-    }
-    
-    
+                if (result.status === 'success') {
+                    updateTotalCoins(50);
+                    startCoinRain();
+                    document.getElementById('telegram-share-button').disabled = true;
+                    document.getElementById('telegram-share-button').textContent = 'Completed';
+                } else {
+                    alert('Please share the story to receive your reward.');
+                }
+            }, 5000);
+        }
 
-    
-}
         async function checkConnectedWallet() {
             try {
                 // Check if a wallet is already connected
@@ -508,7 +487,6 @@ async function sendTonTransaction() {
             }
         }
 
-        
         async function dailyCheckinAvailable() {
             try {
                 const data = await checkDailyCheckInAvailable(tgID);
@@ -520,7 +498,6 @@ async function sendTonTransaction() {
                 if (data.available) {
                     // Reward is available, handle the check-in logic here
                     console.log(data.message);
-                    // Additional code to process the check-in
                     button.textContent = "Check In"; // Ensure the button text is the default when available
                     button.disabled = false; // Ensure the button is enabled if available
                 } else {
@@ -532,7 +509,6 @@ async function sendTonTransaction() {
                     const minutes = Math.floor((waitTimeSeconds % 3600) / 60);
 
                     button.textContent = `Wait for ${hours}h ${minutes}m`;  // Update button text
-                
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -548,26 +524,22 @@ async function sendTonTransaction() {
                 const button = document.getElementById('dailyLogIn');
 
                 if (data.available) {
-                    // Reward is available, handle the check-in logic here
                     console.log(data.message);
-                    // Additional code to process the check-in
-                    button.textContent = "Log In"; // Ensure the button text is the default when available
-                    button.disabled = false; // Ensure the button is enabled if available
+                    button.textContent = "Log In";
+                    button.disabled = false;
                 } else {
-                    // Reward is not available
-                    button.disabled = true;  // Disable the button
-                    // Calculate the remaining time
+                    button.disabled = true;
                     const waitTimeSeconds = data.wait_time_seconds;
                     const hours = Math.floor(waitTimeSeconds / 3600);
                     const minutes = Math.floor((waitTimeSeconds % 3600) / 60);
 
-                    button.textContent = `Wait for ${hours}h ${minutes}m`;  // Update button text
-                
+                    button.textContent = `Wait for ${hours}h ${minutes}m`;
                 }
             } catch (error) {
                 console.error('Error:', error);
             }
         }
+
         async function dailyCheckIn() {
             data = await doDailyCheckIn(tgID)
             if (data.message.startsWith('Daily checkin successful!')){
@@ -577,9 +549,9 @@ async function sendTonTransaction() {
                 startCoinRain()
             }
         }
+
         async function dailyLogin(){
             trxID = await sendTonTransaction()
-            //trxID = "xxxxx"
             data = await doDailyLogIn(tgID,trxID)
             console.log(data)
             if (data.message.startsWith('Daily login successful!')){
@@ -588,12 +560,14 @@ async function sendTonTransaction() {
                 dailyLoginAvailable(tgID)
                 startCoinRain()
             }
-}
+        }
 
-        // Load dynamic quests when the page is loaded
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
         window.onload = () => {
-            // Wait for tgID to be defined before loading dynamic quests
-            
             const intervalId = setInterval(() => {
                 if (tgID) {
                     setupCanvas();
@@ -603,7 +577,7 @@ async function sendTonTransaction() {
                     checkConnectedWallet()
                     loadDynamicQuests();
                     
-                    clearInterval(intervalId); // Stop the interval once tgID is defined and quests are loaded
+                    clearInterval(intervalId);
                 } else {
                     console.log("Waiting for tgID to be initialized...");
                 }
