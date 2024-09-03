@@ -546,15 +546,15 @@ async function sendTonTransaction() {
             }
         }
         async function dailyLogin(){
-            //trxID = await sendTonTransaction()
-            trxID = "xxxxx"
+            trxID = await sendTonTransaction()
+            //trxID = "xxxxx"
             data = await doDailyLogIn(tgID,trxID)
             console.log(data)
-            if (data.message.startsWith('Daily checkin successful!')){
-                        setupCanvas();
-                        loadDynamicQuests()
-                        startCoinRain()
-                    }
+            if (data.message.startsWith('Daily login successful!')){
+                setupCanvas();
+                loadDynamicQuests()
+                startCoinRain()
+            }
 }
 
         // Load dynamic quests when the page is loaded
