@@ -149,10 +149,17 @@
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
 
             if (isMobile) {
-                // Redirect to Telegram bot (using the provided URL)
-                window.location.href = 'https://t.me/TwinRacer_bot/TwinRacer?startapp';
+                // Check if device has motion sensors (accelerometer/gyroscope)
+                if (typeof DeviceMotionEvent === 'function' || typeof Gyroscope === 'function') {
+                    // Redirect to Telegram bot mini app
+                    window.location.href = 'https://t.me/TwinRacer_bot/TwinRacer?startapp';
+                } else {
+                    // No motion sensor, display QR code
+                    document.getElementById('qrContainer').style.display = 'block';
+                    document.getElementById('startContainer').style.display = 'none';
+                }
             } else {
-                // Display QR code for non-mobile users
+                // Non-mobile users see QR code
                 document.getElementById('qrContainer').style.display = 'block';
                 document.getElementById('startContainer').style.display = 'none';
             }
@@ -800,11 +807,10 @@
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        // Determine game style based on the current date
         var today = new Date();
         var referenceDate = new Date('2024-01-04');
         var dayNumber = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
-        var styles = ["grassland", "desert", "ice","midnight"];
+        var styles = ["grassland", "desert", "ice", "midnight"];
         var gameStyle = styles[dayNumber % styles.length];
         console.log("Current game style:", gameStyle);
 
@@ -844,19 +850,17 @@
                     FINISH: { road: '#4FC3F7', grass: '#4FC3F7', rumble: '#4FC3F7' }
                 };
                 break;
-
             case 'midnight':
                 COLORS = {
-                  SKY: '#0A0A2A',
-                  TREE: '#005108',
-                  FOG: '#005108',
-                  LIGHT: { road: '#3A3A3A', grass: '#004400', rumble: '#333333', lane: '#888888' },
-                  DARK: { road: '#2F2F2F', grass: '#003300', rumble: '#666666' },
-                  START: { road: 'white', grass: 'white', rumble: 'white' },
-                  FINISH: { road: 'black', grass: 'black', rumble: 'black' }
+                    SKY: '#0A0A2A',
+                    TREE: '#005108',
+                    FOG: '#005108',
+                    LIGHT: { road: '#3A3A3A', grass: '#004400', rumble: '#333333', lane: '#888888' },
+                    DARK: { road: '#2F2F2F', grass: '#003300', rumble: '#666666' },
+                    START: { road: 'white', grass: 'white', rumble: 'white' },
+                    FINISH: { road: 'black', grass: 'black', rumble: 'black' }
                 };
                 break;
-              
             default:
                 COLORS = {
                     SKY: '#72D7EE',
@@ -871,27 +875,27 @@
         }
 
         var KEY = {
-            LEFT:  37,
-            UP:    38,
+            LEFT: 37,
+            UP: 38,
             RIGHT: 39,
-            DOWN:  40,
-            A:     65,
-            D:     68,
-            S:     83,
-            W:     87
+            DOWN: 40,
+            A: 65,
+            D: 68,
+            S: 83,
+            W: 87
         };
 
         var BACKGROUND = {
-            HILLS: { x:   5, y:   5, w: 1280, h: 480 },
-            SKY:   { x:   5, y: 495, w: 1280, h: 480 },
-            TREES: { x:   5, y: 985, w: 1280, h: 480 }
+            HILLS: { x: 5, y: 5, w: 1280, h: 480 },
+            SKY: { x: 5, y: 495, w: 1280, h: 480 },
+            TREES: { x: 5, y: 985, w: 1280, h: 480 }
         };
 
         var SPRITES = {
-            PLAYER_STRAIGHT:        { x: 1085, y:  480, w:   284, h:   41 }
+            PLAYER_STRAIGHT: { x: 1085, y: 480, w: 284, h: 41 }
         };
 
-        SPRITES.SCALE = 0.3 * (1/SPRITES.PLAYER_STRAIGHT.w); // the reference sprite width should be 1/3rd the (half-)roadWidth
+        SPRITES.SCALE = 0.3 * (1 / SPRITES.PLAYER_STRAIGHT.w); // the reference sprite width should be 1/3rd the (half-)roadWidth
 
         Game.run({
             canvas: canvas,
@@ -1070,18 +1074,18 @@
                 ];
 
                 spritesPlants = [
-                    bush01Sprite, bush02Sprite,bush03Sprite, bush04Sprite, 
-                    bush05Sprite,bush06Sprite, bush07Sprite, boulder01Sprite, 
-                    boulder02Sprite, boulder03Sprite,boulder04Sprite, boulder05Sprite, 
+                    bush01Sprite, bush02Sprite, bush03Sprite, bush04Sprite,
+                    bush05Sprite, bush06Sprite, bush07Sprite, boulder01Sprite,
+                    boulder02Sprite, boulder03Sprite, boulder04Sprite, boulder05Sprite,
                     palmTree01Sprite, palmTree02Sprite, palmTree03Sprite, palmTree04Sprite,
                     palmTree05Sprite, deadTree01Sprite, deadTree02Sprite,
                     stump01Sprite, stump02Sprite, cactus01Sprite, cactus02Sprite,
-                    column01Sprite, column02Sprite , column03Sprite, column04Sprite                    
+                    column01Sprite, column02Sprite, column03Sprite, column04Sprite
                 ];
 
                 spritesCars = [
                     car01Sprite, car02Sprite, car03Sprite, car04Sprite,
-                    car03Sprite, car04Sprite,truck01Sprite, truck02Sprite,
+                    car03Sprite, car04Sprite, truck01Sprite, truck02Sprite,
                     truck03Sprite, truck04Sprite, truck05Sprite,
                     semi01Sprite, semi02Sprite, semi03Sprite, semi04Sprite,
                     semi05Sprite, semi06Sprite, semi07Sprite, semi08Sprite, semi09Sprite,
@@ -1115,7 +1119,6 @@
             if ((segments.length == 0) || (options.segmentLength) || (options.rumbleLength))
                 resetRoad();
         }
-
     </script>
 
 </body>
