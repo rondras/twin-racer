@@ -232,28 +232,28 @@
         });
 
         async function connectToWallet() {
-    try {
-        await tonConnectUI.connectWallet();
-        const connectedWallet = tonConnectUI.wallet; // Get the connected wallet instance
-        const walletAddress = connectedWallet.account.address; // Access the wallet address
+            try {
+                await tonConnectUI.connectWallet();
+                const connectedWallet = tonConnectUI.wallet; // Get the connected wallet instance
+                const walletAddress = connectedWallet.account.address; // Access the wallet address
 
-        // Update the button to show the wallet address and a copy option
-        const tonConnectElement = document.getElementById('ton-connect');
-        tonConnectElement.innerHTML = `
-            <div style="display: flex; align-items: center;">
-                <span id="wallet-id">Wallet: ${walletAddress}</span>
-                <button onclick="copyToClipboard('${walletAddress}')">Copy</button>
-            </div>
-        `;
+                // Update the button to show the wallet address and a copy option
+                const tonConnectElement = document.getElementById('ton-connect');
+                tonConnectElement.innerHTML = `
+                    <div style="display: flex; align-items: center;">
+                        <span id="wallet-id">Wallet: ${walletAddress}</span>
+                        <button onclick="copyToClipboard('${walletAddress}')">Copy</button>
+                    </div>
+                `;
 
-        console.log(connectedWallet);
-    } catch (error) {
-        console.error("Error connecting to wallet:", error);
-    }
-}
+                console.log(connectedWallet);
+            } catch (error) {
+                console.error("Error connecting to wallet:", error);
+            }
+        }
 
 
-        document.getElementById('ton-connect').addEventListener('click', connectToWallet);
+        //document.getElementById('ton-connect').addEventListener('click', connectToWallet);
 
 
         document.getElementById('sendMessageButton').addEventListener('click', function() {
