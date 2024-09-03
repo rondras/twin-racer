@@ -11,7 +11,6 @@
     <script src="api.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/tonweb@0.0.41/dist/tonweb.js"></script>
 
-
     <style>
         body {
             font-family: 'Press Start 2P', cursive;
@@ -49,6 +48,21 @@
             margin-top: 5px;
             font-size: 1.2rem;
             color: #e74c3c;
+        }
+
+        #back-button-container {
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        #backButton {
+            cursor: pointer;
+            width: 50px;
+            transition: transform 0.3s ease;
+        }
+
+        #backButton:hover {
+            transform: scale(1.1);
         }
 
         .quest-wrapper {
@@ -172,7 +186,12 @@
         <div class="header-container">
             <h1 class="game-title">Twin Racer</h1>
             <p class="tagline">Complete Quests, Earn Rewards!</p>
-            <p id="coin-overview" class="coin-overview">Total Coins: 0</p>
+            <p id="coin-overview" class="coin-overview">Total Coins: 1220</p>
+        </div>
+
+        <!-- Back Button -->
+        <div id="back-button-container">
+            <img id="backButton" src="images/back_button.png" alt="Back">
         </div>
     </header>
 
@@ -187,19 +206,22 @@
                     <p>Connect your TON Wallet <span>(100 Coins)</span></p>
                     <div id="ton-connect"></div>
                 </div>
-                
+
                 <div class="quest-item">
                     <p>Invite<span>(100 Coins, 5% on earned coins)</span></p>
                     <button id="sendMessageButton">Invite</button>
                 </div>
+
                 <div class="quest-item">
                     <p>Daily Check-In <span>(10 Coins, reset every 24h)</span></p>
                     <button id="dailyCheckIn" onclick="dailyCheckIn()">Check In</button>
                 </div>
+
                 <div class="quest-item">
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
                     <button id="dailyLogIn" onclick="dailyLogin()">Log In</button>
                 </div>
+
                 <!-- Placeholder for dynamic quests -->
                 <div id="dynamic-quests"></div>
 
@@ -217,6 +239,11 @@
             </div>
         </div>
     </footer>
+
+    <script>
+        document.getElementById('backButton').addEventListener('click', function() {
+            window.location.href = 'index.html'; // Replace with the actual path to your main page
+        });
 
     <script>
         var ctx;
