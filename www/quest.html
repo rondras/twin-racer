@@ -466,7 +466,7 @@ async function sendTonTransaction() {
         const tonweb = new TonWeb();
         const bocCellBytes = await tonweb.boc.Cell.oneFromBoc(tonweb.utils.base64ToBytes(result.boc)).hash();
 
-        const hashBase64 = tonweb.utils.bytesToBase64(await bocCellBytes.hash());
+        const hashBase64 = tonweb.utils.bytesToBase64(bocCellBytes);
 
         return (hashBase64)
     } catch (e) {
