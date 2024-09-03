@@ -196,7 +196,6 @@
                 <div class="quest-item">
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
                     <button onclick="sendTonTransaction()">Log In</button>
-                    <div id="loading" style="display:none;">Processing transaction, please wait...</div>
                 </div>
                 <!-- Placeholder for dynamic quests -->
                 <div id="dynamic-quests"></div>
@@ -230,6 +229,9 @@
             manifestUrl: 'https://racer.twinfinance.io/tonconnect-manifest.json',
             buttonRootId: 'ton-connect'
         });
+        tonConnectUI.uiOptions = {
+            twaReturnUrl: 'https://t.me/TwinRacer_bot/TwinRacer?startapp'
+        };
 
         async function connectToWallet() {
             try {
@@ -444,11 +446,15 @@ async function sendTonTransaction() {
          // stateInit: "base64bocblahblahblah==" // just for instance. Replace with your transaction initState or remove
         }
     ],
-    return_url: 'https://t.me/twin-racer_bot?start=after_transaction'
+    
 }
 
     try {
-        const result = await tonConnectUI.sendTransaction(transaction);
+        const result = await tonConnectUI.sendTransaction(transaction, {
+            modals: ['before', 'success', 'error'],
+            notifications: ['before', 'success', 'error'],
+            skipRedirectToWallet: 'ios' //'ios' (default), or 'never', or 'always'
+        });
 
         // you can use signed boc to find the transaction 
         const someTxData = await myAppExplorerService.getTransaction(result.boc);
