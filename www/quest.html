@@ -518,7 +518,7 @@ async function sendTonTransaction() {
         }
         async function dailyCheckIn() {
             data = await doDailyCheckIn(tgID)
-            if (data.message.startsWith('Daily login successful!')){
+            if (data.message.startsWith('Daily checkin successful!')){
                 setupCanvas();
                 loadDynamicQuests()
                 startCoinRain()
