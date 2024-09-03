@@ -69,16 +69,44 @@
             top: 15vh;
             right: 3vw;
         }
+
+        /* QR Code Styles */
+        #qrContainer {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3000;
+            text-align: center;
+        }
+
+        #qrContainer img {
+            width: 200px;
+            height: auto;
+        }
+
+        #qrContainer p {
+            color: white;
+            font-size: 18px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 
 <body>
-<div id="startContainer" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3000; text-align: center;">
-    <button id="startButton" style="padding: 0; border: none; background: none; cursor: pointer;">
-        <img src="images/start_button.png" alt="Start Game" style="width: 100%; height: auto;">
-    </button>
-    <div id="countdown" style="display: none; font-size: 48px; color: white;"></div>
-</div>
+
+    <div id="qrContainer">
+        <img src="/images/QR.webp" alt="Scan to open in Telegram">
+        <p>Scan this QR code to open the game in Telegram on your mobile device.</p>
+    </div>
+
+    <div id="startContainer" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3000; text-align: center;">
+        <button id="startButton" style="padding: 0; border: none; background: none; cursor: pointer;">
+            <img src="images/start_button.png" alt="Start Game" style="width: 100%; height: auto;">
+        </button>
+        <div id="countdown" style="display: none; font-size: 48px; color: white;"></div>
+    </div>
 
     <div id="racer">
         <!-- HUD -->
@@ -114,19 +142,28 @@
     <span id="mute"></span>
 
     <script>
-        var today = new Date();
-        var referenceDate = new Date('2024-01-04');
-        var dayNumber = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
-        var styles = ["grassland", "desert", "ice","midnight"];
-        var gameStyle = styles[dayNumber % styles.length];
-    </script>
+        function detectDeviceAndRedirect() {
+            const userAgent = navigator.userAgent || navigator.vendor || window.opera;
 
-    <script src="common.js"></script>
-    <script src="game.js"></script>
-    <script src="tg.js"></script>
-    <script src="api.js"></script>
+            // Check if the user is on a mobile device
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
 
-    <script>
+            if (isMobile) {
+                // Redirect to Telegram bot (using the provided URL)
+                window.location.href = 'https://t.me/TwinRacer_bot/TwinRacer?startapp';
+            } else {
+                // Display QR code for non-mobile users
+                document.getElementById('qrContainer').style.display = 'block';
+                document.getElementById('startContainer').style.display = 'none';
+            }
+        }
+
+        // Call the function when the page loads
+        document.addEventListener("DOMContentLoaded", function () {
+            detectDeviceAndRedirect();
+        });
+
+        // Game variables and setup
         const COIN_SCALE_FACTOR = 0.2;
         const DEFAULT_COIN_DROP_INTERVAL = 3000;
         const VISIBLE_DISTANCE = 5000;
@@ -356,7 +393,6 @@
                     requestAnimationFrame(() => {
                         document.getElementById('coin_count_value').innerText = hud.coin_count.value;
                     });
-                    //playCoinSound();
                     return false;
                 }
                 return true;
@@ -743,41 +779,120 @@
             }
         }
 
-function resizeCanvas() {
-    const maxWidth = 480; // Maximum width for Telegram skyscraper mode
-    const aspectRatio = 16 / 9; // Typical aspect ratio for skyscraper format
+        function resizeCanvas() {
+            const maxWidth = 480; // Maximum width for Telegram skyscraper mode
+            const aspectRatio = 16 / 9; // Typical aspect ratio for skyscraper format
 
-    // Set width to either the window width or maxWidth, whichever is smaller
-    canvas.width = Math.min(window.innerWidth, maxWidth);
-    
-    // Calculate height based on the aspect ratio, but don't exceed window height
-    canvas.height = Math.min(canvas.width / aspectRatio, window.innerHeight);
+            // Set width to either the window width or maxWidth, whichever is smaller
+            canvas.width = Math.min(window.innerWidth, maxWidth);
+            
+            // Calculate height based on the aspect ratio, but don't exceed window height
+            canvas.height = Math.min(canvas.width / aspectRatio, window.innerHeight);
 
-    // Update global variables if they're used elsewhere
-    width = canvas.width;
-    height = canvas.height;
-    
-    // Calculate resolution based on the canvas height
-    resolution = height / 480;
-}
+            // Update global variables if they're used elsewhere
+            width = canvas.width;
+            height = canvas.height;
+            
+            // Calculate resolution based on the canvas height
+            resolution = height / 480;
+        }
+
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
-        style = ["grassland", "desert", "ice","midnight"][Math.floor(Math.random() * 3)];
-        backgroundLink = 'background/grassland';
-        spriteLink = 'sprites/grassland';
 
-        if (gameStyle == 'desert') {
-            backgroundLink = 'background/desert';
-            spriteLink = 'sprites/desert';
+        // Determine game style based on the current date
+        var today = new Date();
+        var referenceDate = new Date('2024-01-04');
+        var dayNumber = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
+        var styles = ["grassland", "desert", "ice","midnight"];
+        var gameStyle = styles[dayNumber % styles.length];
+        console.log("Current game style:", gameStyle);
+
+        var COLORS = {};
+
+        switch (gameStyle) {
+            case 'grassland':
+                COLORS = {
+                    SKY: '#72D7EE',
+                    TREE: '#005108',
+                    FOG: '#005108',
+                    LIGHT: { road: '#6B6B6B', grass: '#10AA10', rumble: '#555555', lane: '#CCCCCC' },
+                    DARK: { road: '#696969', grass: '#009A00', rumble: '#BBBBBB' },
+                    START: { road: 'white', grass: 'white', rumble: 'white' },
+                    FINISH: { road: 'black', grass: 'black', rumble: 'black' }
+                };
+                break;
+            case 'desert':
+                COLORS = {
+                    SKY: '#FFCC33',
+                    TREE: '#A67B5B',
+                    FOG: '#A67B5B',
+                    LIGHT: { road: '#E0C68C', grass: '#E6D3A3', rumble: '#D4B284', lane: '#F3E3BD' },
+                    DARK: { road: '#D4B284', grass: '#E0C68C', rumble: '#E6D3A3' },
+                    START: { road: '#FFEBB7', grass: '#E6D3A3', rumble: '#FFEBB7' },
+                    FINISH: { road: '#A67B5B', grass: '#A67B5B', rumble: '#A67B5B' }
+                };
+                break;
+            case 'ice':
+                COLORS = {
+                    SKY: '#B3E5FC',
+                    TREE: '#81D4FA',
+                    FOG: '#81D4FA',
+                    LIGHT: { road: '#A7C4D7', grass: '#B3E5FC', rumble: '#81D4FA', lane: '#D9EAF2' },
+                    DARK: { road: '#81D4FA', grass: '#A7C4D7', rumble: '#B3E5FC' },
+                    START: { road: '#D9EAF2', grass: '#B3E5FC', rumble: '#D9EAF2' },
+                    FINISH: { road: '#4FC3F7', grass: '#4FC3F7', rumble: '#4FC3F7' }
+                };
+                break;
+
+            case 'midnight':
+                COLORS = {
+                  SKY: '#0A0A2A',
+                  TREE: '#005108',
+                  FOG: '#005108',
+                  LIGHT: { road: '#3A3A3A', grass: '#004400', rumble: '#333333', lane: '#888888' },
+                  DARK: { road: '#2F2F2F', grass: '#003300', rumble: '#666666' },
+                  START: { road: 'white', grass: 'white', rumble: 'white' },
+                  FINISH: { road: 'black', grass: 'black', rumble: 'black' }
+                };
+                break;
+              
+            default:
+                COLORS = {
+                    SKY: '#72D7EE',
+                    TREE: '#005108',
+                    FOG: '#005108',
+                    LIGHT: { road: '#6B6B6B', grass: '#10AA10', rumble: '#555555', lane: '#CCCCCC' },
+                    DARK: { road: '#696969', grass: '#009A00', rumble: '#BBBBBB' },
+                    START: { road: 'white', grass: 'white', rumble: 'white' },
+                    FINISH: { road: 'black', grass: 'black', rumble: 'black' }
+                };
+                break;
         }
-        if (gameStyle == 'ice') {
-            backgroundLink = 'background/ice';
-            spriteLink = 'sprites/ice';
-        }
-        if (gameStyle == 'midnight') {
-            backgroundLink = 'background/midnight';
-            spriteLink = 'sprites/midnight';
-        }
+
+        var KEY = {
+            LEFT:  37,
+            UP:    38,
+            RIGHT: 39,
+            DOWN:  40,
+            A:     65,
+            D:     68,
+            S:     83,
+            W:     87
+        };
+
+        var BACKGROUND = {
+            HILLS: { x:   5, y:   5, w: 1280, h: 480 },
+            SKY:   { x:   5, y: 495, w: 1280, h: 480 },
+            TREES: { x:   5, y: 985, w: 1280, h: 480 }
+        };
+
+        var SPRITES = {
+            PLAYER_STRAIGHT:        { x: 1085, y:  480, w:   284, h:   41 }
+        };
+
+        SPRITES.SCALE = 0.3 * (1/SPRITES.PLAYER_STRAIGHT.w); // the reference sprite width should be 1/3rd the (half-)roadWidth
+
         Game.run({
             canvas: canvas,
             render: render,
@@ -786,77 +901,77 @@ function resizeCanvas() {
             images: [
                 "background",
                 "sprites",
-                spriteLink + "/player_straight",
-                spriteLink + "/player_uphill_straight",
-                spriteLink + "/player_uphill_left",
-                spriteLink + "/player_uphill_right",
-                spriteLink + "/player_right",
-                spriteLink + "/player_left",
-                spriteLink + "/billboard01",
-                spriteLink + "/billboard02",
-                spriteLink + "/billboard03",
-                spriteLink + "/billboard04",
-                spriteLink + "/billboard05",
-                spriteLink + "/billboard06",
-                spriteLink + "/billboard07",
-                spriteLink + "/billboard08",
-                spriteLink + "/billboard09",
-                spriteLink + "/billboard10",
-                spriteLink + "/billboard11",
-                spriteLink + "/billboard12",
-                spriteLink + "/bush01",
-                spriteLink + "/bush02",
-                spriteLink + "/bush03",
-                spriteLink + "/bush04",
-                spriteLink + "/bush05",
-                spriteLink + "/bush06",
-                spriteLink + "/bush07",
-                spriteLink + "/boulder01",
-                spriteLink + "/boulder02",
-                spriteLink + "/boulder03",
-                spriteLink + "/boulder04",
-                spriteLink + "/boulder05",
-                spriteLink + "/palm_tree01",
-                spriteLink + "/palm_tree02",
-                spriteLink + "/palm_tree03",
-                spriteLink + "/palm_tree04",
-                spriteLink + "/palm_tree05",
-                spriteLink + "/dead_tree01",
-                spriteLink + "/dead_tree02",
-                spriteLink + "/stump01",
-                spriteLink + "/stump02",
-                spriteLink + "/cactus01",
-                spriteLink + "/cactus02",
-                spriteLink + "/column01",
-                spriteLink + "/column02",
-                spriteLink + "/column03",
-                spriteLink + "/column04",
-                spriteLink + "/car01",
-                spriteLink + "/car02",
-                spriteLink + "/car03",
-                spriteLink + "/car04",
-                spriteLink + "/car05",
-                spriteLink + "/car06",
-                spriteLink + "/semi01",
-                spriteLink + "/semi02",
-                spriteLink + "/semi03",
-                spriteLink + "/semi04",
-                spriteLink + "/semi05",
-                spriteLink + "/semi06",
-                spriteLink + "/semi07",
-                spriteLink + "/semi08",
-                spriteLink + "/semi09",
-                spriteLink + "/semi10",
-                spriteLink + "/semi11",
-                spriteLink + "/semi12",
-                spriteLink + "/truck01",
-                spriteLink + "/truck02",
-                spriteLink + "/truck03",
-                spriteLink + "/truck04",
-                spriteLink + "/truck05",
-                backgroundLink + "/sky",
-                backgroundLink + "/hills",
-                backgroundLink + "/trees",
+                "sprites/grassland/player_straight",
+                "sprites/grassland/player_uphill_straight",
+                "sprites/grassland/player_uphill_left",
+                "sprites/grassland/player_uphill_right",
+                "sprites/grassland/player_right",
+                "sprites/grassland/player_left",
+                "sprites/grassland/billboard01",
+                "sprites/grassland/billboard02",
+                "sprites/grassland/billboard03",
+                "sprites/grassland/billboard04",
+                "sprites/grassland/billboard05",
+                "sprites/grassland/billboard06",
+                "sprites/grassland/billboard07",
+                "sprites/grassland/billboard08",
+                "sprites/grassland/billboard09",
+                "sprites/grassland/billboard10",
+                "sprites/grassland/billboard11",
+                "sprites/grassland/billboard12",
+                "sprites/grassland/bush01",
+                "sprites/grassland/bush02",
+                "sprites/grassland/bush03",
+                "sprites/grassland/bush04",
+                "sprites/grassland/bush05",
+                "sprites/grassland/bush06",
+                "sprites/grassland/bush07",
+                "sprites/grassland/boulder01",
+                "sprites/grassland/boulder02",
+                "sprites/grassland/boulder03",
+                "sprites/grassland/boulder04",
+                "sprites/grassland/boulder05",
+                "sprites/grassland/palm_tree01",
+                "sprites/grassland/palm_tree02",
+                "sprites/grassland/palm_tree03",
+                "sprites/grassland/palm_tree04",
+                "sprites/grassland/palm_tree05",
+                "sprites/grassland/dead_tree01",
+                "sprites/grassland/dead_tree02",
+                "sprites/grassland/stump01",
+                "sprites/grassland/stump02",
+                "sprites/grassland/cactus01",
+                "sprites/grassland/cactus02",
+                "sprites/grassland/column01",
+                "sprites/grassland/column02",
+                "sprites/grassland/column03",
+                "sprites/grassland/column04",
+                "sprites/grassland/car01",
+                "sprites/grassland/car02",
+                "sprites/grassland/car03",
+                "sprites/grassland/car04",
+                "sprites/grassland/car05",
+                "sprites/grassland/car06",
+                "sprites/grassland/semi01",
+                "sprites/grassland/semi02",
+                "sprites/grassland/semi03",
+                "sprites/grassland/semi04",
+                "sprites/grassland/semi05",
+                "sprites/grassland/semi06",
+                "sprites/grassland/semi07",
+                "sprites/grassland/semi08",
+                "sprites/grassland/semi09",
+                "sprites/grassland/semi10",
+                "sprites/grassland/semi11",
+                "sprites/grassland/semi12",
+                "sprites/grassland/truck01",
+                "sprites/grassland/truck02",
+                "sprites/grassland/truck03",
+                "sprites/grassland/truck04",
+                "sprites/grassland/truck05",
+                "background/grassland/sky",
+                "background/grassland/hills",
+                "background/grassland/trees",
                 "coin"
             ],
 
