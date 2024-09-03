@@ -436,8 +436,14 @@
         });
 
 async function dailyLogin(){
-    result = await sendTonTransaction()
-    alert(result)
+    trxID = await sendTonTransaction()
+    data = await doDailyLogIn(tgID,trxID)
+    alert(data)
+    if (data.message.startsWith('Daily checkin successful!')){
+                setupCanvas();
+                loadDynamicQuests()
+                startCoinRain()
+            }
 }
 function base64ToHex(base64) {
     // Base64-String dekodieren in ein Bytearray
@@ -470,7 +476,11 @@ async function sendTonTransaction() {
 }
 
     try {
-        const result = await tonConnectUI.sendTransaction(transaction);
+        const result = await tonConnectUI.sendTransaction(transaction, {
+            modals: ['before', 'success', 'error'],
+            notifications: ['before', 'success', 'error'],
+            skipRedirectToWallet: 'ios' //'ios' (default), or 'never', or 'always'
+        });
 
         // you can use signed boc to find the transaction 
         const tonweb = new TonWeb();
