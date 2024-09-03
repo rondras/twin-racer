@@ -344,6 +344,7 @@ async function doDailyCheckIn(tgID) {
             // Parse the JSON response
             const result = await response.json();
             console.log('Checkin performed:', result);
+            return (result)
             
         } else {
             // Handle errors if the response is not successful
@@ -393,6 +394,7 @@ async function doDailyLogIn(tgID,trxID) {
             // Parse the JSON response
             const result = await response.json();
             console.log('Checkin performed:', result);
+            return(result)
             
         } else {
             // Handle errors if the response is not successful
