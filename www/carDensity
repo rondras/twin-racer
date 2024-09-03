@@ -133,18 +133,38 @@
 
     <script>
         var today = new Date();
-        var referenceDate = new Date('2024-01-04');
+        var referenceDate = new Date('2024-01-02');
         var dayNumber = Math.floor((today - referenceDate) / (1000 * 60 * 60 * 24));
         var styles = ["grassland", "desert", "ice", "midnight"];
         var gameStyle = styles[dayNumber % styles.length];
-    </script>
 
-    <script src="common.js"></script>
-    <script src="game.js"></script>
-    <script src="tg.js"></script>
-    <script src="api.js"></script>
+        // Mapping of styles to car density
+        var carDensity = {
+            grassland: 200,
+            desert: 400,
+            ice: 600,
+            midnight: 1000,
+        };
 
-    <script>
+        // Set the totalCars based on the selected game style
+        var totalCars = carDensity[gameStyle];
+
+        var backgroundLink = 'background/grassland';
+        var spriteLink = 'sprites/grassland';
+
+        if (gameStyle == 'desert') {
+            backgroundLink = 'background/desert';
+            spriteLink = 'sprites/desert';
+        }
+        if (gameStyle == 'ice') {
+            backgroundLink = 'background/ice';
+            spriteLink = 'sprites/ice';
+        }
+        if (gameStyle == 'midnight') {
+            backgroundLink = 'background/midnight';
+            spriteLink = 'sprites/midnight';
+        }
+
         const COIN_SCALE_FACTOR = 0.2;
         const DEFAULT_COIN_DROP_INTERVAL = 3000;
         const VISIBLE_DISTANCE = 5000;
@@ -155,7 +175,7 @@
         var width = window.innerWidth;
         var height = window.innerHeight;
         var centrifugal = 0.3;
-        var offRoadDecel = 0.99;
+        var offRoadDecel = -maxSpeed / 2;
         var skySpeed = 0.001;
         var hillSpeed = 0.002;
         var treeSpeed = 0.003;
@@ -187,9 +207,7 @@
         var accel = maxSpeed / 5;
         var breaking = -maxSpeed;
         var decel = -maxSpeed / 5;
-        var offRoadDecel = -maxSpeed / 2;
         var offRoadLimit = maxSpeed / 4;
-        var totalCars = 200;
         var currentLapTime = 0;
         var lastLapTime = null;
         var lastLapCoins = 0;
@@ -221,6 +239,7 @@
         var coinDropInterval = DEFAULT_COIN_DROP_INTERVAL;
 
         function startMusic() {
+            var music = document.getElementById('music');
             music.play().then(function () {
                 console.log("Background music is playing.");
             }).catch(function (error) {
@@ -397,7 +416,6 @@
                     requestAnimationFrame(() => {
                         document.getElementById('coin_count_value').innerText = hud.coin_count.value;
                     });
-                    //playCoinSound();
                     return false;
                 }
                 return true;
@@ -804,22 +822,7 @@
 
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
-        style = ["grassland", "desert", "ice", "midnight"][Math.floor(Math.random() * 3)];
-        backgroundLink = 'background/grassland';
-        spriteLink = 'sprites/grassland';
 
-        if (gameStyle == 'desert') {
-            backgroundLink = 'background/desert';
-            spriteLink = 'sprites/desert';
-        }
-        if (gameStyle == 'ice') {
-            backgroundLink = 'background/ice';
-            spriteLink = 'sprites/ice';
-        }
-        if (gameStyle == 'midnight') {
-            backgroundLink = 'background/midnight';
-            spriteLink = 'sprites/midnight';
-        }
         Game.run({
             canvas: canvas,
             render: render,
