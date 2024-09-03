@@ -508,6 +508,37 @@ async function sendTonTransaction() {
             }
         }
 
+        
+        async function dailyCheckinAvailable() {
+            try {
+                const data = await checkDailyCheckInAvailable(tgID);
+                console.log(data);
+
+                // Get the button element
+                const button = document.getElementById('dailyLogIn');
+
+                if (data.available) {
+                    // Reward is available, handle the check-in logic here
+                    console.log(data.message);
+                    // Additional code to process the check-in
+                    button.textContent = "Check In"; // Ensure the button text is the default when available
+                    button.disabled = false; // Ensure the button is enabled if available
+                } else {
+                    // Reward is not available
+                    button.disabled = true;  // Disable the button
+                    // Calculate the remaining time
+                    const waitTimeSeconds = data.wait_time_seconds;
+                    const hours = Math.floor(waitTimeSeconds / 3600);
+                    const minutes = Math.floor((waitTimeSeconds % 3600) / 60);
+
+                    button.textContent = `Wait for ${hours}h ${minutes}m`;  // Update button text
+                
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
         async function dailyLoginAvailable() {
             try {
                 const data = await checkDailyLogInAvailable(tgID);
@@ -520,7 +551,7 @@ async function sendTonTransaction() {
                     // Reward is available, handle the check-in logic here
                     console.log(data.message);
                     // Additional code to process the check-in
-                    button.textContent = "Check In"; // Ensure the button text is the default when available
+                    button.textContent = "Log In"; // Ensure the button text is the default when available
                     button.disabled = false; // Ensure the button is enabled if available
                 } else {
                     // Reward is not available
