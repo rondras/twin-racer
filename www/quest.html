@@ -439,6 +439,20 @@ async function dailyLogin(){
     result = await sendTonTransaction()
     alert(result)
 }
+function base64ToHex(base64) {
+    // Base64-String dekodieren in ein Bytearray
+    const raw = atob(base64);
+    let result = '';
+
+    // Jedes Byte in einen zweistelligen HEX-Wert umwandeln und zum Ergebnis hinzufügen
+    for (let i = 0; i < raw.length; i++) {
+        const hex = raw.charCodeAt(i).toString(16).padStart(2, '0');
+        result += hex;
+    }
+
+    return result;
+}
+
 
 async function sendTonTransaction() {
     // Ensure the DOM is fully loaded before starting
@@ -468,7 +482,7 @@ async function sendTonTransaction() {
 
         const hashBase64 = tonweb.utils.bytesToBase64(bocCellBytes);
 
-        return (hashBase64)
+        return (base64ToHex(hashBase64))
     } catch (e) {
         console.error(e);
     }
