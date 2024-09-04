@@ -202,7 +202,7 @@ async function completeQuest(tgID,questID) {
     }
 }
 
-async function checkTelegramMembership(tgID,questID) {
+async function verifyTelegramMembership(tgID,questID) {
     // API endpoint URL
     const apiUrl = apiBase + 'verifyTelegramMembership';
     

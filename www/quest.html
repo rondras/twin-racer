@@ -392,11 +392,9 @@
         }
 
         async function checkTelegramMembership(button,questID) {
-            result = await checkTelegramMembership(tgID,questID)
+            result = await verifyTelegramMembership(tgID,questID)
             console.log(result)
-            const questItem = button.closest('.quest-item');
-            button.disabled = true;
-            button.textContent = 'Completed';
+            
         }    
 
         function checkTask(button, coins, startTime, isVideo) {
