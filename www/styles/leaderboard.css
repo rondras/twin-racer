@@ -11,7 +11,7 @@ body {
 }
 
 tbody{
-    font-size: clamp(10px, 2vw, 25px);
+    font-size: clamp(8px, 2vw, 25px);
 }
 header {
     background-color: #333;
