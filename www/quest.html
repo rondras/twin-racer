@@ -296,17 +296,19 @@
                         <p>${quest.questText} <span>(${quest.questReward} Coins)</span></p>
                         <button 
                             ${quest.questStatus === 3 ? 'disabled' : ''} 
-                            onclick="${quest.questStatus === 0 ? 
-                                `startTask(this,${quest.questID},'${quest.questLink}')` 
-                                : quest.questStatus === 2 ? 
-                                    `completeTask(this,'${quest.questID}','${tgID}' )` 
-                                    : ''
-                                    }
-                                    "
-                        >
+                            onclick="${
+                                quest.questStatus === 0 
+                                    ? `startTask(this, ${quest.questID}, '${quest.questLink}')` 
+                                    : quest.questStatus === 2 
+                                        ? quest.questType === 'TG' 
+                                            ? `checkTelegramMembership(this, '${quest.questID}')` 
+                                            : `completeTask(this, '${quest.questID}')` 
+                                        : ''
+                                }"
+                            >
                             ${quest.questStatus === 0 ? quest.questButtonText 
                             : quest.questStatus === 1 ? 'In Progress' 
-                            : quest.questStatus === 2 ? 'Complete' 
+                            : quest.questStatus === 2 ? 'Check' 
                             : 'Completed'}
                         </button>
                     `;
@@ -388,6 +390,10 @@
             loadDynamicQuests()
             startCoinRain()
         }
+
+        function checkTelegramMembership(button,questID) {
+            console.log("DEBUG")
+        }    
 
         function checkTask(button, coins, startTime, isVideo) {
             const questItem = button.closest('.quest-item');
