@@ -394,7 +394,7 @@
 
         async function checkTelegramMembership(button,questID) {
             result = await verifyTelegramMembership(tgID,questID)
-            if (resul.message) {
+            if (result.message) {
                 setupCanvas();
                 loadDynamicQuests()
                 updateCoins();
