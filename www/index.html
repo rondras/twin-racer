@@ -758,31 +758,27 @@
             dropCoins(true);
         }
 
-        function dropCoins(isInitialDrop = false) {
-            if (isInitialDrop) {
-                let numberOfCoins = 50;
-
-                for (let i = 0; i < numberOfCoins; i++) {
-                    let zPosition = i * 2000 + Util.randomInt(1000, 2000);
-                    let offset = Util.randomChoice([-0.5, 0, 0.5]);
-
-                    coins.push({ id: i, offset: offset, z: zPosition, collected: false });
-                }
-            } else {
-                let zStart = position + playerZ + 8000;
-                let zSpacing = 2000;
-                let numberOfCoins = [3, 4, 6][Math.floor(Math.random() * 3)];
-                let minSpacing = 300;
-                let maxSpacing = 600;
-
-                for (let i = 0; i < numberOfCoins; i++) {
-                    let offset = 0;
-                    let zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
-
-                    coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
-                }
-            }
+function dropCoins(isInitialDrop = false) {
+    if (isInitialDrop) {
+        let numberOfCoins = 12; // Reduced from 25 to 12
+        for (let i = 0; i < numberOfCoins; i++) {
+            let zPosition = i * 4000 + Util.randomInt(2000, 4000); // Increased spacing
+            let offset = Util.randomChoice([-0.5, 0, 0.5]);
+            coins.push({ id: i, offset: offset, z: zPosition, collected: false });
         }
+    } else {
+        let zStart = position + playerZ + 12000; // Increased start position for further spacing
+        let zSpacing = 4000; // Increased from 3000 to 4000
+        let numberOfCoins = [1, 2, 3][Math.floor(Math.random() * 3)]; // Reduced from [2, 3, 4]
+        let minSpacing = 1000; // Increased from 500 to 1000
+        let maxSpacing = 1500; // Increased from 1000 to 1500
+        for (let i = 0; i < numberOfCoins; i++) {
+            let offset = Util.randomChoice([-0.5, 0, 0.5]);
+            let zPosition = zStart + i * zSpacing + Util.randomInt(minSpacing, maxSpacing);
+            coins.push({ id: i + coins.length, offset: offset, z: zPosition, collected: false });
+        }
+    }
+}
 
         function resizeCanvas() {
             const maxWidth = 480; // Maximum width for Telegram skyscraper mode
