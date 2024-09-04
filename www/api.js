@@ -203,8 +203,6 @@ async function completeQuest(tgID,questID) {
 }
 
 async function checkTelegramMembership(tgID,questID) {
-    console.log("Debug")
-    // for testing - take out
     // API endpoint URL
     const apiUrl = apiBase + 'verifyTelegramMembership';
     
@@ -250,7 +248,6 @@ async function checkTelegramMembership(tgID,questID) {
 }
 
 async function addTONWallet(tgID,walletAddress) {
-    console.log("Debug")
     // for testing - take out
     // API endpoint URL
     const apiUrl = apiBase + 'addTONWallet';
