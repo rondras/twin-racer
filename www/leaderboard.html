@@ -42,58 +42,7 @@
     </script>
     <style>
         /* Existing CSS styles */
-        .leaderboard-wrapper {
-            width: 100%;
-        }
-        #car-container {
-            position: relative;
-            width: 100%;
-            height: 100px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
 
-        .car {
-            position: absolute;
-            bottom: 0;
-            z-index: 10;
-            width: 150px;
-            height: auto;
-        }
-
-        @keyframes drive-left {
-            0% {
-                right: -150px;
-            }
-            100% {
-                right: 100%;
-            }
-        }
-
-        @keyframes drive-right {
-            0% {
-                left: -150px;
-            }
-            100% {
-                left: 100%;
-            }
-        }
-
-        .drive-left {
-            animation: drive-left 5s linear forwards;
-        }
-
-        .drive-right {
-            animation: drive-right 5s linear forwards;
-        }
-
-        .red-line {
-            width: 100%;
-            height: 5px;
-            background-color: #e74c3c;
-            position: absolute;
-            bottom: 0;
-        }
     </style>
 </head>
 <body>
@@ -124,7 +73,7 @@
                     </tbody>
                 </table>
                 <div class="trophy-container">
-                    <img src="./images/sprites/pokal.png" alt="Trophy" class="trophy">
+                    <img src="./images/trophy.png" alt="Trophy" class="trophy">
                 </div>
             </div>
         </div>
@@ -148,10 +97,10 @@
         const carContainer = document.getElementById('car-container');
 
         const cars = [
-            './images/sprites/pandacar_drive_to_left.png',  // Drives from right to left
-            './images/sprites/car_drive_to_right.png',      // Drives from left to right
-            './images/sprites/car_drive_to_left.png',       // Drives from right to left
-            './images/sprites/pandacar_drive_to_right.png'  // Drives from left to right
+            './images/car_left.webp',  // Drives from right to left
+            './images/car_right.webp',      // Drives from left to right
+            './images/car_left1.webp',       // Drives from right to left
+            './images/car_right1.webp'  // Drives from left to right
         ];
 
         function spawnCar() {
