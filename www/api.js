@@ -202,6 +202,52 @@ async function completeQuest(tgID,questID) {
     }
 }
 
+async function checkTelegramMembership(tgID,questID) {
+    console.log("Debug")
+    // for testing - take out
+    // API endpoint URL
+    const apiUrl = apiBase + 'verifyTelegramMembership';
+    
+    if (questID == '' || tgID == '' ){
+        console.log("Inputs missing")
+        return
+    }
+
+    // Create the payload object
+    const data = {
+        tgID: tgID,
+        questID: questID
+    };
+    console.log(data)
+    try {
+        // Make the POST request to the API
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            console.log('Membership confirmed:', result);
+            return (result)
+            
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error completing quest:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed due to network error.');
+    }
+}
 
 async function addTONWallet(tgID,walletAddress) {
     console.log("Debug")
