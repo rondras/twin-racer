@@ -391,8 +391,8 @@
             startCoinRain()
         }
 
-        function checkTelegramMembership(button,questID) {
-            result = checkTelegramMembership(tgID,questID)
+        async function checkTelegramMembership(button,questID) {
+            result = await checkTelegramMembership(tgID,questID)
             console.log(result)
         }    
 
