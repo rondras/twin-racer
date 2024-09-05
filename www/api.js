@@ -424,7 +424,7 @@ async function doDailyLogIn(tgID,trxID) {
         if (response.ok) {
             // Parse the JSON response
             const result = await response.json();
-            console.log('Checkin performed:', result);
+            console.log('Log in performed:', result);
             return(result)
             
         } else {

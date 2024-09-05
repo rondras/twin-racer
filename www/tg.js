@@ -164,9 +164,10 @@ async function sendTonTransaction(amountInWei) {
 
         const hashBase64 = tonweb.utils.bytesToBase64(bocCellBytes);
 
-        return (base64ToHex(hashBase64))
+        return ({'success':true, 'trxID':base64ToHex(hashBase64)})
     } catch (e) {
-        console.error(e);
+        console.error(e)
+        return ({'success':false, 'error':e});
     }
     
     

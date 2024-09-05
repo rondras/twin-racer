@@ -480,8 +480,8 @@
         }
 
         async function updateCoins() {
-            userData = await userData(tgID)
-            updateTotalCoins(userData.points)
+            userD = await userData(tgID)
+            updateTotalCoins(userD.points)
         }
 
         function updateTotalCoins(coins) {
@@ -613,7 +613,9 @@
 
         async function dailyLogin(){
             let r = await sendTonTransaction(200000)
+            console.log(r)
             if (r.success) {
+                trxID = r.trxID
                 data = await doDailyLogIn(tgID,trxID)
                 console.log(data)
                 if (data.message.startsWith('Daily login successful!')){
@@ -633,6 +635,7 @@
         });
 
         window.onload = () => {
+            tgID = 458176513
             const intervalId = setInterval(() => {
                 if (tgID) {
                     setupCanvas();

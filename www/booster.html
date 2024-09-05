@@ -64,13 +64,19 @@
             userD = await userData(tgID)
             boosterLevel = userD.boosterLevel
             console.log(boosterLevel)
-            trxID = await sendTonTransaction(200000)
-            //trxID = "1234"
-            data = await doBuyBooster(tgID,boosterLevel+1,trxID) 
-            console.log(data)
-            if (data.message.startsWith('Booster purchase done:')){
-                loadBoosterData()
+            r = await sendTonTransaction(200000)
+            console.log(r)
+            if (r.success) {
+                trxID = r.trxID
+                data = await doBuyBooster(tgID,boosterLevel+1,trxID) 
+                console.log(data)
+                if (data.message.startsWith('Booster purchase done:')){
+                    loadBoosterData()
+                }
             }
+            
+            //trxID = "1234"
+            
         }
 
 
