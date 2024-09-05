@@ -1,9 +1,9 @@
 body {
+    max-width: 100%;
     margin: 0;
     font-family: 'Press Start 2P', cursive;
     background-color: #000;
     color: #fff;
-    background-image: url('background-pattern.png');
     background-size: cover;
     background-repeat: no-repeat;
     position: relative;
