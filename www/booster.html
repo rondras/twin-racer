@@ -20,7 +20,7 @@
         <div class="header-container">
             <img src="images/back_button.png"home-button" onclick="window.location.href='index.html'">
             <h1 class="game-title">Twin Racer</h1>
-            <p class="tagline">Auto-Farmer</p>
+            <p class="tagline">Shop</p>
         </div>
     </header>
     
@@ -30,8 +30,9 @@
             Your browser does not support the video tag.
         </video>
         <div class="purchase-info" id="purchaseInfo">
-            Purchase Speed Booster for 0.1.<br>
-            It will increase your max speed by 5%.
+            <div>Speed Booster Level <span id="boosterLevelNew"></span></div>
+            <div> It will increase your max speed by 5%.</div>
+            <div> Price: <span id="boosterPrice"></span>&nbsp;TON</div>
         </div>
         <div class="quest-item">
             <div id="ton-connect"></div>
@@ -64,7 +65,7 @@
             userD = await userData(tgID)
             boosterLevel = userD.boosterLevel
             console.log(boosterLevel)
-            r = await sendTonTransaction(200000)
+            r = await sendTonTransaction(getBoosterPrice(boosterLevel+1)*1000000000)
             console.log(r)
             if (r.success) {
                 trxID = r.trxID
@@ -79,18 +80,45 @@
             
         }
 
+        function getBoosterPrice(boosterLevel){
+            if (boosterLevel === 1){return(0.1)}
+            if (boosterLevel === 2){return(0.2)}
+            if (boosterLevel === 3){return(0.5)}
+            if (boosterLevel === 4){return(1)}
+            if (boosterLevel === 5){return(2)}
+            if (boosterLevel === 6){return(5)}
+            if (boosterLevel === 7){return(10)}
+
+        }
 
         async function loadBoosterData(){
-            console.log('LoadingBoosterData')
+            
+            console.log('LoadingBoosterData');
+            
+            try {
+                // Assume you have a function that retrieves user data, like userData(tgID)
+                const userD = await userData(tgID);  // Fetch user data
+                const boosterLevel = userD.boosterLevel;  // Extract booster level
+                console.log('Booster Level:', boosterLevel);
+                const boosterPrice = getBoosterPrice(boosterLevel+1)
+                
+                // Update the span element with boosterLevel + 1
+                document.getElementById("boosterLevelNew").textContent = boosterLevel + 1;
+                document.getElementById("boosterPrice").textContent = boosterPrice
+                return (boosterLevel)
+
+            } catch (error) {
+                console.error("Error loading booster data:", error);
+            }
         }
+        
 
         window.onload = () => {
             tgID = 458176513
             const intervalId = setInterval(() => {
                 if (tgID) {
                     userD = userData(tgID)
-                    boosterLevel = userD.boosterLevel 
-                    console.log(boosterLevel)
+                    boosterLevel = loadBoosterData()
                     clearInterval(intervalId);
                 } else {
                     console.log("Waiting for tgID to be initialized...");
