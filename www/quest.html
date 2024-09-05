@@ -604,24 +604,27 @@
             data = await doDailyCheckIn(tgID)
             if (data.message.startsWith('Daily checkin successful!')){
                 setupCanvas();
-                updateCoins();
-                loadDynamicQuests()
-                dailyCheckinAvailable(tgID)
+                await updateCoins();
+                await loadDynamicQuests()
+                await dailyCheckinAvailable(tgID)
                 startCoinRain()
             }
         }
 
         async function dailyLogin(){
-            trxID = await sendTonTransaction(200000)
-            data = await doDailyLogIn(tgID,trxID)
-            console.log(data)
-            if (data.message.startsWith('Daily login successful!')){
-                setupCanvas();
-                updateCoins();
-                loadDynamicQuests()
-                dailyLoginAvailable(tgID)
-                startCoinRain()
+            let r = await sendTonTransaction(200000)
+            if (r.success) {
+                data = await doDailyLogIn(tgID,trxID)
+                console.log(data)
+                if (data.message.startsWith('Daily login successful!')){
+                    setupCanvas();
+                    updateCoins();
+                    loadDynamicQuests()
+                    dailyLoginAvailable(tgID)
+                    startCoinRain()
+                }
             }
+            
         }
 
         window.addEventListener('resize', () => {
