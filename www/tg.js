@@ -1,3 +1,4 @@
+
 var tgName = ''
 var tgID = ''
 var referrerTelegramId = ''
@@ -122,4 +123,53 @@ async function addUser(tgName, tgID,referrerTelegramId) {
 }
 
 
+function base64ToHex(base64) {
+    // Base64-String dekodieren in ein Bytearray
+    const raw = atob(base64);
+    let result = '';
 
+    // Jedes Byte in einen zweistelligen HEX-Wert umwandeln und zum Ergebnis hinzufügen
+    for (let i = 0; i < raw.length; i++) {
+        const hex = raw.charCodeAt(i).toString(16).padStart(2, '0');
+        result += hex;
+    }
+
+    return result;
+}
+
+async function sendTonTransaction(amountInWei) {
+    // Ensure the DOM is fully loaded before starting
+    
+    const transaction = {
+    validUntil: Math.floor(Date.now() / 1000) + 60, // 60 sec
+    messages: [
+        {
+            address: "0:281fa2e973d8a0d9685321cd5c579bdae62512a831fa987eb2d2ca24e8d04621",
+            amount: amountInWei 
+        }
+    ],
+    
+}
+
+    try {
+        const result = await tonConnectUI.sendTransaction(transaction, {
+            modals: ['before', 'success', 'error'],
+            notifications: ['before', 'success', 'error'],
+            skipRedirectToWallet: 'ios' //'ios' (default), or 'never', or 'always'
+        });
+
+        // you can use signed boc to find the transaction 
+        const tonweb = new TonWeb();
+        const bocCellBytes = await tonweb.boc.Cell.oneFromBoc(tonweb.utils.base64ToBytes(result.boc)).hash();
+
+        const hashBase64 = tonweb.utils.bytesToBase64(bocCellBytes);
+
+        return (base64ToHex(hashBase64))
+    } catch (e) {
+        console.error(e);
+    }
+    
+    
+
+    
+}

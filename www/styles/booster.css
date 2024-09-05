@@ -1,0 +1,96 @@
+/* Basic styles for the page */
+body {
+    font-family: 'Press Start 2P', cursive;
+    background-color: #f3f3f3;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+header, footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    position: relative;
+}
+
+.game-title {
+    font-size: 2rem;
+    margin: 0;
+}
+
+.tagline {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+video {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+}
+
+.purchase-info {
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #e74c3c;
+    line-height: 1.5;
+}
+
+.purchase-button {
+    background-color: #e74c3c;
+    border: none;
+    color: #fff;
+    padding: 15px 30px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    text-align: center;
+    transition: background-color 0.3s ease;
+    text-transform: uppercase;
+    margin-top: 10px;
+}
+
+.purchase-button:hover {
+    opacity: 0.8;
+}
+
+.home-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 180px;  /* Increased width */
+    height: 120px; /* Increased height */
+    cursor: pointer;
+}
+
+.confirmation-message {
+    margin-top: 20px;
+    font-size: 1rem;
+    color: #333;
+    text-align: center;
+    display: none;
+}
+
+.upgrade-description {
+    font-size: 1rem;
+    margin-top: 5px;
+    color: #e74c3c;
+    text-align: center;
+}

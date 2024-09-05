@@ -612,7 +612,7 @@
         }
 
         async function dailyLogin(){
-            trxID = await sendTonTransaction()
+            trxID = await sendTonTransaction(200000)
             data = await doDailyLogIn(tgID,trxID)
             console.log(data)
             if (data.message.startsWith('Daily login successful!')){
