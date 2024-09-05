@@ -1039,6 +1039,19 @@ function dropCoins(isInitialDrop = false) {
             if ((segments.length == 0) || (options.segmentLength) || (options.rumbleLength))
                 resetRoad();
         }
+        window.onload = () => {
+            //tgID = 458176513
+            const intervalId = setInterval(() => {
+                if (tgID) {
+                    userD = userData(tgID)
+                    boosterLevel = userD.boosterLevel
+                    maxspeed = maxspeed * (1.05** boosterLevel)
+                    clearInterval(intervalId);
+                } else {
+                    console.log("Waiting for tgID to be initialized...");
+                }
+            }, 100); // Check every 100ms
+        };
 
     </script>
 
