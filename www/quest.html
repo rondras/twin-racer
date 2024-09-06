@@ -6,8 +6,7 @@
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','GTM-KBD2BBBQ');
-    </script>
+        })(window,document,'script','dataLayer','GTM-KBD2BBBQ');</script>
     <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -178,13 +177,12 @@
     <!-- Google Tag Manager (noscript) -->
     <noscript>
         <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KBD2BBBQ"
-        height="0" width="0" style="display:none;visibility:hidden">
-        </iframe>
+        height="0" width="0" style="display:none;visibility:hidden"></iframe>
     </noscript>
     <!-- End Google Tag Manager (noscript) -->
     <header>
         <div class="header-container">
-            <img src="images/back_button.png"home-button" onclick="window.location.href='index.html'">
+            <img src="images/back_button.png" alt="home-button" onclick="window.location.href='index.html'">
             <h1 class="game-title">Twin Racer</h1>
             <p class="tagline">Complete Quests, Earn Rewards!</p>
             <p id="coin-overview" class="coin-overview">Total Coins: 0</p>
@@ -236,9 +234,9 @@
         <div class="footer-container">
             <p>Follow Us</p>
             <div class="social-icons">
-                <a href="https://www.tiktok.com/@twin_racer" target="_blank"><img src="images/Icon_TikTok.png" alt="TikTok"></a>
-                <a href="https://x.com/twin_race" target="_blank"><img src="images/Icon_X.png" alt="X (formerly Twitter)"></a>
-                <a href="https://discord.gg/852Vr8S5Sf" target="_blank"><img src="images/Icon_Discord.png" alt="Discord"></a>
+                <a href="https://www.tiktok.com/@twin_racer" target="_blank" rel="noopener noreferrer"><img src="images/Icon_TikTok.png" alt="TikTok"></a>
+                <a href="https://x.com/twin_race" target="_blank" rel="noopener noreferrer"><img src="images/Icon_X.png" alt="X (formerly Twitter)"></a>
+                <a href="https://discord.gg/852Vr8S5Sf" target="_blank" rel="noopener noreferrer"><img src="images/Icon_Discord.png" alt="Discord"></a>
             </div>
         </div>
     </footer>
@@ -264,10 +262,9 @@
         async function connectToWallet() {
             try {
                 await tonConnectUI.connectWallet();
-                const connectedWallet = tonConnectUI.wallet; // Get the connected wallet instance
-                const walletAddress = connectedWallet.account.address; // Access the wallet address
+                const connectedWallet = tonConnectUI.wallet;
+                const walletAddress = connectedWallet.account.address;
 
-                // Update the button to show the wallet address and a copy option
                 const tonConnectElement = document.getElementById('ton-connect');
                 tonConnectElement.innerHTML = `
                     <div style="display: flex; align-items: center;">
@@ -275,24 +272,15 @@
                         <button onclick="copyToClipboard('${walletAddress}')">Copy</button>
                     </div>
                 `;
-
-                console.log(connectedWallet);
             } catch (error) {
                 console.error("Error connecting to wallet:", error);
             }
         }
 
         document.getElementById('sendMessageButton').addEventListener('click', function() {
-            // Define the message you want the user to send
-            var message = `Check out this awesome Mini App!  `
-            message += `https://t.me/TwinRacer_bot/TwinRacer?startapp=ref`
-            message += tgID
-
-            // Construct the Telegram link; user will choose the recipient
+            var message = `Check out this awesome Mini App!  https://t.me/TwinRacer_bot/TwinRacer?startapp=ref${tgID}`;
             const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
-
-            // Open the Telegram link
-            Telegram.WebApp.openTelegramLink(telegramLink);
+            window.open(telegramLink, '_blank', 'noopener,noreferrer');
         });
 
         async function loadDynamicQuests() {
@@ -393,84 +381,65 @@
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'In Progress';
-            window.open(url, '_blank');
+            window.open(url, '_blank', 'noopener,noreferrer');
             setupCanvas();
-            loadDynamicQuests()
+            loadDynamicQuests();
         }
+
         function completeTask(button,questID) {
-            completeQuest(tgID,questID)
+            completeQuest(tgID,questID);
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'Completed';
             setupCanvas();
-            loadDynamicQuests()
+            loadDynamicQuests();
             updateCoins();
-            startCoinRain()
+            startCoinRain();
         }
 
         async function checkTelegramMembership(button,questID) {
-            result = await verifyTelegramMembership(tgID,questID)
+            result = await verifyTelegramMembership(tgID,questID);
             if (result.message) {
                 setupCanvas();
-                loadDynamicQuests()
+                loadDynamicQuests();
                 updateCoins();
-                startCoinRain()
+                startCoinRain();
             }
-            
-        }    
-        async function verifyTelegramMembership(tgID,questID) {
-    // API endpoint URL
-    const apiUrl = apiBase + 'verifyTelegramMembership';
-    
-    if (questID == '' || tgID == '' ){
-        console.log("Inputs missing")
-        return
-    }
-
-    // Create the payload object
-    const data = {
-        tgID: tgID,
-        questID: questID
-    };
-    console.log(data)
-    try {
-        // Make the POST request to the API
-        const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        // Check if the response is successful
-        if (response.ok) {
-            // Parse the JSON response
-            const result = await response.json();
-            console.log('Membership confirmed:', result);
-            return (result)
-            
-        } else {
-            // Handle errors if the response is not successful
-            const errorData = await response.json();
-            console.error('Error completing quest:', errorData);
-            
         }
-    } catch (error) {
-        // Handle any network or other errors
-        
-        alert('Failed due to network error.');
-    }
-}
+
+        async function verifyTelegramMembership(tgID,questID) {
+            const apiUrl = apiBase + 'verifyTelegramMembership';
+            if (questID == '' || tgID == '' ){
+                console.log("Inputs missing");
+                return;
+            }
+            const data = { tgID: tgID, questID: questID };
+            console.log(data);
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Membership confirmed:', result);
+                    return (result);
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error completing quest:', errorData);
+                }
+            } catch (error) {
+                alert('Failed due to network error.');
+            }
+        }
 
         function checkTask(button, coins, startTime, isVideo) {
             const questItem = button.closest('.quest-item');
             const currentTime = Date.now();
-
             if (isVideo && currentTime - startTime < 600000) {
                 questItem.classList.add('grey-out');
                 let countdown = 30;
-
                 const countdownInterval = setInterval(() => {
                     if (countdown > 0) {
                         questItem.setAttribute('data-countdown', `Wait ${countdown} sec`);
@@ -482,7 +451,6 @@
                         button.disabled = false;
                     }
                 }, 1000);
-
                 button.disabled = true;
                 button.textContent = 'Task not finished';
             } else {
@@ -495,8 +463,8 @@
         }
 
         async function updateCoins() {
-            userD = await userData(tgID)
-            updateTotalCoins(userD.points)
+            userD = await userData(tgID);
+            updateTotalCoins(userD.points);
         }
 
         function updateTotalCoins(coins) {
@@ -507,7 +475,6 @@
 
         async function boostTelegramChannel() {
             const result = await checkTelegramBoost(tgID); // Implement this function to verify via your backend
-
             if (result.status === 'success') {
                 updateCoins();
                 startCoinRain();
@@ -521,15 +488,11 @@
         function shareTelegramStory() {
             const message = encodeURIComponent("🚨 Hey, have you checked out Twin Racer yet? 🚀 It's the latest buzz in the TON gaming world, and the airdrop potential is off the charts! Don't miss out—jump in now! 🏁🎮");
             const imageUrl = encodeURIComponent("https://racer.twinfinance.io/images/telegramshare.webp");
-
             const telegramShareUrl = `https://t.me/share/url?url=${imageUrl}&text=${message}`;
-            window.open(telegramShareUrl, '_blank');
+            window.open(telegramShareUrl, '_blank', 'noopener,noreferrer');
 
-            // Wait for 5 seconds to verify the task completion
             setTimeout(async () => {
-                // Logic to verify the share and reward the user
                 const result = await verifyShare(tgID); // Implement this function to verify via your backend
-
                 if (result.status === 'success') {
                     updateCoins();
                     startCoinRain();
@@ -543,15 +506,13 @@
 
         async function checkConnectedWallet() {
             try {
-                // Check if a wallet is already connected
                 const connectedWallet = tonConnectUI.wallet;
                 if (connectedWallet && connectedWallet.account && connectedWallet.account.address) {
                     const walletAddress = connectedWallet.account.address;
                     console.log('Connected Wallet Address:', walletAddress);
-                    result = await addTONWallet(tgID,walletAddress)
-                    console.log(result)
+                    result = await addTONWallet(tgID,walletAddress);
                     if (result == 'TON wallet address added successfully!'){
-                        startCoinRain()
+                        startCoinRain();
                         updateCoins();
                     }
                 } else {
@@ -565,25 +526,16 @@
         async function dailyCheckinAvailable() {
             try {
                 const data = await checkDailyCheckInAvailable(tgID);
-                console.log(data);
-
-                // Get the button element
                 const button = document.getElementById('dailyCheckIn');
-
                 if (data.available) {
-                    // Reward is available, handle the check-in logic here
-                    console.log(data.message);
-                    button.textContent = "Check In"; // Ensure the button text is the default when available
-                    button.disabled = false; // Ensure the button is enabled if available
+                    button.textContent = "Check In";
+                    button.disabled = false;
                 } else {
-                    // Reward is not available
-                    button.disabled = true;  // Disable the button
-                    // Calculate the remaining time
+                    button.disabled = true;
                     const waitTimeSeconds = data.wait_time_seconds;
                     const hours = Math.floor(waitTimeSeconds / 3600);
                     const minutes = Math.floor((waitTimeSeconds % 3600) / 60);
-
-                    button.textContent = `Wait for ${hours}h ${minutes}m`;  // Update button text
+                    button.textContent = `Wait for ${hours}h ${minutes}m`;
                 }
             } catch (error) {
                 console.error('Error:', error);
@@ -593,13 +545,8 @@
         async function dailyLoginAvailable() {
             try {
                 const data = await checkDailyLogInAvailable(tgID);
-                console.log(data);
-
-                // Get the button element
                 const button = document.getElementById('dailyLogIn');
-
                 if (data.available) {
-                    console.log(data.message);
                     button.textContent = "Log In";
                     button.disabled = false;
                 } else {
@@ -607,7 +554,6 @@
                     const waitTimeSeconds = data.wait_time_seconds;
                     const hours = Math.floor(waitTimeSeconds / 3600);
                     const minutes = Math.floor((waitTimeSeconds % 3600) / 60);
-
                     button.textContent = `Wait for ${hours}h ${minutes}m`;
                 }
             } catch (error) {
@@ -616,32 +562,29 @@
         }
 
         async function dailyCheckIn() {
-            data = await doDailyCheckIn(tgID)
+            data = await doDailyCheckIn(tgID);
             if (data.message.startsWith('Daily checkin successful!')){
                 setupCanvas();
                 await updateCoins();
-                await loadDynamicQuests()
-                await dailyCheckinAvailable(tgID)
-                startCoinRain()
+                await loadDynamicQuests();
+                await dailyCheckinAvailable(tgID);
+                startCoinRain();
             }
         }
 
         async function dailyLogin(){
-            let r = await sendTonTransaction(200000)
-            console.log(r)
+            let r = await sendTonTransaction(200000);
             if (r.success) {
-                trxID = r.trxID
-                data = await doDailyLogIn(tgID,trxID)
-                console.log(data)
+                trxID = r.trxID;
+                data = await doDailyLogIn(tgID,trxID);
                 if (data.message.startsWith('Daily login successful!')){
                     setupCanvas();
                     updateCoins();
-                    loadDynamicQuests()
-                    dailyLoginAvailable(tgID)
-                    startCoinRain()
+                    loadDynamicQuests();
+                    dailyLoginAvailable(tgID);
+                    startCoinRain();
                 }
             }
-            
         }
 
         window.addEventListener('resize', () => {
@@ -650,21 +593,20 @@
         });
 
         window.onload = () => {
-            tgID = 458176513
+            tgID = 458176513;
             const intervalId = setInterval(() => {
                 if (tgID) {
                     setupCanvas();
                     updateCoins();
-                    dailyLoginAvailable(tgID)
-                    dailyCheckinAvailable(tgID)
-                    checkConnectedWallet()
+                    dailyLoginAvailable(tgID);
+                    dailyCheckinAvailable(tgID);
+                    checkConnectedWallet();
                     loadDynamicQuests();
-                    
                     clearInterval(intervalId);
                 } else {
                     console.log("Waiting for tgID to be initialized...");
                 }
-            }, 100); // Check every 100ms
+            }, 100);
         };
     </script>
 </body>
