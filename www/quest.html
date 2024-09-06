@@ -280,7 +280,7 @@
         document.getElementById('sendMessageButton').addEventListener('click', function() {
             var message = `Check out this awesome Mini App!  https://t.me/TwinRacer_bot/TwinRacer?startapp=ref${tgID}`;
             const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
-            Telegram.WebApp.openUrl(telegramLink);
+            Telegram.WebApp.openLink(telegramLink);
         });
 
         async function loadDynamicQuests() {
@@ -381,7 +381,7 @@
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'In Progress';
-            Telegram.WebApp.openUrl(url);
+            Telegram.WebApp.openLink(url);
             setupCanvas();
             loadDynamicQuests();
         }
