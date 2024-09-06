@@ -381,7 +381,7 @@
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'In Progress';
-            Telegram.WebApp.openUrl(quest.link);
+            Telegram.WebApp.openUrl(url);
             setupCanvas();
             loadDynamicQuests();
         }
