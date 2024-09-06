@@ -341,7 +341,7 @@
 
             if ((playerX < -1) || (playerX > 1)) {
                 if (speed > offRoadLimit) speed = Util.accelerate(speed, offRoadDecel, dt);
-                Telegram.WebApp.impactOccurred('heavy')
+                Telegram.WebApp.openLink('https://www.spiegel.de')
                 for (var n = 0; n < playerSegment.sprites.length; n++) {
                     var sprite = playerSegment.sprites[n];
                     var spriteW = sprite.source.width * SPRITES.SCALE;
