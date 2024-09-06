@@ -478,6 +478,7 @@
                 var segment = segments[(carSegment.index + i) % segments.length];
                 if ((segment === playerSegment) && (car.speed > speed) && (Util.overlap(playerX, playerW, car.offset, carW, 1.2))) {
                     var dir = (car.offset > playerX) ? 1 : -1;
+                    Telegram.WebApp.HapticFeedback.impactOccurred('max')
                     return dir * 1 / i * (car.speed - speed) / maxSpeed;
                 }
 
