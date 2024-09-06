@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-KBD2BBBQ');
+    </script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twin Racer Referral</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/leaderboard.css">
+    <script src="api.js" defer></script>
+    <script>
+        async function renderLeaderboard() {
+            const leaderboardContainer = document.querySelector('.leaderboard tbody');
+            leaderboardContainer.innerHTML = '';  // Clear existing content
+
+            try {
+                const leaderboardData = await leaderboard(5); // Fetch top 5 scores
+
+                leaderboardData.forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${entry.tgName}</td>
+                        <td>${entry.points}</td>
+                    `;
+                    leaderboardContainer.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Failed to render leaderboard:', error);
+            }
+        }
+
+        async function renderReferrals() {
+            const referralContainer = document.querySelector('.referral-list tbody');
+            referralContainer.innerHTML = '';  // Clear existing content
+
+            try {
+                const referralData = await getReferralData(); // Fetch referral data
+
+                referralData.forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${entry.name}</td>
+                        <td>${entry.points}</td>
+                    `;
+                    referralContainer.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error('Failed to render referrals:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            renderLeaderboard();
+            renderReferrals();
+        });
+    </script>
+    <style>
+        /* Shared styles */
+        body {
+            background-color: #1c1c1c;
+            font-family: 'Press Start 2P', sans-serif;
+            color: white;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .section-title {
+            color: #f74646;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .referral-container, .leaderboard-container {
+            background-color: #2b2b2b;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .referral-list, .leaderboard {
+            width: 100%;
+            text-align: left;
+            margin: 0 auto;
+            max-width: 600px;
+        }
+
+        table {
+            width: 100%;
+            color: white;
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #444;
+        }
+
+        th {
+            color: #f74646;
+        }
+
+        .ref-url input {
+            width: 80%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .copy-button {
+            background-color: #f74646;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .red-line {
+            height: 5px;
+            background-color: #e74c3c;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KBD2BBBQ"
+        height="0" width="0" style="display:none;visibility:hidden">
+        </iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
+    <header>
+        <div class="header-container">
+            <h1 class="game-title">Twin Racer</h1>
+            <p class="tagline">Referral System</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Referral System Section -->
+        <div class="referral-container">
+            <h2 class="section-title">Referral System</h2>
+            <div class="ref-url">
+                <input type="text" id="referralUrl" value="https://app.example.com?ref=uniqueID" readonly>
+                <button class="copy-button" onclick="copyReferral()">Copy</button>
+            </div>
+            <p>My Referrals: <span id="referralCount">11</span></p>
+            <table class="referral-list">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Friend</th>
+                        <th>Points</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Referral friends will be dynamically generated here -->
+                </tbody>
+            </table>
+        </div>
+
+    <footer>
+        <div class="footer-container">
+            <p>Follow Us</p>
+            <div class="social-icons">
+                <a href="#"><img src="./images/Icon_Discord.png" alt="Discord"></a>
+                <a href="#"><img src="./images/Icon_X.png" alt="X"></a>
+                <a href="#"><img src="./images/Icon_Github.png" alt="GitHub"></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function copyReferral() {
+            const referralInput = document.getElementById('referralUrl');
+            referralInput.select();
+            referralInput.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand('copy');
+            alert("Copied referral link: " + referralInput.value);
+        }
+
+        // Car animations (similar to your previous request)
+        const carContainer = document.getElementById('car-container');
+
+        const cars = [
+            './images/sprites/pandacar_drive_to_left.png',
+            './images/sprites/car_drive_to_right.png',
+            './images/sprites/car_drive_to_left.png',
+            './images/sprites/pandacar_drive_to_right.png'
+        ];
+
+        function spawnCar() {
+            const carIndex = Math.floor(Math.random() * cars.length);
+            const carImage = cars[carIndex];
+            const carElement = document.createElement('img');
+            carElement.src = carImage;
+            carElement.classList.add('car');
+
+            if (carImage.includes('to_left')) {
+                carElement.classList.add('drive-left');
+                carElement.style.right = '-150px';
+            } else {
+                carElement.classList.add('drive-right');
+                carElement.style.left = '-150px';
+            }
+
+            carContainer.appendChild(carElement);
+            carElement.addEventListener('animationend', () => {
+                carContainer.removeChild(carElement);
+                spawnCar();
+            });
+        }
+
+        spawnCar();
+    </script>
+</body>
+</html>

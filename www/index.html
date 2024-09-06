@@ -2,6 +2,15 @@
 <html>
 
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-KBD2BBBQ');
+    </script>
+    <!-- End Google Tag Manager -->
+    
     <title>TWIN Racer</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -87,6 +96,13 @@
 </head>
 
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KBD2BBBQ"
+        height="0" width="0" style="display:none;visibility:hidden">
+        </iframe>
+    </noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div id="startContainer" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3000; text-align: center;">
         <button id="startButton" style="padding: 0; border: none; background: none; cursor: pointer;">
             <img src="images/start_button.png" alt="Start Game" style="width: 100%; height: auto;">
@@ -237,17 +253,7 @@
             const startContainer = document.getElementById("startContainer");
 
             startButton.addEventListener("click", async function () {
-                if (tgID) {
-                    userD =  await userData(tgID)
-
-                    boosterLevel = userD.boosterLevel
-                    console.log(boosterLevel)
-                    maxSpeed = maxSpeed * (1.05** boosterLevel)
-                    console.log(maxSpeed)
-                } 
-                else {
-                    console.log("Waiting for tgID to be initialized...");
-                }
+                
             
                 startMusic();
                 countdownElement.style.display = "block";
@@ -269,6 +275,17 @@
                 } else {
                     console.log("DeviceMotionEvent.requestPermission is not a function, assuming permission is granted.");
                     addDeviceMotionListener();
+                }
+                if (tgID) {
+                    userD =  await userData(tgID)
+
+                    boosterLevel = userD.boosterLevel
+                    console.log(boosterLevel)
+                    maxSpeed = maxSpeed * (1.05** boosterLevel)
+                    console.log(maxSpeed)
+                } 
+                else {
+                    console.log("Waiting for tgID to be initialized...");
                 }
                 gameStarted = true;
             });
