@@ -236,7 +236,19 @@
             const countdownElement = document.getElementById("countdown");
             const startContainer = document.getElementById("startContainer");
 
-            startButton.addEventListener("click", function () {
+            startButton.addEventListener("click", async function () {
+                if (tgID) {
+                    userD =  await userData(tgID)
+
+                    boosterLevel = userD.boosterLevel
+                    console.log(boosterLevel)
+                    maxSpeed = maxSpeed * (1.05** boosterLevel)
+                    console.log(maxSpeed)
+                } 
+                else {
+                    console.log("Waiting for tgID to be initialized...");
+                }
+            
                 startMusic();
                 countdownElement.style.display = "block";
                 startButton.style.display = "none";
@@ -817,7 +829,10 @@ function dropCoins(isInitialDrop = false) {
             backgroundLink = 'background/midnight';
             spriteLink = 'sprites/midnight';
         }
+
+
         Game.run({
+            
             canvas: canvas,
             render: render,
             update: update,
@@ -1039,19 +1054,7 @@ function dropCoins(isInitialDrop = false) {
             if ((segments.length == 0) || (options.segmentLength) || (options.rumbleLength))
                 resetRoad();
         }
-        window.onload = () => {
-            //tgID = 458176513
-            const intervalId = setInterval(() => {
-                if (tgID) {
-                    userD = userData(tgID)
-                    boosterLevel = userD.boosterLevel
-                    maxspeed = maxspeed * (1.05** boosterLevel)
-                    clearInterval(intervalId);
-                } else {
-                    console.log("Waiting for tgID to be initialized...");
-                }
-            }, 100); // Check every 100ms
-        };
+
 
     </script>
 
