@@ -302,7 +302,7 @@
                             ${quest.questStatus === 3 ? 'disabled' : ''} 
                             onclick="${
                                 quest.questStatus === 0 
-                                    ? `startTask(this, ${quest.questID}, '${quest.questLink}')` 
+                                    ? `startTask(this, ${quest.questID}, '${quest.questLink},'${quest.questType}')` 
                                     : quest.questStatus === 2 
                                         ? quest.questType === 'TG' 
                                             ? `checkTelegramMembership(this, '${quest.questID}')` 
@@ -376,12 +376,18 @@
             }
         }
 
-        async function startTask(button,questID,url) {
+        async function startTask(button,questID,url,questType) {
             await addActiveQuest(tgID,questID)
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'In Progress';
-            Telegram.WebApp.openLink(url);
+            if (questType == 'shareStory'){
+                shareTelegramStory()
+            }
+            else(
+                Telegram.WebApp.openLink(url);
+            )
+            
             setupCanvas();
             loadDynamicQuests();
         }
