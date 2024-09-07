@@ -377,18 +377,17 @@
         }
 
         async function startTask(button,questID,url,questType) {
-            await addActiveQuest(tgID,questID)
+            console.log(questType)
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'In Progress';
-            Telegram.WebApp.openLink(url);
             if (questType === 'shareStory'){
                 shareTelegramStory();
             }
             else {
                 Telegram.WebApp.openLink(url);
             };
-            
+            await addActiveQuest(tgID,questID)
             setupCanvas();
             loadDynamicQuests();
         }
