@@ -136,11 +136,7 @@
         <div id="loading-screen">Loading...</div>
     </div>
 
-    <audio id="music" loop>
-        <source src="music/racer.ogg" type="audio/ogg">
-        <source src="music/racer.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+    
     <audio id="coinSound">
         <source src="music/coinsound.aac" type="audio/aac">
         Your browser does not support the audio element.
@@ -254,7 +250,20 @@
 
             startButton.addEventListener("click", async function () {
                 
-            
+                var musicSource = document.getElementById('musicSource');
+                var audioElement = document.getElementById('music');
+                
+                // Map the musicChoice to different music files
+                if (gameStyle == 'desert') {musicSource.src = "music/desert.aac"}
+                if (gameStyle == 'ice') {musicSource.src = "music/level3.aac"}
+                if (gameStyle == 'midnight') {musicSource.src = "music/level4.aac"}
+                if (gameStyle == 'grassland') {musicSource.src = "music/level1.aac"}
+
+                var musicSource = document.getElementById('musicSource');
+                var audioElement = document.getElementById('music');
+                audioElement.load();
+                audioElement.play();
+
                 startMusic();
                 countdownElement.style.display = "block";
                 startButton.style.display = "none";
@@ -1075,6 +1084,10 @@ function dropCoins(isInitialDrop = false) {
 
 
     </script>
+    <audio id="music" loop>
+        <source id="musicSource" src="music/desert.aac" type="audio/ogg">
+        Your browser does not support the audio element.
+    </audio>
 
 </body>
 
