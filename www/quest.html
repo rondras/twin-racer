@@ -392,8 +392,9 @@
             button.disabled = true;
             button.textContent = 'Completed';
             setupCanvas();
-            loadDynamicQuests();
             updateCoins();
+            checkConnectedWallet();
+            loadDynamicQuests();
             startCoinRain();
         }
 
@@ -489,19 +490,15 @@
             const message = encodeURIComponent("🚨 Hey, have you checked out Twin Racer yet? 🚀 It's the latest buzz in the TON gaming world, and the airdrop potential is off the charts! Don't miss out—jump in now! 🏁🎮");
             const imageUrl = encodeURIComponent("https://racer.twinfinance.io/images/telegramshare.webp");
             const telegramShareUrl = `https://t.me/share/url?url=${imageUrl}&text=${message}`;
-            window.open(telegramShareUrl, '_blank', 'noopener,noreferrer');
-
-            setTimeout(async () => {
-                const result = await verifyShare(tgID); // Implement this function to verify via your backend
-                if (result.status === 'success') {
-                    updateCoins();
-                    startCoinRain();
-                    document.getElementById('telegram-share-button').disabled = true;
-                    document.getElementById('telegram-share-button').textContent = 'Completed';
-                } else {
-                    alert('Please share the story to receive your reward.');
+            const params = {
+                text: message,
+                widget_link: {
+                    url: imageURL,
+                    name: 'LINK',
                 }
-            }, 5000);
+            };
+            Telegram.WebApp.shareToStory("https://racer.twinfinance.io/images/telegramshare.webp",params)
+            
         }
 
         async function checkConnectedWallet() {
