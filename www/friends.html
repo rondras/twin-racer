@@ -18,33 +18,7 @@
     
     <script src="tg.js" defer></script>
     <script src="api.js" defer></script>
-    <script>
-        async function renderReferrals() {
-            const referralContainer = document.querySelector('.referral-list tbody');
-            referralContainer.innerHTML = '';  // Clear existing content
-
-            try {
-                const referralData = await getReferralData(); // Fetch referral data
-
-                referralData.forEach((entry, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${entry.name}</td>
-                        <td>${entry.points}</td>
-                    `;
-                    referralContainer.appendChild(row);
-                });
-
-            } catch (error) {
-                console.error('Failed to render referrals:', error);
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            renderReferrals();
-        });
-    </script>
+    
     <style>
         /* Shared styles */
         body {
