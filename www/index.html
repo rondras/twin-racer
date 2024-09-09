@@ -356,13 +356,13 @@
 
             if ((playerX < -1) || (playerX > 1)) {
                 if (speed > offRoadLimit) speed = Util.accelerate(speed, offRoadDecel, dt);
-                Telegram.WebApp.HapticFeedback.impactOccurred('light')
+                Telegram.WebApp.HapticFeedback.impactOccurred('soft')
                 for (var n = 0; n < playerSegment.sprites.length; n++) {
                     var sprite = playerSegment.sprites[n];
                     var spriteW = sprite.source.width * SPRITES.SCALE;
                     if (Util.overlap(playerX, playerW, sprite.offset + spriteW / 2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
                         if (sprite.source !== palmTree01Sprite) {
-                            Telegram.WebApp.HapticFeedback.impactOccurred('rigid')
+                            Telegram.WebApp.HapticFeedback.impactOccurred('light')
                             speed = maxSpeed / 5;
                             position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength);
                             break;
