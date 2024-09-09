@@ -362,7 +362,7 @@
                     var spriteW = sprite.source.width * SPRITES.SCALE;
                     if (Util.overlap(playerX, playerW, sprite.offset + spriteW / 2 * (sprite.offset > 0 ? 1 : -1), spriteW)) {
                         if (sprite.source !== palmTree01Sprite) {
-                            Telegram.WebApp.HapticFeedback.impactOccurred('light')
+                            
                             speed = maxSpeed / 5;
                             position = Util.increase(playerSegment.p1.world.z, -playerZ, trackLength);
                             break;
@@ -376,6 +376,7 @@
                 var carW = car.sprite.width * SPRITES.SCALE;
                 if (speed > car.speed) {
                     if (Util.overlap(playerX, playerW, car.offset, carW, 0.8)) {
+                        Telegram.WebApp.HapticFeedback.impactOccurred('rigid')
                         speed = car.speed * (car.speed / speed);
                         position = Util.increase(car.z, -playerZ, trackLength);
                         break;
