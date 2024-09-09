@@ -158,7 +158,7 @@
             <div class="invite-container">
                 <button class="invite-button" id="sendMessageButton">Invite</button>
             </div>
-            <p>My Referrals: <span id="referralCount">11</span></p>
+            <p>My Referrals: <span id="referralCount">0</span></p>
             <table class="referral-list">
                 <thead>
                     <tr>
@@ -189,7 +189,7 @@
         document.getElementById('sendMessageButton').addEventListener('click', function() {
             var message = `Check out this awesome Mini App!  https://t.me/TwinRacer_bot/TwinRacer?startapp=ref${tgID}`;
             const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
-            Telegram.WebApp.openLink(telegramLink);
+            Telegram.WebApp.openTelegramLink(telegramLink);
         });
 
 
