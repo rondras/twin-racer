@@ -186,10 +186,11 @@
 
     <script>
 
-        document.getElementById('sendMessageButton').addEventListener('click', function() {
-            var message = `Check out this awesome Mini App!  https://t.me/TwinRacer_bot/TwinRacer?startapp=ref${tgID}`;
-            const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
-            Telegram.WebApp.openTelegramLink(telegramLink);
+    document.getElementById('sendMessageButton').addEventListener('click', function() {
+        const tgID = '6421373941';  // Replace with your dynamic tgID variable
+        const message = `🔥🚗 Play Twin Racer for Exclusive Airdrops! 🚗🔥\n\nI’m already racing ahead in Twin Racer, and I want you to join in on the action!\n\n🎁 What’s in it for you?\n- Free to Play, Win Big!\n- Special Rewards for Both of us as you level up!\n- Exclusive Airdrops – Don’t miss out!\n\nAccept my invite NOW and let’s start collecting those rewards together! 🏎️\n\nhttps://t.me/TwinRacer_bot/TwinRacer?startapp=ref${tgID}`;
+        const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
+        Telegram.WebApp.openTelegramLink(telegramLink);
         });
 
 
