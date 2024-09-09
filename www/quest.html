@@ -217,16 +217,7 @@
                     <p>Daily Log-In <span>(100 Coins, reset every 24h)</span></p>
                     <button id="dailyLogIn" onclick="dailyLogin()">Log In</button>
                 </div>
-                <!-- New Quest: Boost Telegram Channel -->
-                <div class="quest-item">
-                    <p>Boost Telegram Channel <span>(100 Coins)</span></p>
-                    <button id="boostTelegramChannel" onclick="boostTelegramChannel()">Boost</button>
-                </div>
-                <!-- New Quest: Share Telegram Story -->
-                <div class="quest-item">
-                    <p>Share Telegram Story <span>(50 Coins)</span></p>
-                    <button id="telegram-share-button" onclick="shareTelegramStory()">Share</button>
-                </div>
+                
                 <!-- Placeholder for dynamic quests -->
                 <div id="dynamic-quests"></div>
 
@@ -284,7 +275,7 @@
         document.getElementById('sendMessageButton').addEventListener('click', function() {
             var message = `Check out this awesome Mini App!  https://t.me/TwinRacer_bot/TwinRacer?startapp=ref${tgID}`;
             const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
-            Telegram.WebApp.openLink(telegramLink);
+            Telegram.WebApp.openTelegramLink(telegramLink);
         });
 
         async function loadDynamicQuests() {
@@ -306,7 +297,7 @@
                             ${quest.questStatus === 3 ? 'disabled' : ''} 
                             onclick="${
                                 quest.questStatus === 0 
-                                    ? `startTask(this, ${quest.questID}, '${quest.questLink}')` 
+                                    ? `startTask(this, ${quest.questID}, '${quest.questLink}','${quest.questType}')` 
                                     : quest.questStatus === 2 
                                         ? quest.questType === 'TG' 
                                             ? `checkTelegramMembership(this, '${quest.questID}')` 
@@ -380,25 +371,31 @@
             }
         }
 
-        async function startTask(button,questID,url) {
-            await addActiveQuest(tgID,questID)
+        async function startTask(button,questID,url,questType) {
+            console.log(questType)
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'In Progress';
-            Telegram.WebApp.openLink(url);
+            if (questType === 'shareStory'){
+                shareTelegramStory();
+            }
+            else {
+                Telegram.WebApp.openLink(url);
+            };
+            await addActiveQuest(tgID,questID)
             setupCanvas();
             loadDynamicQuests();
         }
 
-        function completeTask(button,questID) {
+        async function completeTask(button,questID) {
             completeQuest(tgID,questID);
             const questItem = button.closest('.quest-item');
             button.disabled = true;
             button.textContent = 'Completed';
             setupCanvas();
-            updateCoins();
-            checkConnectedWallet();
-            loadDynamicQuests();
+            await updateCoins();
+            await checkConnectedWallet();
+            await loadDynamicQuests();
             startCoinRain();
         }
 

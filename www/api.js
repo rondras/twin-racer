@@ -486,3 +486,33 @@ async function doBuyBooster(tgID,boosterLevel,trxID) {
         alert('Failed due to network error.');
     }
 }
+
+// Function to get the leaderboard Data
+async function getReferrals(tgID) {
+    // API endpoint URL
+    const apiUrl = apiBase + 'getReferrals?tgID=' + tgID;
+    
+    try {
+        // Make the GET request to the API
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            return (result)
+
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error getting leaderboard:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed to get leaderboard due to network error.');
+    }
+}

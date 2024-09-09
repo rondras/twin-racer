@@ -14,30 +14,11 @@
     <title>Twin Racer Referral</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="./styles/leaderboard.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <script src="tg.js" defer></script>
     <script src="api.js" defer></script>
     <script>
-        async function renderLeaderboard() {
-            const leaderboardContainer = document.querySelector('.leaderboard tbody');
-            leaderboardContainer.innerHTML = '';  // Clear existing content
-
-            try {
-                const leaderboardData = await leaderboard(5); // Fetch top 5 scores
-
-                leaderboardData.forEach((entry, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${entry.tgName}</td>
-                        <td>${entry.points}</td>
-                    `;
-                    leaderboardContainer.appendChild(row);
-                });
-
-            } catch (error) {
-                console.error('Failed to render leaderboard:', error);
-            }
-        }
-
         async function renderReferrals() {
             const referralContainer = document.querySelector('.referral-list tbody');
             referralContainer.innerHTML = '';  // Clear existing content
@@ -130,7 +111,19 @@
             border-radius: 5px;
             border: none;
         }
-
+        .invite-container {
+            margin: 30px;
+        }
+        .invite-button{
+            background-color: #f74646;
+            color: white;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            width: 100%;
+        }
+        
         .red-line {
             height: 5px;
             background-color: #e74c3c;
@@ -148,26 +141,44 @@
     <!-- End Google Tag Manager (noscript) -->
     <header>
         <div class="header-container">
+            <img src="images/back_button.png"home-button" onclick="window.location.href='index.html'">
             <h1 class="game-title">Twin Racer</h1>
             <p class="tagline">Referral System</p>
         </div>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1173153058930503"
+     crossorigin="anonymous"></script>
     </header>
 
     <main class="container">
         <!-- Referral System Section -->
         <div class="referral-container">
             <h2 class="section-title">Referral System</h2>
+            
+            <!-- Marketing Text -->
+            <p>🚀 Invite Your Friends & Unlock the Rewards! 🚀</p>
+            <p>Want to supercharge your experience and earn exclusive bonuses? It’s simple – just invite your friends to join the fun!</p>
+            <p>🎁 Here's how it works:</p>
+            <ul>
+                <li>For every friend you refer, you’ll earn 100 bonus coins!</li>
+                <li>Refer 10 friends and get a special booster on top, giving you an edge in the game!</li>
+            </ul>
+            <p>💡 The more you share, the bigger the rewards! Don’t miss out on this chance to stack up your coins and unlock exclusive in-game perks. Start inviting now and let the bonuses roll in!</p>
+            <!-- End Marketing Text -->
+            
             <div class="ref-url">
-                <input type="text" id="referralUrl" value="https://app.example.com?ref=uniqueID" readonly>
+                <input type="text" id="referralUrl" value="" readonly>
                 <button class="copy-button" onclick="copyReferral()">Copy</button>
             </div>
-            <p>My Referrals: <span id="referralCount">11</span></p>
+            <div class="invite-container">
+                <button class="invite-button" id="sendMessageButton">Invite</button>
+            </div>
+            <p>My Referrals: <span id="referralCount">0</span></p>
             <table class="referral-list">
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Friend</th>
-                        <th>Points</th>
+                        <th>Coins</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -176,59 +187,76 @@
             </table>
         </div>
 
-    <footer>
-        <div class="footer-container">
-            <p>Follow Us</p>
-            <div class="social-icons">
-                <a href="#"><img src="./images/Icon_Discord.png" alt="Discord"></a>
-                <a href="#"><img src="./images/Icon_X.png" alt="X"></a>
-                <a href="#"><img src="./images/Icon_Github.png" alt="GitHub"></a>
+        <footer>
+            <div class="footer-container">
+                <p>Follow Us</p>
+                <div class="social-icons">
+                    <a href="https://www.tiktok.com/@twin_racer" target="_blank"><img src="images/Icon_TikTok.png" alt="TikTok"></a>
+                    <a href="https://x.com/twin_race" target="_blank"><img src="images/Icon_X.png" alt="X (formerly Twitter)"></a>
+                    <a href="https://discord.gg/852Vr8S5Sf" target="_blank"><img src="images/Icon_Discord.png" alt="Discord"></a>
+                </div>
             </div>
-        </div>
-    </footer>
+        </footer>
 
     <script>
+
+    document.getElementById('sendMessageButton').addEventListener('click', function() {
+        const tgID = '6421373941';  // Replace with your dynamic tgID variable
+        const message = `🔥🚗 Play Twin Racer for Exclusive Airdrops! 🚗🔥\n\nI’m already racing ahead in Twin Racer, and I want you to join in on the action!\n\n🎁 What’s in it for you?\n- Free to Play, Win Big!\n- Special Rewards for Both of us as you level up!\n- Exclusive Airdrops – Don’t miss out!\n\nAccept my invite NOW and let’s start collecting those rewards together! 🏎️\n\nhttps://t.me/TwinRacer_bot/TwinRacer?startapp=ref${tgID}`;
+        const telegramLink = `https://t.me/share/url?url=&text=${encodeURIComponent(message)}`;
+        Telegram.WebApp.openTelegramLink(telegramLink);
+        });
+
+
         function copyReferral() {
             const referralInput = document.getElementById('referralUrl');
             referralInput.select();
-            referralInput.setSelectionRange(0, 99999); // For mobile devices
             document.execCommand('copy');
             alert("Copied referral link: " + referralInput.value);
         }
+        // Function to get a random avatar
+        function getRandomAvatar() {
+            const totalImages = 13; // Number of images
+            const randomIndex = Math.floor(Math.random() * totalImages);
+            return './images/avatars/Default_racing_avatar' + randomIndex + '.jpg';
+        }
+        async function loadReferrals(tgID){
+            referralData = await getReferrals(tgID)
+            document.getElementById('referralCount').textContent = referralData.count;
+            const referralContainer = document.querySelector('.referral-list tbody');
+            referralContainer.innerHTML = '';  // Clear any existing content
 
-        // Car animations (similar to your previous request)
-        const carContainer = document.getElementById('car-container');
+            try {
+                // Fetch leaderboard data
+                // Loop through each entry in the leaderboard and create rows
+                referralData.referrals.forEach((entry, index) => {
+                    const randomAvatar = getRandomAvatar();
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td><img src="${randomAvatar}" alt="Avatar" width="60" height="60"> ${entry.tgName}</td>
+                        <td>${entry.pointsEarned}</td>
+                    `;
+                    referralContainer.appendChild(row);
+                });
 
-        const cars = [
-            './images/sprites/pandacar_drive_to_left.png',
-            './images/sprites/car_drive_to_right.png',
-            './images/sprites/car_drive_to_left.png',
-            './images/sprites/pandacar_drive_to_right.png'
-        ];
-
-        function spawnCar() {
-            const carIndex = Math.floor(Math.random() * cars.length);
-            const carImage = cars[carIndex];
-            const carElement = document.createElement('img');
-            carElement.src = carImage;
-            carElement.classList.add('car');
-
-            if (carImage.includes('to_left')) {
-                carElement.classList.add('drive-left');
-                carElement.style.right = '-150px';
-            } else {
-                carElement.classList.add('drive-right');
-                carElement.style.left = '-150px';
+            } catch (error) {
+                console.error('Failed to render leaderboard:', error);
             }
 
-            carContainer.appendChild(carElement);
-            carElement.addEventListener('animationend', () => {
-                carContainer.removeChild(carElement);
-                spawnCar();
-            });
         }
-
-        spawnCar();
+        window.onload = () => {
+            //tgID = 458176513;
+            const intervalId = setInterval(() => {
+                if (tgID) {
+                    document.getElementById('referralUrl').value = 'https://t.me/TwinRacer_bot/TwinRacer?startapp='+tgID
+                    loadReferrals(tgID);
+                    clearInterval(intervalId);
+                } else {
+                    console.log("Waiting for tgID to be initialized...");
+                }
+            }, 100);
+        };    
     </script>
 </body>
 </html>
