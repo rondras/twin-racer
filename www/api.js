@@ -516,3 +516,33 @@ async function getReferrals(tgID) {
         alert('Failed to get leaderboard due to network error.');
     }
 }
+
+// Function to get the leaderboard Data
+async function getPrice(productName,level) {
+    // API endpoint URL
+    const apiUrl = apiBase + 'productPrices?productName=' + productName + '&level='+level;
+    
+    try {
+        // Make the GET request to the API
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+        });
+
+        // Check if the response is successful
+        if (response.ok) {
+            // Parse the JSON response
+            const result = await response.json();
+            return (result)
+
+        } else {
+            // Handle errors if the response is not successful
+            const errorData = await response.json();
+            console.error('Error getting leaderboard:', errorData);
+            
+        }
+    } catch (error) {
+        // Handle any network or other errors
+        
+        alert('Failed to get leaderboard due to network error.');
+    }
+}

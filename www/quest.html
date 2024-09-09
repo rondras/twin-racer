@@ -567,9 +567,16 @@
                 startCoinRain();
             }
         }
+        async function getDailyLoginPrice(){
+            let r = await getPrice('dailyLogin',1)
+            price = r[0]['priceInTon']
+            console.log(price)
+            return (price)
+
 
         async function dailyLogin(){
-            let r = await sendTonTransaction(200000);
+            let price = await getDailyLoginPrice()
+            let r = await sendTonTransaction(price * 1000000000);
             if (r.success) {
                 trxID = r.trxID;
                 data = await doDailyLogIn(tgID,trxID);
